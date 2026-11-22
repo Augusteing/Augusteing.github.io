@@ -1,0 +1,680 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="B树, LLRB (左倾红黑树), 哈希 (Hashing)讨论课 07: 2025年3月10日 1. 2-3 树与左倾红黑树 (2-3 Trees and LLRBs) (a) 画出在插入 18, 38, 12, 13 和 20 之后，以下 2-3 树会变成什么样子。 (注：原 PDF 包含一张树的图片，根节点为 8，左子节点为 [4 | 6]，右子节点为 14) (b) 现在，将上面生成的 2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS 61B 2025年春季">
+<meta property="og:url" content="https://augusteing.github.io/2026/06/23/CS61B-disccusion-07/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="B树, LLRB (左倾红黑树), 哈希 (Hashing)讨论课 07: 2025年3月10日 1. 2-3 树与左倾红黑树 (2-3 Trees and LLRBs) (a) 画出在插入 18, 38, 12, 13 和 20 之后，以下 2-3 树会变成什么样子。 (注：原 PDF 包含一张树的图片，根节点为 8，左子节点为 [4 | 6]，右子节点为 14) (b) 现在，将上面生成的 2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-disccusion-07/Pasted%20image%2020260622183809.png">
+<meta property="article:published_time" content="2026-06-23T02:19:02.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.875Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-disccusion-07/Pasted%20image%2020260622183809.png">
+  
+  
+  
+  <title>CS 61B 2025年春季 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS 61B 2025年春季"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-06-23 10:19" pubdate>
+          2026年6月23日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS 61B 2025年春季</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="B树-LLRB-左倾红黑树-哈希-Hashing"><a href="#B树-LLRB-左倾红黑树-哈希-Hashing" class="headerlink" title="B树, LLRB (左倾红黑树), 哈希 (Hashing)"></a>B树, LLRB (左倾红黑树), 哈希 (Hashing)</h2><p><strong>讨论课 07: 2025年3月10日</strong></p>
+<h3 id="1-2-3-树与左倾红黑树-2-3-Trees-and-LLRBs"><a href="#1-2-3-树与左倾红黑树-2-3-Trees-and-LLRBs" class="headerlink" title="1. 2-3 树与左倾红黑树 (2-3 Trees and LLRBs)"></a>1. 2-3 树与左倾红黑树 (2-3 Trees and LLRBs)</h3><p><img src="/images/CS61B-disccusion-07/Pasted%20image%2020260622183809.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>(a)</strong> 画出在插入 18, 38, 12, 13 和 20 之后，以下 2-3 树会变成什么样子。 <em>(注：原 PDF 包含一张树的图片，根节点为 8，左子节点为 [4 | 6]，右子节点为 14)</em></p>
+<p><strong>(b)</strong> 现在，将上面生成的 2-3 树转换为左倾红黑树 (left-leaning red-black tree)。</p>
+<p><strong>(c)</strong> 如果一棵 2-3 树的深度为 <code>H</code>（即，叶子节点到根节点的距离为 <code>H</code>），在对应的红黑树中，为了查找某个特定的键是否存在于树中，<strong>最多</strong>需要进行多少次比较？</p>
+<p><strong>(d)</strong> 现在，将 <code>9</code> 插入到下面的 LLRB 树中。描述你会将此节点插入到哪里，以及在插入后你会采取哪些平衡操作（<code>rotateLeft</code> 左旋, <code>rotateRight</code> 右旋, <code>colorSwap</code> 颜色翻转）来使树保持平衡。假设在给定的 LLRB 树中，节点之间的虚线链接是红色的，实线链接是黑色的。 <em>(注：原 PDF 包含一张 LLRB 树的图片，根节点为 7)</em></p>
+<h3 id="2-哈希-Hashing"><a href="#2-哈希-Hashing" class="headerlink" title="2. 哈希 (Hashing)"></a>2. 哈希 (Hashing)</h3><p><strong>(a)</strong> 以下是 <code>Integer</code> 类 <code>hashCode()</code> 方法的五种潜在实现方案。请将它们分别归类为：</p>
+<ol>
+<li><p><strong>无效的 (invalid)</strong></p>
+</li>
+<li><p><strong>有效但不好 (valid but not good)</strong></p>
+</li>
+<li><p><strong>有效且好 (valid and good)</strong></p>
+</li>
+</ol>
+<p>如果是无效的，请解释原因。如果是有效但不好的，请指出其缺陷或缺点。对于第二种实现，请注意 <code>intValue()</code> 将返回该 <code>Integer</code> 内部的数字值（类型为 <code>int</code>），并假设 <code>Integer</code> 类的 <code>equals</code> 方法会检查两个 <code>Integer</code> 的 <code>intValue</code> 是否相等。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-comment">// 实现 1</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">hashCode</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>&#125; <span class="hljs-comment">// 无效的 因为无法区分</span><br><br><span class="hljs-comment">// 实现 2</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">hashCode</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> intValue() * intValue(); <br>&#125; <span class="hljs-comment">// 有效但不好 比如 1和-1有相同的哈希码但是并不相等，这是哈希冲突</span><br><br><span class="hljs-comment">// 实现 3</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">hashCode</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> super.hashCode(); <span class="hljs-comment">// Object 的 hashCode() 是基于内存地址计算的</span><br>&#125; <span class="hljs-comment">// 无效的 我认为使用默认的地址会使得两个相等的数得到contains false</span><br><br><span class="hljs-comment">// 实现 4</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">hashCode</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> (<span class="hljs-built_in">int</span>) (<span class="hljs-keyword">new</span> Date()).getTime(); <span class="hljs-comment">// 以 int 类型返回当前时间</span><br>&#125; <span class="hljs-comment">// 无效的 同一对象的hash码不一致</span><br><br><span class="hljs-comment">// 实现 5</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">hashCode</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> intValue() + <span class="hljs-number">3</span>;<br>&#125; <span class="hljs-comment">// 有效且好 </span><br></code></pre></td></tr></table></figure>
+
+<p><strong>(b)</strong> 对于以下每个问题，请回答：<strong>总是 (Always)<strong>、</strong>有时 (Sometimes)</strong> 或 **从不 (Never)**。</p>
+<ol>
+<li><p>如果你能够修改一个<strong>已经插入</strong>到 HashMap 中的键 (key)，你稍后还能再次检索到该条目吗？例如，假设你正在将学号映射到学生姓名，并且执行了 <code>put(303, &quot;Elisa&quot;)</code> 操作。现在，假设我们以某种方式找到了 HashMap 中的那个项目，并手动将键 (key) 更改为 304。如果我们稍后执行 <code>get(304)</code>，我们能找到并返回 “Elisa” 吗？请解释。</p>
+<p> 我们不能找到，因为我们手动将303改到304，那么其对应的hash码应该会变化，分到的桶也会变化，我们在get（304）的时候只会往304的桶去找了</p>
+</li>
+<li><p>当你修改一个<strong>已经插入</strong>到 HashMap 中的值 (value) 时，你能再次检索到该条目吗？例如，在上述场景中，假设我们首先执行了 <code>put(303, &quot;Elisa&quot;)</code>，然后将该项目的值 (value) 从 “Elisa” 更改为 “Daniel”。如果我们稍后执行 <code>get(303)</code>，我们能找到并返回 “Daniel” 吗？请解释。<br> 我们当然可以找到，因为我们是根据key来找值，因为key没有改变，所以对于值没有影响。</p>
+</li>
+</ol>
+<h3 id="3-薯饼配菜-A-Side-of-Hash-Browns"><a href="#3-薯饼配菜-A-Side-of-Hash-Browns" class="headerlink" title="3. 薯饼配菜 (A Side of Hash Browns)"></a>3. 薯饼配菜 (A Side of Hash Browns)</h3><p><em>(注：标题是一个双关语，Hash 既指哈希结构，Hash Browns 是指炸薯饼)</em></p>
+<p>我们想要将食物的名称映射到它们的美味程度 (yumminess)。我们希望能够在常数时间 (constant time) 内找到这些信息，所以我们决定使用 Java 内置的 <code>HashMap</code> 类！在这里，键 (key) 是代表食物的 <code>String</code>，值 (value) 是一个表示美味评分的 <code>int</code>。</p>
+<p>为了简单起见，我们假设在这里<strong>一个字符串的 <code>hashcode</code> 就是它首字母在字母表中的位置</strong>（A&#x3D;0, B&#x3D;1… Z&#x3D;25）。例如，字符串 “Hashbrowns” 以 “H” 开头，而 “H” 是字母表中的第 7 个字母（从 0 开始索引），因此其 <code>hashCode</code> 将是 7。请注意，在现实编程中，String 的 <code>hashCode</code> 实现要比这复杂得多。</p>
+<p>我们的 HashMap 将通过 <strong>键的 hashcode 值除以 HashMap 中桶 (buckets) 的数量取余数 (modulo)</strong> 来计算索引 (index)。 假设初始大小为 <strong>4 个桶</strong>，并且一旦负载因子 (load factor) 达到 <strong>3&#x2F;4</strong>，我们就会将 HashMap 的大小翻倍。如果我们尝试放入一个重复的键，只需将与该键关联的值替换为新值即可。</p>
+<p><strong>(a)</strong> 画出在执行以下操作后，HashMap 会变成什么样子。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">HashMap</span>&lt;String, Integer&gt; hm = new HashMap&lt;&gt;();<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Hashbrowns&quot;</span>, <span class="hljs-number">7</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Dim sum&quot;</span>, <span class="hljs-number">10</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Escargot&quot;</span>, <span class="hljs-number">5</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Brown bananas&quot;</span>, <span class="hljs-number">1</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Burritos&quot;</span>, <span class="hljs-number">2</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Buffalo wings&quot;</span>, <span class="hljs-number">8</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Banh mi&quot;</span>, <span class="hljs-number">9</span>);<br><span class="hljs-attribute">hm</span>.put(<span class="hljs-string">&quot;Burritos&quot;</span>, <span class="hljs-number">10</span>);<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>(b)</strong> 你看出了我们的 HashMap 行为中潜在的问题了吗？我们该如何解决这个问题？</p>
+<p>分布的十分不均匀，因为以首字母开头为hash码的话有一些单词会较为偏好。</p>
+<p>我认为可以以评分为hash码这样分的比较均匀</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS 61B 2025年春季</div>
+      <div>https://augusteing.github.io/2026/06/23/CS61B-disccusion-07/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年6月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/07/03/CS61B-ch22-note%EF%BC%9A%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86%E5%92%8C%E5%9B%BE/" title="22.1 Tree Recap">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">22.1 Tree Recap</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/06/20/CS61B-ch18-note-%E7%BA%A2%E9%BB%91%E6%A0%91/" title="Rotating Trees">
+                        <span class="hidden-mobile">Rotating Trees</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,751 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="Operator Overloading  运算符重载假设我们定义了一个 Dog 类： 1234567class Dog:   def __init__(self, name, size):       self.name &#x3D; name       self.size &#x3D; size     def __gt__(self, other):       return self.size &gt; o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Polymorphism vs. Function Passing">
+<meta property="og:url" content="https://augusteing.github.io/2026/04/11/CS61B-ch10-note-%EF%BC%9A%E5%A4%9A%E6%80%81/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="Operator Overloading  运算符重载假设我们定义了一个 Dog 类： 1234567class Dog:   def __init__(self, name, size):       self.name &#x3D; name       self.size &#x3D; size     def __gt__(self, other):       return self.size &gt; o">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch10-note-%EF%BC%9A%E5%A4%9A%E6%80%81/Pasted%20image%2020251230162013.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch10-note-%EF%BC%9A%E5%A4%9A%E6%80%81/Pasted%20image%2020251230162020.png">
+<meta property="article:published_time" content="2026-04-11T14:11:35.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.427Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch10-note-%EF%BC%9A%E5%A4%9A%E6%80%81/Pasted%20image%2020251230162013.png">
+  
+  
+  
+  <title>Polymorphism vs. Function Passing - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Polymorphism vs. Function Passing"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-04-11 22:11" pubdate>
+          2026年4月11日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          23 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Polymorphism vs. Function Passing</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="Operator-Overloading-运算符重载"><a href="#Operator-Overloading-运算符重载" class="headerlink" title="Operator Overloading  运算符重载"></a><strong>Operator Overloading  运算符重载</strong></h2><p>假设我们定义了一个 Dog 类：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs ruby"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Dog</span>:<br>   <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params"><span class="hljs-variable language_">self</span>, name, size</span>):<br>       <span class="hljs-variable language_">self</span>.name = name<br>       <span class="hljs-variable language_">self</span>.size = size<br>  <br>   <span class="hljs-keyword">def</span> <span class="hljs-title function_">__gt__</span>(<span class="hljs-params"><span class="hljs-variable language_">self</span>, other</span>):<br>       <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.size &gt; other.size<br></code></pre></td></tr></table></figure>
+
+<p>以下 Python 代码可用于在 Dog 列表中找到最大的 Dog。</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs applescript">def get_the_max(x):<br>   max_value = x[<span class="hljs-number">0</span>]<br>   <span class="hljs-keyword">for</span> <span class="hljs-built_in">item</span> <span class="hljs-keyword">in</span> x:<br>       <span class="hljs-keyword">if</span> <span class="hljs-built_in">item</span> &gt; max_value:<br>           max_value = <span class="hljs-built_in">item</span><br><span class="hljs-built_in">   return</span> max_value<br><br>max_dog = get_the_max(doglist)<br></code></pre></td></tr></table></figure>
+
+<p>Python 中的 get_the_max 函数是通用的，可以作用于任何类型。它通过利用”运算符重载”实现了这种通用性。</p>
+<p>更一般地，这种处理任何类型的能力有时被称为”多态”，我将通过维基百科来定义它。指的是：“编程中呈现相同编程接口以适应不同底层形式的能力” [wiki]</p>
+<p>也就是说，我们有同样的 get_the_max 函数，但是有传入的数值有不同的类型。</p>
+<p>在这种情况下，&gt;运算符允许比较任何事物（即”任何底层形式”）。而&gt;的定义由 <code>__gt__</code> 给出。</p>
+<h1 id="Comparables-and-Comparators"><a href="#Comparables-and-Comparators" class="headerlink" title="Comparables and Comparators"></a>Comparables and Comparators</h1><h2 id="Comparables"><a href="#Comparables" class="headerlink" title="Comparables"></a>Comparables</h2><p>作为一个激励性的例子，考虑以下 Java 代码，我们想要尝试在狗的列表中找到最大的狗。</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">List&lt;Dog&gt; dogs = <span class="hljs-built_in">new</span> ArrayList&lt;&gt;();<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Grigometh&quot;, <span class="hljs-number">200</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Pelusa&quot;, <span class="hljs-number">5</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Clifford&quot;, <span class="hljs-number">9000</span>));<br>Dog maxDog = Collections.max(dogs);<br></code></pre></td></tr></table></figure>
+
+<p>这段代码几乎可以正常工作，但存在一个问题：Java 不知道如何比较狗。这会导致一个相当难以理解的错误信息，即”没有类型变量 T 的实例，使得 Dog 符合 <code>Comparable&lt;? super T&gt;</code></p>
+<p>与 Python 不同，我们在其中定义了 <code>__gt__</code> 方法以允许比较，Java 没有运算符重载。相反，我们必须利用实现继承。具体来说，我们将实现下面给出的 <code>Comparable</code> 接口：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-symbol">Comparable</span>&lt;<span class="hljs-symbol">T</span>&gt; &#123;<br>    <span class="hljs-built_in">int</span> compareTo(T o);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如我们之前在课堂上所见， <code>compareTo</code> 方法在第一个参数小于、等于或大于第二个参数时，分别返回一个负整数、零或正整数。如果你感兴趣，也可以查看 Comparator.java 的源代码，该源代码可以通过此链接查看。</p>
+<p>在实现 <code>Comparable</code> 接口后，我们最终得到以下代码：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> Dog <span class="hljs-keyword">implements</span> Comparable&lt;Dog&gt; &#123;<br>   ...<br>   @Override<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-keyword">compareTo</span>(Dog uddaDog) &#123;<br>       <span class="hljs-keyword">if</span> (<span class="hljs-keyword">size</span> &gt; uddaDog.<span class="hljs-keyword">size</span>) &#123;<br>           <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>       &#125;<br>       <span class="hljs-keyword">if</span> (<span class="hljs-keyword">size</span> &lt; uddaDog.<span class="hljs-keyword">size</span>) &#123;<br>           <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<br>       &#125;<br>       <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>实现这个接口后， <code>Collections.max(dogs)</code> 现在可以工作了。</p>
+<p>虽然我们上面编写的代码可以工作，但它有点笨拙。下面展示了一种替代方法：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-symbol">Dog</span> <span class="hljs-symbol">implements</span> <span class="hljs-symbol">Comparable</span>&lt;<span class="hljs-symbol">Dog</span>&gt; &#123;<br>   ...<br>   @Override<br>   <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> compareTo(Dog uddaDog) &#123;<br>       <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.size - uddaDog.size;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在这里，我们通过简单地相减来节省一些代码行。在 Java 中，返回两个数字之间的差值是实现 <code>compareTo</code> 方法的一种常见方式。</p>
+<p>我们刚刚使用的<strong>多态性</strong>有时被称为<strong>子类型多态性</strong>。</p>
+<p>这里的思路是，一个超类型（ <code>Comparable</code> ）指定了能力（在这个例子中是比较能力）。然后一个子类型（ <code>Dog</code> ）重写了超类型的抽象方法。在运行时，Java 根据调用方法的对象的类型来决定要做什么。</p>
+<h2 id="Comparators"><a href="#Comparators" class="headerlink" title="Comparators"></a>Comparators</h2><p>“自然顺序”这个术语有时用来指代一个 <code>Comparable</code> 的 <code>compareTo</code> 方法所隐含的排序方式。我们的 compareTo 方法认为狗的大小是其自然顺序。</p>
+<p>有时我们希望考虑其他排序方式。例如，我们可能希望按名字对狗进行排序</p>
+<p>在 Python 中，我们通过函数传递来实现这个目标。例如，在下面的代码中，我们将 <code>name_len</code> 作为键函数传递给 <code>get_the_max</code> 。</p>
+<figure class="highlight sas"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sas">def get_the_<span class="hljs-meta">max</span>(<span class="hljs-keyword">x</span>, <span class="hljs-keyword">key</span>):<br>  max_value = <span class="hljs-keyword">x</span>[0]<br>  for item <span class="hljs-keyword">in</span> <span class="hljs-keyword">x</span>:<br>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">key</span>(item) &gt; <span class="hljs-keyword">key</span>(max_value):<br>      max_value = item<br>  <span class="hljs-keyword">return</span> max_value<br><br>def name_le<span class="hljs-meta">n</span>(dog):<br>   <span class="hljs-keyword">return</span> le<span class="hljs-meta">n</span>(dog.name)<br><br>max_dog=get_the_<span class="hljs-meta">max</span>(doglist, name_len)<br></code></pre></td></tr></table></figure>
+
+<p>相比之下，Java 代码通常不使用函数传递来处理交替顺序。相反，我们再次依赖子类型多态性。</p>
+<p>具体来说，我们可以实现下面给出的 <code>Comparator</code> 接口：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-symbol">Comparator</span>&lt;<span class="hljs-symbol">T</span>&gt; &#123;<br>    <span class="hljs-built_in">int</span> compare(T o1, T o2);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>下面给出一个基于名字比较狗的示例 <code>Comparator</code> ：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">public</span> static <span class="hljs-keyword">class</span> <span class="hljs-symbol">NameComparator</span> <span class="hljs-symbol">implements</span> <span class="hljs-symbol">Comparator</span>&lt;<span class="hljs-symbol">Dog</span>&gt; &#123;<br>   @Override<br>   <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> compare(Dog a, Dog b) &#123;<br>       <span class="hljs-keyword">return</span> a.name.compareTo(b.name);<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>为了测试你对这些概念的理解，请考虑这个问题。下面代码的输出是什么？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Dog</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&quot;Frank&quot;</span>, <span class="hljs-number">1</span>);<br><span class="hljs-type">Dog</span> <span class="hljs-variable">b</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&quot;Zeke&quot;</span>, <span class="hljs-number">1</span>);<br>Comparator&lt;Dog&gt; nc = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>.NameComparator();<br>System.out.println(nc.compare(a, b));<br></code></pre></td></tr></table></figure>
+
+<h2 id="Using-a-Comparator-使用比较器"><a href="#Using-a-Comparator-使用比较器" class="headerlink" title="Using a Comparator  使用比较器"></a>Using a Comparator  使用比较器</h2><p>下面的代码展示了我们如何将 <code>Comparator</code> 传递给 <code>Collections.max</code> 。</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">List&lt;Dog&gt; dogs = <span class="hljs-built_in">new</span> ArrayList&lt;&gt;();<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Grigometh&quot;, <span class="hljs-number">200</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Pelusa&quot;, <span class="hljs-number">5</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Clifford&quot;, <span class="hljs-number">9000</span>));<br>Dog maxNameDog = Collections.max(dogs, <span class="hljs-built_in">new</span> Dog.NameComparator());<br></code></pre></td></tr></table></figure>
+
+<p>这十分类似于我们可以在 Python 中将一个键函数传递给 <code>get_the_max</code> 。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs scss">def <span class="hljs-built_in">length_of_name</span>(dog):<br>   return <span class="hljs-built_in">len</span>(dog.name)<br><br>dogs = [<span class="hljs-built_in">Dog</span>(<span class="hljs-string">&quot;Grigometh&quot;</span>, <span class="hljs-number">10</span>),<br>        <span class="hljs-built_in">Dog</span>(<span class="hljs-string">&quot;Pelusa&quot;</span>, <span class="hljs-number">5</span>),<br>        <span class="hljs-built_in">Dog</span>(<span class="hljs-string">&quot;Clifford&quot;</span>, <span class="hljs-number">9000</span>)]<br>max_dog = <span class="hljs-built_in">get_the_max</span>(dogs, length_of_name)<br></code></pre></td></tr></table></figure>
+
+<p>笔者按：我们创建了新的比较器<code>new Dog.NameComparator()</code>用以进行狗类的名字比较，十分类似于 python 中我们传入函数 <code>key</code> 进行比较，二者在设计哲学上很多类似的点</p>
+<p>注意这里的区别。在 Java 中，我们将比较函数包装在一个 <code>Comparator</code> 对象内部，即我们依赖于子类型多态。</p>
+<p>相比之下，在 Python 中，我们将比较函数传递给 <code>get_the_max</code> ，即我们依赖函数传递。</p>
+<h3 id="Minor-Improvements"><a href="#Minor-Improvements" class="headerlink" title="Minor Improvements"></a>Minor Improvements</h3><p>NameComparator 的实例化很别扭，而且从美观的角度来看（对我来说）并不令人愉悦。似乎很奇怪需要实例化一个类仅仅是为了传递一个比较函数。</p>
+<p>一个解决方案是在 Dog 类中添加一个静态变量引用，引用一个预先实例化的 NameComparator。</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Dog</span> &#123;<br>   ...<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Comparator&lt;Dog&gt; NAME_COMPARATOR = <span class="hljs-keyword">new</span> NameComparator();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这使我们能够将 <code>Dog.NAME_COMPARATOR</code> 传递给 <code>Collections.max</code> ，而无需实例化一个新的 <code>NameComparator</code> 对象。这导致代码看起来像这样：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">List&lt;Dog&gt; dogs = <span class="hljs-built_in">new</span> ArrayList&lt;&gt;();<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Grigometh&quot;, <span class="hljs-number">200</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Pelusa&quot;, <span class="hljs-number">5</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Clifford&quot;, <span class="hljs-number">9000</span>));<br>Dog maxNameDog = Collections.max(dogs, Dog.NAME_COMPARATOR);<br></code></pre></td></tr></table></figure>
+
+<h1 id="Bonus-Content"><a href="#Bonus-Content" class="headerlink" title="Bonus Content"></a>Bonus Content</h1><p>也可以使用 lambda 表达式来实现 <code>Comparator</code> 。以下展示了如何实现：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">List&lt;Dog&gt; dogs = <span class="hljs-built_in">new</span> ArrayList&lt;&gt;();<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Grigometh&quot;, <span class="hljs-number">200</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Pelusa&quot;, <span class="hljs-number">5</span>));<br>dogs.<span class="hljs-keyword">add</span>(<span class="hljs-built_in">new</span> Dog(&quot;Clifford&quot;, <span class="hljs-number">9000</span>));<br>Comparator&lt;Dog&gt; dc = (a, b) -&gt; a.name.compareTo(b.name);<br>Dog maxNameDog = Collections.max(dogs, dc);<br></code></pre></td></tr></table></figure>
+
+<p>这稍微简洁了一些，但也稍微难以阅读一些。我们不会要求你在本课程中学习 lambda 表达式。</p>
+<h1 id="Comparables-vs-Comparators"><a href="#Comparables-vs-Comparators" class="headerlink" title="Comparables vs. Comparators"></a>Comparables vs. Comparators</h1><p>Comparable 接口指定了存在“自然顺序”。该类的实例可以与其他对象进行比较。只可能存在一种这样的顺序。</p>
+<p><img src="/images/CS61B-ch10-note-%EF%BC%9A%E5%A4%9A%E6%80%81/Pasted%20image%2020251230162013.png" srcset="/img/loading.gif" lazyload></p>
+<p>Comparator 接口用于外部的比较（由其他类实现）。可能有多个此类类，每个类指定一种排序方式。</p>
+<p><img src="/images/CS61B-ch10-note-%EF%BC%9A%E5%A4%9A%E6%80%81/Pasted%20image%2020251230162020.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="writing-a-max-function"><a href="#writing-a-max-function" class="headerlink" title="writing a max function"></a>writing a max function</h1><p>我们看到了 Java 为我们提供了一个很好的 <code>Collections.max</code> 函数。 <code>Collections</code> 还包括其他方便的函数，如 <code>min</code> 、 <code>sort</code> 和 <code>reverse</code> 。</p>
+<p>在本章中，我们将看到如何自己编写这样的函数。</p>
+<h2 id="Generic-Function"><a href="#Generic-Function" class="headerlink" title="Generic Function"></a>Generic Function</h2><p>作为热身，假设我们想要一个能从数组中随机选择一个元素的功能。下面是一些代码示例：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RandomPicker</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">static</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">randomItem</span><span class="hljs-params">(T[] items)</span> </span>&#123;<br>        Random random = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Random</span>();<br>        <span class="hljs-type">int</span> randomIndex = random.<span class="hljs-built_in">nextInt</span>(x.length);<br>        <span class="hljs-keyword">return</span> x[randomIndex];<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>下面是一个使用这个函数的示例程序：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RandomPickerDemo</span> &#123;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">main</span>(<span class="hljs-params"><span class="hljs-title class_">String</span>[] args</span>) &#123;<br>       <span class="hljs-title class_">String</span>[] x = &#123;<span class="hljs-string">&quot;hi&quot;</span>, <span class="hljs-string">&quot;little&quot;</span>, <span class="hljs-string">&quot;cat&quot;</span>&#125;;<br>       <span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-title class_">RandomPicker</span>.<span class="hljs-title function_">pickRandom</span>(x));<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>接下来，我们将尝试让 <code>pickRandom</code> 函数能适用于任何类型的数组。</p>
+<h2 id="Approach-One-Generics"><a href="#Approach-One-Generics" class="headerlink" title="Approach One: Generics"></a>Approach One: Generics</h2><p>我们可以尝试使用泛型，如下面的代码所示：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RandomPicker</span>&lt;T&gt; &#123;<br>   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> T <span class="hljs-title">pickRandom</span><span class="hljs-params">(T[] x)</span> </span>&#123;<br>       Random random = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Random</span>();<br>       <span class="hljs-type">int</span> randomIndex = random.<span class="hljs-built_in">nextInt</span>(x.length);<br>       <span class="hljs-keyword">return</span> x[randomIndex];<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然而，按照这样写的代码并没有实际意义。 <code>pickRandom</code> 函数是静态的，但是我们必须实例化一个 <code>RandomPicker</code> 对象来指定泛型类型。也就是说，我们需要做类似这样的事情：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-type">String</span>[] x = &#123;<span class="hljs-string">&quot;hi&quot;</span>, <span class="hljs-string">&quot;little&quot;</span>, <span class="hljs-string">&quot;cat&quot;</span>&#125;;<br>RandomPicker&lt;<span class="hljs-type">String</span>&gt; stringPicker = <span class="hljs-keyword">new</span> RandomPicker&lt;&gt;();<br>System.out.<span class="hljs-built_in">println</span>(stringPicker.<span class="hljs-built_in">pickRandom</span>(x));<br></code></pre></td></tr></table></figure>
+
+<p>但我们不能使用实例来调用静态方法。</p>
+<p>解决这个问题的一个方法是将 <code>pickRandom</code> 函数设为非静态，如下所示：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RandomPicker</span>&lt;T&gt; &#123;<br>   <span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">pickRandom</span><span class="hljs-params">(T[] x)</span> </span>&#123;<br>       Random random = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Random</span>();<br>       <span class="hljs-type">int</span> randomIndex = random.<span class="hljs-built_in">nextInt</span>(x.length);<br>       <span class="hljs-keyword">return</span> x[randomIndex];<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果我们这样做，代码可以正常工作，但仍然很别扭，必须实例化一个 picker 对象。</p>
+<p>我们希望有一个静态的类，它也能识别所有的类型。</p>
+<h2 id="Approach-Two-Generic-Static-Methods"><a href="#Approach-Two-Generic-Static-Methods" class="headerlink" title="Approach Two: Generic Static Methods"></a>Approach Two: Generic Static Methods</h2><p>正确且更好的方法是让我们的静态方法泛型。这显示如下：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RandomPicker</span> &#123;<br>   <span class="hljs-keyword">public</span> <span class="hljs-type">static</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">pickRandom</span><span class="hljs-params">(T[] x)</span> </span>&#123;<br>       Random random = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Random</span>();<br>       <span class="hljs-type">int</span> randomIndex = random.<span class="hljs-built_in">nextInt</span>(x.length);<br>       <span class="hljs-keyword">return</span> x[randomIndex];<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这种语法令人困惑（而且后面会更糟！）。你可以这样理解 <code>public static &lt;T&gt; T pickRandom(T[] x)</code> ：“我正在声明一个公共静态函数，它作用于T 类型 的对象，返回一个 T，它被命名为 pickRandom，并且它接受一个 T类型的数组作为输入。</p>
+<p>在向 Java 指出我们的静态方法是泛型后，我们可以像下面这样调用它，而无需实例化 <code>RandomPicker</code> 对象</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RandomPickerDemo</span> &#123;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">main</span>(<span class="hljs-params"><span class="hljs-title class_">String</span>[] args</span>) &#123;<br>       <span class="hljs-title class_">String</span>[] x = &#123;<span class="hljs-string">&quot;hi&quot;</span>, <span class="hljs-string">&quot;little&quot;</span>, <span class="hljs-string">&quot;cat&quot;</span>&#125;;<br>       <span class="hljs-title class_">System</span>.<span class="hljs-property">out</span>.<span class="hljs-title function_">println</span>(<span class="hljs-title class_">RandomPicker</span>.<span class="hljs-title function_">pickRandom</span>(x));<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>请注意，与泛型类不同，当我们调用泛型静态方法时，无需指定泛型类型（即没有 <code>&lt;String&gt;</code> 在 <code>pickRandom</code> 之后）。类型会自动推断。</p>
+<p>一个小的烦扰是，我们的 pickRandom 函数不能与原始类型数组一起使用，即我们不能使用 <code>int[]</code> ， <code>double[]</code> ， <code>float[]</code> 。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">RandomPickerDemo</span> &#123;<br>   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span>(<span class="hljs-params">String[] <span class="hljs-keyword">args</span></span>)</span> &#123;<br>       <span class="hljs-built_in">int</span>[] x = &#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>&#125;;<br>       System.<span class="hljs-keyword">out</span>.println(RandomPicker.pickRandom(x));<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这是无法避免的，事实上，真实的 Java 库中通常有多个函数，每个原始类型一个。例如，存在 <code>Arrays.sort(int[])</code> 、 <code>Arrays.sort(double[])</code> 、 <code>Arrays.sort(float[])</code> 等。也许有一天 Project Valhalla 会解决这个问题。</p>
+<h2 id="Writing-our-Max-Function-Type-Bounds"><a href="#Writing-our-Max-Function-Type-Bounds" class="headerlink" title="Writing our Max Function, Type Bounds"></a>Writing our Max Function, Type Bounds</h2><p>利用通用静态函数的概念，我们可以将我们的 max 函数写成如下形式：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">public</span> class Maximizer &#123;<br>   <span class="hljs-attribute">public</span> static &lt;T&gt; T max(T[] items) &#123;<br>       <span class="hljs-attribute">T</span> maxItem = items[<span class="hljs-number">0</span>];<br>       <span class="hljs-attribute">for</span> (int i = <span class="hljs-number">0</span>; <span class="hljs-attribute">i</span> &lt; items.length; <span class="hljs-attribute">i</span> += <span class="hljs-number">1</span>) &#123;<br>           <span class="hljs-attribute">int</span> cmp = items[i].compareTo(maxItem);<br>           <span class="hljs-attribute">if</span> (cmp &gt; <span class="hljs-number">0</span>) &#123;<br>               <span class="hljs-attribute">maxItem</span> = items[i];<br>           &#125;<br>       &#125;<br>       <span class="hljs-attribute">return</span> maxItem;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>还有一个最后的问题，Java 不知道 <code>T</code> 有一个 <code>compareTo</code> 方法。我们可以通过为我们的泛型类型添加一个类型约束来解决这个问题，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Maximizer</span> &#123;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Comparable</span>&lt;T&gt;&gt; T <span class="hljs-title function_">max</span><span class="hljs-params">(T[] items)</span> &#123;<br>       <span class="hljs-type">T</span> <span class="hljs-variable">maxItem</span> <span class="hljs-operator">=</span> items[<span class="hljs-number">0</span>];<br>       <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; items.length; i += <span class="hljs-number">1</span>) &#123;<br>           <span class="hljs-type">int</span> <span class="hljs-variable">cmp</span> <span class="hljs-operator">=</span> items[i].compareTo(maxItem);<br>           <span class="hljs-keyword">if</span> (cmp &gt; <span class="hljs-number">0</span>) &#123;<br>               maxItem = items[i];<br>           &#125;<br>       &#125;<br>       <span class="hljs-keyword">return</span> maxItem;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这告诉 Java， <code>T</code> 无论它是什么，都必须实现 <code>Comparable&lt;T&gt;</code> 。如果你尝试将一个不实现 <code>Comparable&lt;T&gt;</code> 的对象数组传递给 max，你会得到一个编译时错误。</p>
+<p>阅读 <code>public static &lt;T extends Comparable&lt;T&gt;&gt; T max(T[] items)</code> 的方式是：”我正在声明一个公共静态函数，它作用于类型为T的对象，返回一个 T，它被命名为 max，并且它接受一个 T 类型的数组作为输入。此外，T 必须实现 Comparable。”</p>
+<h1 id="Bonus-An-Even-Better-Type-Bound"><a href="#Bonus-An-Even-Better-Type-Bound" class="headerlink" title="Bonus: An Even Better Type Bound"></a>Bonus: An Even Better Type Bound</h1><p>在真实的工业级 Java 代码中，泛化我们方法的正确方式是：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Maximizer</span> &#123;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Comparable</span>&lt;? <span class="hljs-variable language_">super</span> T&gt;&gt; T <span class="hljs-title function_">max</span>(<span class="hljs-params">T[] items</span>) &#123;<br>		...<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Polymorphism vs. Function Passing</div>
+      <div>https://augusteing.github.io/2026/04/11/CS61B-ch10-note-：多态/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年4月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/04/22/CS61B-ch19-note-%E5%93%88%E5%B8%8C%E8%A1%A8/" title="Introduction to Hashing: Data Indexed Arrays">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Introduction to Hashing: Data Indexed Arrays</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/04/07/CS61B-CH16-note%EF%BC%9A%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91/" title="Abstract Data Types">
+                        <span class="hidden-mobile">Abstract Data Types</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

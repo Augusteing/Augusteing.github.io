@@ -1,0 +1,766 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="到目前为止，我们已经看到了如何利用递归类定义来创建一个可扩展的列表类，包括 IntList 、 SLList 和 DLList 。在本书接下来的两个章节中，我们将讨论如何使用数组来构建一个列表类。 本书的这一部分假设你已经熟悉数组，并且不打算成为它们语法的全面指南。 为了最终构建一个可以存储信息的列表，我们需要某种方式来获取内存框。之前，我们看到过如何通过变量声明和类实例化来获取内存框。(第三节中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Array Basics">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/23/CS61B-ch6-note%EF%BC%9Aarrays/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="到目前为止，我们已经看到了如何利用递归类定义来创建一个可扩展的列表类，包括 IntList 、 SLList 和 DLList 。在本书接下来的两个章节中，我们将讨论如何使用数组来构建一个列表类。 本书的这一部分假设你已经熟悉数组，并且不打算成为它们语法的全面指南。 为了最终构建一个可以存储信息的列表，我们需要某种方式来获取内存框。之前，我们看到过如何通过变量声明和类实例化来获取内存框。(第三节中">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch6-note%EF%BC%9Aarrays/7a6fc6e02caaf317642d448ce5a869f7.jpg">
+<meta property="article:published_time" content="2025-12-23T09:31:31.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.839Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch6-note%EF%BC%9Aarrays/7a6fc6e02caaf317642d448ce5a869f7.jpg">
+  
+  
+  
+  <title>Array Basics - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Array Basics"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-23 17:31" pubdate>
+          2025年12月23日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Array Basics</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>到目前为止，我们已经看到了如何利用递归类定义来创建一个可扩展的列表类，包括 <code>IntList</code> 、 <code>SLList</code> 和 <code>DLList</code> 。在本书接下来的两个章节中，我们将讨论如何使用数组来构建一个列表类。</p>
+<p>本书的这一部分假设你已经熟悉数组，并且不打算成为它们语法的全面指南。</p>
+<p>为了最终构建一个可以存储信息的列表，我们需要某种方式来获取内存框。之前，我们看到过如何通过变量声明和类实例化来获取内存框。(第三节中的内容）例如：</p>
+<ul>
+<li><code>int x;</code> 给我们一个 32 位内存框，用于存储 int。</li>
+<li><code>Walrus w1;</code> 给我们一个 64 位内存框，用于存储 Walrus 引用。</li>
+<li><code>Walrus w2 = new Walrus(30, 5.6);</code> 让我们获得 3 个内存框。一个 64 位的 Walrus 引用存储框，一个 32 位的 Walrus 大小存储框，以及一个 64 位的 Walrus 牙大小存储框。</li>
+</ul>
+<p>数组是一种特殊的对象，由编号的内存框序列组成。这与类实例不同，类实例具有命名的内存框。要获取数组的第 i 个元素，我们使用方括号表示法，就像我们在 HW0 和 Project 0 中看到的那样，例如使用 <code>A[i]</code> 来获取 A 的 <code>i</code> 个元素。</p>
+<p>数组包含：</p>
+<ul>
+<li>一个固定的整数长度，N</li>
+<li>一个包含 N 个内存框的序列（N &#x3D; 长度），其中所有框的类型相同，编号从 0 到 N - 1。</li>
+</ul>
+<p>与类不同，数组没有方法（但是数组有属性）</p>
+<h1 id="Array-Creation"><a href="#Array-Creation" class="headerlink" title="Array Creation"></a>Array Creation</h1><p>数组创建有三种有效表示法。尝试运行下面的代码并看看会发生什么。</p>
+<ul>
+<li><p><code>x = new int[3];</code></p>
+</li>
+<li><p><code>y = new int[]&#123;1, 2, 3, 4, 5&#125;;</code></p>
+</li>
+<li><p><code>int[] z = &#123;9, 10, 11, 12, 13&#125;;</code></p>
+</li>
+</ul>
+<p>这三种表示法都会创建一个数组。第一种表示法，用于创建 <code>x</code> ，会创建一个指定长度的数组，并用默认值填充每个内存框。在这种情况下，它会创建一个长度为 3 的数组，并用默认的 <code>int</code> 值 <code>0</code> 填充这 3 个框。</p>
+<p>第二种表示法，用于创建 <code>y</code> ，会创建一个刚好能容纳指定初始值的数组。在这种情况下，它会创建一个长度为 5 的数组，包含这五个特定的元素。</p>
+<p>第三种表示法，用于声明和创建 <code>z</code> ，与第二种表示法行为相同。唯一区别在于它省略了 <code>new</code> 的使用，并且只能与变量声明结合使用。</p>
+<p>这些表示法没有哪一种比另一种更好。</p>
+<h1 id="Array-Access-and-Modification"><a href="#Array-Access-and-Modification" class="headerlink" title="Array Access and Modification"></a>Array Access and Modification</h1><p>以下代码展示了我们将用来处理数组的所有关键语法。尝试逐步执行下面的代码，并确保你理解每行代码执行时会发生什么。为此，点击此处进行交互式可视化。除了最后一行代码外，我们之前已经见过所有这些语法。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">int</span>[] z = null;<br><span class="hljs-attribute">int</span>[] x, y;<br><br><span class="hljs-attribute">x</span> = new int[]&#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>&#125;;<br><span class="hljs-attribute">y</span> = x;<br><span class="hljs-attribute">x</span> = new int[]&#123;-<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">4</span>, <span class="hljs-number">99</span>&#125;;<br><span class="hljs-attribute">y</span> = new int[<span class="hljs-number">3</span>];<br><span class="hljs-attribute">z</span> = new int[<span class="hljs-number">0</span>];<br><span class="hljs-attribute">int</span> xL = x.length;<br><br><span class="hljs-attribute">String</span>[] s = new String[<span class="hljs-number">6</span>];<br><span class="hljs-attribute">s</span>[<span class="hljs-number">4</span>] = <span class="hljs-string">&quot;ketchup&quot;</span>;<br><span class="hljs-attribute">s</span>[x[<span class="hljs-number">3</span>] - x[<span class="hljs-number">1</span>]] = <span class="hljs-string">&quot;muffins&quot;</span>;<br><br><span class="hljs-attribute">int</span>[] b = &#123;<span class="hljs-number">9</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>&#125;;<br><span class="hljs-attribute">System</span>.arraycopy(b, <span class="hljs-number">0</span>, x, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>);<br></code></pre></td></tr></table></figure>
+
+<p>最后一行展示了如何将信息从一个数组复制到另一个数组。 <code>System.arraycopy</code> 需要五个参数：</p>
+<ul>
+<li>要作为源使用的数组</li>
+<li>在源数组中开始的位置</li>
+<li>要作为目标使用的数组</li>
+<li>在目标数组中从哪里开始</li>
+<li>要复制多少项</li>
+</ul>
+<p>对于 Python 老手(veteran)来说， <code>System.arraycopy(b, 0,x, 3, 2)</code> 等同于 <code>x[3:5] = b[0:2]</code></p>
+<p>使用循环是复制数组的一种替代方法。 <code>arraycopy</code> 通常比循环更快，并且能生成更紧凑的代码。唯一的缺点是 <code>arraycopy</code> （可以说）更难阅读。请注意，Java 数组仅在运行时进行边界检查。也就是说，以下代码可以正常编译，但在运行时会崩溃。</p>
+<figure class="highlight gml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs gml">int[] <span class="hljs-variable language_">x</span> = &#123;<span class="hljs-number">9</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>, <span class="hljs-number">12</span>, <span class="hljs-number">13</span>&#125;;<br>int[] <span class="hljs-variable language_">y</span> = <span class="hljs-keyword">new</span> int[<span class="hljs-number">2</span>];<br>int i = <span class="hljs-number">0</span>;<br><span class="hljs-keyword">while</span> (i &lt; <span class="hljs-variable language_">x</span>.length) &#123;<br>    <span class="hljs-variable language_">y</span>[i] = <span class="hljs-variable language_">x</span>[i];<br>    i += <span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这一点需要和类型检查进行区分，我们在编译时就进行了类型检查。</p>
+<p>尝试在本地 Java 文件或可视化器中运行此代码。当它崩溃时，你遇到的是什么错误名称？这个错误名称是否合理？</p>
+<h2 id="2D-Arrays-in-Java"><a href="#2D-Arrays-in-Java" class="headerlink" title="2D Arrays in Java"></a>2D Arrays in Java</h2><p>Java 中所谓的二维数组实际上只是一个数组的数组。它们遵循我们已学过的对象的相同规则，但让我们复习一下以确保我们理解它们的工作原理。</p>
+<p>数组的数组语法可能会有些令人困惑。考虑代码 <code>int[][] bamboozle = new int[4][]</code> 。这创建了一个名为 <code>bamboozle</code> 的整数数组数组。具体来说，这创建了恰好四个内存框，每个内存框都可以指向一个整数数组（长度不确定）。</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs inform7">int<span class="hljs-comment">[]</span><span class="hljs-comment">[]</span> pascalsTriangle;<br>pascalsTriangle = new int<span class="hljs-comment">[4]</span><span class="hljs-comment">[]</span>;<br>int<span class="hljs-comment">[]</span> rowZero = pascalsTriangle<span class="hljs-comment">[0]</span>;<br><br>pascalsTriangle<span class="hljs-comment">[0]</span> = new int<span class="hljs-comment">[]</span>&#123;1&#125;;<br>pascalsTriangle<span class="hljs-comment">[1]</span> = new int<span class="hljs-comment">[]</span>&#123;1, 1&#125;;<br>pascalsTriangle<span class="hljs-comment">[2]</span> = new int<span class="hljs-comment">[]</span>&#123;1, 2, 1&#125;;<br>pascalsTriangle<span class="hljs-comment">[3]</span> = new int<span class="hljs-comment">[]</span>&#123;1, 3, 3, 1&#125;;<br>int<span class="hljs-comment">[]</span> rowTwo = pascalsTriangle<span class="hljs-comment">[2]</span>;<br>rowTwo<span class="hljs-comment">[1]</span> = -5;<br><br>int<span class="hljs-comment">[]</span><span class="hljs-comment">[]</span> matrix;<br>matrix = new int<span class="hljs-comment">[4]</span><span class="hljs-comment">[]</span>;<br>matrix = new int<span class="hljs-comment">[4]</span><span class="hljs-comment">[4]</span>;<br><br>int<span class="hljs-comment">[]</span><span class="hljs-comment">[]</span> pascalAgain = new int<span class="hljs-comment">[]</span><span class="hljs-comment">[]</span>&#123;&#123;1&#125;, &#123;1, 1&#125;,<br>                                 &#123;1, 2, 1&#125;, &#123;1, 3, 3, 1&#125;&#125;;<br></code></pre></td></tr></table></figure>
+
+<h2 id="Exercise-2-4-1"><a href="#Exercise-2-4-1" class="headerlink" title="Exercise 2.4.1:"></a><strong>Exercise 2.4.1:</strong></h2><p>练习 2.4.1：运行下面代码后，x[0][0] 和 w[0][0] 的值会是多少？点击此处检查你的答案。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">int</span>[][] x = &#123;&#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>&#125;, &#123;<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>&#125;, &#123;<span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>&#125;&#125;;<br><br><span class="hljs-attribute">int</span>[][] z = new int[<span class="hljs-number">3</span>][];<br><span class="hljs-attribute">z</span>[<span class="hljs-number">0</span>] = x[<span class="hljs-number">0</span>];<br><span class="hljs-attribute">z</span>[<span class="hljs-number">1</span>] = x[<span class="hljs-number">1</span>];<br><span class="hljs-attribute">z</span>[<span class="hljs-number">2</span>] = x[<span class="hljs-number">2</span>];<br><span class="hljs-attribute">z</span>[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = -z[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>];<br><br><span class="hljs-attribute">int</span>[][] w = new int[<span class="hljs-number">3</span>][<span class="hljs-number">3</span>];<br><span class="hljs-attribute">System</span>.arraycopy(x[<span class="hljs-number">0</span>], <span class="hljs-number">0</span>, w[<span class="hljs-number">0</span>], <span class="hljs-number">0</span>, <span class="hljs-number">3</span>);<br><span class="hljs-attribute">System</span>.arraycopy(x[<span class="hljs-number">1</span>], <span class="hljs-number">0</span>, w[<span class="hljs-number">1</span>], <span class="hljs-number">0</span>, <span class="hljs-number">3</span>);<br><span class="hljs-attribute">System</span>.arraycopy(x[<span class="hljs-number">2</span>], <span class="hljs-number">0</span>, w[<span class="hljs-number">2</span>], <span class="hljs-number">0</span>, <span class="hljs-number">3</span>);<br><span class="hljs-attribute">w</span>[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] = -w[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>];<br></code></pre></td></tr></table></figure>
+
+<p>A:如图所示是我的手稿，答案是<br><img src="/images/CS61B-ch6-note%EF%BC%9Aarrays/7a6fc6e02caaf317642d448ce5a869f7.jpg" srcset="/img/loading.gif" lazyload><br>-1 -1</p>
+<h1 id="Arrays-vs-Classes"><a href="#Arrays-vs-Classes" class="headerlink" title="Arrays vs. Classes"></a>Arrays vs. Classes</h1><p>数组和使用类都可以用来组织一堆内存盒子。在两种情况下，内存盒子的数量都是固定的，即数组的长度不能改变，就像类字段不能添加或删除一样。</p>
+<p>数组中的内存盒子和类中的内存盒子的主要区别：</p>
+<ul>
+<li>数组盒子是编号的，使用 <code>[]</code> 符号访问，而类盒子是命名的，使用点符号访问。</li>
+<li>数组框必须全部是同一类型。类框可以是不同类型。</li>
+</ul>
+<p>这些差异的一个特别显著的影响是， <code>[]</code> 符号允许我们在运行时指定我们想要的索引。例如，考虑下面的代码：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-type">int</span> indexOfInterest = askUserForInteger();<br><span class="hljs-type">int</span>[] x = &#123;<span class="hljs-number">100</span>, <span class="hljs-number">101</span>, <span class="hljs-number">102</span>, <span class="hljs-number">103</span>&#125;;<br><span class="hljs-type">int</span> k = x[indexOfInterest];<br><span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(k);<br></code></pre></td></tr></table></figure>
+
+<p>相比之下，在类中指定字段并不是我们在运行时做的事情。例如，考虑下面的代码：<br>也就是在运行中，你不能选择类的成员。</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">String fieldOfInterest</span> = <span class="hljs-string">&quot;mass&quot;</span>;<br><span class="hljs-attribute">Planet p</span> = new Planet(6e24, <span class="hljs-string">&quot;earth&quot;</span>);<br><span class="hljs-attribute">double mass</span> = p[fieldOfInterest];<br></code></pre></td></tr></table></figure>
+
+<p>如果我们尝试编译这段代码，我们会得到一个语法错误。</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs gams"><span class="hljs-symbol">$</span> javac classDemo<br>FieldDemo.java:<span class="hljs-number">5</span>: error: cannot find symbol<br>        double mass = earth.fieldOfInterest;        <br>                           ^<br>  symbol:   <span class="hljs-keyword">variable</span> fieldOfInterest<br>  location: <span class="hljs-keyword">variable</span> <span class="hljs-comment">earth of type Planet</span><br></code></pre></td></tr></table></figure>
+
+<p>如果我们尝试使用点表示法，同样会出现这个问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">String</span> <span class="hljs-variable">fieldOfInterest</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;mass&quot;</span>;<br><span class="hljs-type">Planet</span> <span class="hljs-variable">p</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Planet</span>(<span class="hljs-number">6e24</span>, <span class="hljs-string">&quot;earth&quot;</span>);<br><span class="hljs-type">double</span> <span class="hljs-variable">mass</span> <span class="hljs-operator">=</span> p.fieldOfInterest;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs gams"><span class="hljs-symbol">$</span> javac classDemo<br>FieldDemo.java:<span class="hljs-number">5</span>: error: cannot find symbol<br>        double mass = earth.fieldOfInterest;        <br>                           ^<br>  symbol:   <span class="hljs-keyword">variable</span> fieldOfInterest<br>  location: <span class="hljs-keyword">variable</span> <span class="hljs-comment">earth of type Planet</span><br></code></pre></td></tr></table></figure>
+
+<p>这并非你经常需要面对的限制，但为了严谨的学术态度，还是值得指出。值得一提的是，确实存在一种在运行时指定所需字段的方法，称为反射，但通常被认为是非常糟糕的编程风格。你可以在此了解更多关于反射的信息。你绝不应该在任何 61B 程序中使用反射，我们也不会在课程中讨论它。</p>
+<p>通常情况下，编程语言在设计时部分是为了限制程序员的选项，使代码更易于理解和推理。通过将这些功能限制在特殊的反射 API 中，我们使典型的 Java 程序更易于阅读和解释。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Array Basics</div>
+      <div>https://augusteing.github.io/2025/12/23/CS61B-ch6-note：arrays/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/24/CS61B-ch7-note/" title="Testing and Selection Sort">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Testing and Selection Sort</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/22/CS61B-ch5-note/" title="DLLists">
+                        <span class="hidden-mobile">DLLists</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,768 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="在第三章中，我们构建了 IntList 类，这是一种理论上可以完成列表所有功能的列表数据结构。然而，实际上， IntList 类存在使用起来较为笨拙的问题，导致代码难以阅读和维护。 如果你自己写代码你就会明白了，很丑陋的数据结构 根本问题在于 IntList 类是一种我称之为“裸递归”数据结构。为了正确使用 IntList 类，程序员必须理解并运用递归，即使是在处理简单的列表相关任务时也是如此。这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SLLists">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/20/CS61B-ch4-note/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="在第三章中，我们构建了 IntList 类，这是一种理论上可以完成列表所有功能的列表数据结构。然而，实际上， IntList 类存在使用起来较为笨拙的问题，导致代码难以阅读和维护。 如果你自己写代码你就会明白了，很丑陋的数据结构 根本问题在于 IntList 类是一种我称之为“裸递归”数据结构。为了正确使用 IntList 类，程序员必须理解并运用递归，即使是在处理简单的列表相关任务时也是如此。这">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch4-note/Pasted%20image%2020251215104250.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch4-note/Pasted%20image%2020251215114315.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch4-note/Pasted%20image%2020251220153944.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch4-note/Pasted%20image%2020251220154042.png">
+<meta property="article:published_time" content="2025-12-20T07:42:19.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.820Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch4-note/Pasted%20image%2020251215104250.png">
+  
+  
+  
+  <title>SLLists - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SLLists"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-20 15:42" pubdate>
+          2025年12月20日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          30 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">SLLists</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>在第三章中，我们构建了 <code>IntList</code> 类，这是一种理论上可以完成列表所有功能的列表数据结构。然而，实际上， <code>IntList</code> 类存在使用起来较为笨拙的问题，导致代码难以阅读和维护。</p>
+<p>如果你自己写代码你就会明白了，很丑陋的数据结构</p>
+<p>根本问题在于 <code>IntList</code> 类是一种我称之为“裸递归”数据结构。为了正确使用 <code>IntList</code> 类，程序员必须理解并运用递归，即使是在处理简单的列表相关任务时也是如此。这限制了它对初学者的实用性，并且根据 <code>IntList</code> 类提供的辅助方法类型，可能会引入全新的、容易出错的错误类别。</p>
+<p>受我们在使用 <code>IntList</code> 类的经验启发，我们现在将构建一个新的 <code>SLList</code> 类，它在很大程度上更接近现代语言中程序员使用的列表实现方式。我们将通过逐步迭代地添加一系列改进来实现这一点</p>
+<h2 id="Improvement-1-Rebranding"><a href="#Improvement-1-Rebranding" class="headerlink" title="Improvement #1: Rebranding"></a>Improvement #1: Rebranding</h2><p>我们之前写的 <code>IntList</code> 类如下，省略了辅助方法：（用于回顾）</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IntList</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> first;<br>    <span class="hljs-keyword">public</span> <span class="hljs-built_in">IntList</span> rest;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">IntList</span>(<span class="hljs-type">int</span> f, <span class="hljs-built_in">IntList</span> r) &#123;<br>        first = f;<br>        rest = r;<br>    &#125;<br>...<br></code></pre></td></tr></table></figure>
+
+<p>我们的第一步将是简单地重命名所有内容并丢弃辅助方法。这可能看起来并没有进展，但请相信我，我是个专业人士。</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IntNode</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> item;<br>    <span class="hljs-keyword">public</span> IntNode <span class="hljs-keyword">next</span>;<br><br>    <span class="hljs-keyword">public</span> IntNode(<span class="hljs-built_in">int</span> i, IntNode n) &#123;<br>        item = i;<br>        <span class="hljs-keyword">next</span> = n;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这或许根本没有什么不同嘛，但是最大的改变是我们看待问题的方式。</p>
+<h2 id="Improvement-2-Bureaucracy"><a href="#Improvement-2-Bureaucracy" class="headerlink" title="Improvement #2: Bureaucracy"></a>Improvement #2: Bureaucracy</h2><p>我们都知道IntNode（IntLIst）很难处理，所以我们用SLList来包装它。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs aspectj"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SLList</span> </span>&#123;<br>    <span class="hljs-keyword">public</span> IntNode first;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">SLList</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>        first = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>已经，我们可以大致了解为什么链表更好。比较 <code>IntList</code>和<code>SLList</code>  如何创建一个元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">IntList</span> <span class="hljs-variable">L1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">5</span>, <span class="hljs-literal">null</span>);<br><span class="hljs-type">SLList</span> <span class="hljs-variable">L2</span>  <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">SLList</span>(<span class="hljs-number">5</span>);<br></code></pre></td></tr></table></figure>
+
+<p>SLLIist对用户隐藏了null的细节。</p>
+<h2 id="addFirst-and-getFirst"><a href="#addFirst-and-getFirst" class="headerlink" title="addFirst and getFirst"></a>addFirst and getFirst</h2><p>我们现在的列表还不是特别的使用，所以我们要向其添加一些方法。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">SLList</span> &#123;<br>    <span class="hljs-keyword">public</span> IntNode first;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">SLList</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> x</span>)</span> &#123;<br>        first = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-literal">null</span>);<br>    &#125;<br><br>    <span class="hljs-comment">/** Adds an item to the front of the list. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addFirst</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> x</span>)</span> &#123;<br>        first = <span class="hljs-keyword">new</span> IntNode(x, first);<br>    &#125;<br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+<p>getFirst更加简单：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-comment">/** Retrieves the front item from the list. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">getFirst</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> first.item;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>得到的 <code>SLList</code> 类要容易使用得多。对比：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs abnf">SLList L <span class="hljs-operator">=</span> new SLList(<span class="hljs-number">15</span>)<span class="hljs-comment">;</span><br>L.addFirst(<span class="hljs-number">10</span>)<span class="hljs-comment">;</span><br>L.addFirst(<span class="hljs-number">5</span>)<span class="hljs-comment">;</span><br>int x <span class="hljs-operator">=</span> L.getFirst()<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>等效于 <code>IntList</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">IntList</span> <span class="hljs-variable">L</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">15</span>, <span class="hljs-literal">null</span>);<br>L = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">10</span>, L);<br>L = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">5</span>, L);<br><span class="hljs-type">int</span> <span class="hljs-variable">x</span> <span class="hljs-operator">=</span> L.first;<br></code></pre></td></tr></table></figure>
+
+<p>从视觉上比较这两种数据结构，我们有：（上面是 <code>IntList</code> 版本，下面是 <code>SLList</code> 版本）:</p>
+<p><img src="/images/CS61B-ch4-note/Pasted%20image%2020251215104250.png" srcset="/img/loading.gif" lazyload></p>
+<p>本质上， <code>SLList</code> 类充当了列表使用者和裸露的递归数据结构之间的中间人。正如上面 <code>IntList</code> d可视化中所建议的， <code>IntList</code> 使用者可能会有指向 <code>IntList</code> 中间部分的变量，这可能带来一些不希望出现的情况。<br>正如奥维德所说：凡人无法直视神明而不死，因此也许最好让 <code>SLList</code> 作为我们的中间人。<br>（感谢我的神学老师Justin David，一个神棍）</p>
+<h2 id="练习-2-2-1："><a href="#练习-2-2-1：" class="headerlink" title="练习 2.2.1："></a>练习 2.2.1：</h2><p>好奇的读者可能会提出异议，认为如果我们简单地编写一个 <code>addFirst</code> 方法， <code>IntList</code> 类的使用将同样容易。尝试为 <code>IntList</code> 类编写一个 <code>addFirst</code> 方法。你会发现，得到的方法同样具有难度且效率低下。</p>
+<h2 id="Improvement-3-Public-vs-Private"><a href="#Improvement-3-Public-vs-Private" class="headerlink" title="Improvement #3: Public vs. Private"></a>Improvement #3: Public vs. Private</h2><p>不幸的是，我们的 <code>SLList</code> 可以被绕过，裸露的数据结构（包含所有潜在危险）的原始成员可以被访问。例如，程序员可以轻易地直接修改列表，但却不通过经过儿童测试、母亲认可的 <code>addFirst</code> 方法：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs abnf">SLList L <span class="hljs-operator">=</span> new SLList(<span class="hljs-number">15</span>)<span class="hljs-comment">;</span><br>L.addFirst(<span class="hljs-number">10</span>)<span class="hljs-comment">;</span><br>L.first.next.next <span class="hljs-operator">=</span> L.first.next<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/CS61B-ch4-note/Pasted%20image%2020251215114315.png" srcset="/img/loading.gif" lazyload></p>
+<p>这会导致一个结构不正确的列表，出现无限循环。为了解决这个问题，我们可以修改 <code>SLList</code> 类，使 <code>first</code> 变量使用 <code>private</code> 关键字声明。</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs perl">public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SLList</span> </span>&#123;<br>    private IntNode first;<br>...<br></code></pre></td></tr></table></figure>
+
+<p>私有变量和方法只能被同一文件 <code>.java</code> 中的代码访问，例如在这种情况下 <code>SLList.java</code> 。这意味着下面的 <code>SLLTroubleMaker</code> 类将无法编译，产生一个 <code>first has private access in SLList</code> 错误。(I like troublemaker)</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SLLTroubleMaker</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> main(String[] args) &#123;<br>        SLList L = <span class="hljs-keyword">new</span> SLList(<span class="hljs-number">15</span>);<br>        L.addFirst(<span class="hljs-number">10</span>);<br>        L.first.<span class="hljs-keyword">next</span>.<span class="hljs-keyword">next</span> = L.first.<span class="hljs-keyword">next</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>相比之下，任何在 <code>SLList.java</code> 文件中的代码都可以访问 <code>first</code> 变量。</p>
+<p>限制访问可能看起来有些傻。毕竟， <code>private</code> 关键字所做的唯一一件事就是阻止那些本来可以编译的程序运行。然而，在大型软件工程项目中， <code>private</code> 关键字是一个宝贵的信号，它表明某些代码部分应该被最终用户忽略（因此无需理解）。</p>
+<p>同样地， <code>public</code> 关键字应被视为一种声明，表明该方法将永远像现在一样正常工作。</p>
+<p>以类比的方式，一辆汽车有某些 <code>public</code> 特性，例如油门和刹车踏板。在引擎盖下，有 <code>private</code> 关于这些部件如何运作的细节。在燃油汽车中，油门踏板可能控制某种燃油喷射系统，而在电动汽车中，它可能调节提供给电机的电池功率。虽然私有细节可能因车而异，但我们期望所有油门踏板都表现出相同的行为。改变这些细节会让用户感到非常困扰，甚至可能引发严重的事故。</p>
+<p><em><strong>When you create a</strong> <code>**public**</code> <strong>member (i.e. method or variable), be careful, because you’re effectively committing to supporting that member’s behavior exactly as it is now, forever.</strong></em></p>
+<h2 id="Improvement-4-Nested-Classes"><a href="#Improvement-4-Nested-Classes" class="headerlink" title="Improvement #4: Nested Classes"></a>Improvement #4: Nested Classes</h2><p>目前，我们有两个 <code>.java</code> 文件： <code>IntNode</code> 和 <code>SLList</code> 。然而， <code>IntNode</code> 实际上只是 <code>SLList</code> 故事中的一个配角。</p>
+<p>Java 提供了将一个类声明嵌入到另一个类中的能力，正好适用于这种情形。其语法简单直观：</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SLList</span> &#123;<br>       <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IntNode</span> &#123;<br>            <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> item;<br>            <span class="hljs-keyword">public</span> IntNode <span class="hljs-keyword">next</span>;<br>            <span class="hljs-keyword">public</span> IntNode(<span class="hljs-built_in">int</span> i, IntNode n) &#123;<br>                item = i;<br>                <span class="hljs-keyword">next</span> = n;<br>            &#125;<br>       &#125;<br><br>       <span class="hljs-keyword">private</span> IntNode first; <br><br>       <span class="hljs-keyword">public</span> SLList(<span class="hljs-built_in">int</span> x) &#123;<br>           first = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-literal">null</span>);<br>       &#125; <br>...<br></code></pre></td></tr></table></figure>
+
+
+<p>拥有嵌套类对代码性能没有实质性影响，它仅仅是用于保持代码有序的一种工具。如需了解更多关于嵌套类的内容，请参阅 Oracle 的官方文档。</p>
+<p>如果嵌套类不需要使用 <code>SLList</code> 的任何实例方法或变量，您可以声明嵌套类 <code>static</code> ，如下所示。将嵌套类声明为 <code>static</code> 表示静态类中的方法无法访问包含类的任何成员。在这种情况下，这意味着 <code>IntNode</code> 中的任何方法都无法访问 <code>first</code> 、 <code>addFirst</code> 或 <code>getFirst</code> 。</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs perl">public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SLList</span> </span>&#123;<br>       public static <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntNode</span> </span>&#123;<br>            public <span class="hljs-keyword">int</span> item;<br>            public IntNode <span class="hljs-keyword">next</span>;<br>            public IntNode(<span class="hljs-keyword">int</span> i, IntNode n) &#123;<br>                item = i;<br>                <span class="hljs-keyword">next</span> = n;<br>            &#125;<br>       &#125;<br><br>       private IntNode first;<br>...<br></code></pre></td></tr></table></figure>
+
+<p>这节省了一点内存，因为每个 <code>IntNode</code> 不再需要跟踪如何访问包含它的 <code>SLList</code> 。</p>
+<p>练习 2.2.2 尽可能少地删除 <code>static</code> 这个词，使得这个程序能够编译（点击链接后刷新页面并确保网址已更改）。在进行练习前，请务必阅读顶部的注释。</p>
+<p><a target="_blank" rel="noopener" href="https://joshhug.gitbooks.io/hug61b/content/chap2/exercises/Government.java">https://joshhug.gitbooks.io/hug61b/content/chap2/exercises/Government.java</a></p>
+<h2 id="addLast-and-size"><a href="#addLast-and-size" class="headerlink" title="addLast() and size()"></a>addLast() and size()</h2><p>为了激励我们接下来的改进，并且展示一些数据结构实现中的常见模式，我们将添加 <code>addLast(int x)</code> 和 <code>size()</code> 方法。在继续阅读之前，建议你先尝试用自己的起始代码进行实现。我特别鼓励你尝试编写 <code>size</code> 的递归实现，这将带来一个有趣的挑战。</p>
+<p>以下是我的答案：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-keyword">int</span> x) &#123;  <br>    <span class="hljs-comment">/* Your Code Here! */</span>  <br>    IntNode p = <span class="hljs-keyword">this</span>.first;  <br>    <span class="hljs-keyword">while</span> (p.<span class="hljs-keyword">next</span> != <span class="hljs-keyword">null</span>) &#123;  <br>        p = p.<span class="hljs-keyword">next</span>;  <br>    &#125;  <br>    IntNode last = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);  <br>    p.<span class="hljs-keyword">next</span> = last;  <br>&#125;  <br>  <br><span class="hljs-comment">/** Returns the number of items in the list using recursion. */</span>  <br><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-keyword">size</span>() &#123;  <br>    <span class="hljs-comment">/* Your Code Here! */</span>  <br>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.first.<span class="hljs-keyword">next</span> == <span class="hljs-keyword">null</span>) &#123;  <br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;  <br>    &#125; <span class="hljs-keyword">else</span> &#123;  <br>        IntNode NextIntNode = <span class="hljs-keyword">this</span>.first.<span class="hljs-keyword">next</span>;  <br>        SLList next_list = <span class="hljs-keyword">new</span> SLList(<span class="hljs-number">0</span>);  <br>        next_list.first = NextIntNode;  <br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span> + next_list.<span class="hljs-keyword">size</span>();  <br>    &#125;  <br>&#125;  <br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> main(String[] args) &#123;  <br>    SLList a = <span class="hljs-keyword">new</span> SLList(<span class="hljs-number">1</span>);  <br>    a.addFirst(<span class="hljs-number">2</span>);  <br>    a.addLast(<span class="hljs-number">3</span>);  <br>    System.out.<span class="hljs-keyword">println</span>(a.<span class="hljs-keyword">size</span>());  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>本书作者：我会用迭代的方式实现 <code>addLast</code> 方法，虽然你也可以用递归的方式。这个想法相当直接，我们创建一个指针变量 <code>p</code> ，并让它遍历列表直到末尾。</p>
+<p>&#96;&#96;</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-comment">/** Adds an item to the end of the list. */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-built_in">int</span> x) &#123;<br>    IntNode p = first;<br><br>    <span class="hljs-comment">/* Advance p to the end of the list. */</span><br>    <span class="hljs-keyword">while</span> (p.<span class="hljs-keyword">next</span> != <span class="hljs-literal">null</span>) &#123;<br>        p = p.<span class="hljs-keyword">next</span>;<br>    &#125;<br>    p.<span class="hljs-keyword">next</span> = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-literal">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>相比之下，我将递归地实现 <code>size</code> 。这种方法将与我们在第 2.1 节为 <code>IntList</code> 实现的 <code>size</code> 方法有些相似。</p>
+<p>在 <code>IntList</code> 中对 <code>size</code> 的递归调用很简单： <code>return 1 + this.rest.size()</code> 。对于 <code>SLList</code> ，这种方法是没有意义的。 <code>SLList</code> 没有 <code>rest</code> 变量。相反，我们将使用一种常用于中间类如 <code>SLList</code> 的常见模式——创建一个私有的辅助方法，与底层的裸递归数据结构进行交互。</p>
+<p>这提供了一种类似下面的方法：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-comment">/** Returns the size of the list starting at IntNode p. */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-keyword">size</span>(IntNode p) &#123;<br>    <span class="hljs-keyword">if</span> (p.<span class="hljs-keyword">next</span> == <span class="hljs-keyword">null</span>) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span> + <span class="hljs-keyword">size</span>(p.<span class="hljs-keyword">next</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>使用这种方法，我们可以轻松地计算整个列表的大小：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs aspectj"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">size</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">return</span> <span class="hljs-title">size</span><span class="hljs-params">(first)</span></span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>请注意，此处的实现方法和我的不同，我每次创建了新的SLList用以递归，这里创建了辅助的方法，直接针对到IntNode类。而且以<code>private</code> 关键词进行私有化，使得用户（client）不必关心背后的实现细节。</p>
+<p><em>Clients only care the usage of method but not implmentation</em></p>
+<p>这里我们有两个方法，名称都是 <code>size</code> 。这在 Java 中是允许的，因为它们的参数不同。我们称具有相同名称但不同签名的方法为重载方法。如需了解更多关于重载方法的内容，请参阅 Java 的官方文档。</p>
+<p>另一种方法是在 <code>IntNode</code> 类本身中创建一个非静态的辅助方法。虽然两种方法都可以，但我个人更倾向于不在 <code>IntNode</code> 类中包含任何方法。</p>
+<h2 id="Improvement-5-Caching"><a href="#Improvement-5-Caching" class="headerlink" title="Improvement #5: Caching"></a>Improvement #5: Caching</h2><p>考虑我们上面写的 <code>size</code> 方法。假设 <code>size</code> 在一个长度为 1,000 的列表上需要 2 秒。我们期望在长度为 1,000,000 的列表上， <code>size</code> 方法需要 2,000 秒，因为计算机必须遍历列表中 1,000 倍多的元素才能到达末尾。对于大型列表来说，拥有一个 <code>size</code> 方法运行得非常缓慢是不可接受的，因为我们可以做得更好。</p>
+<p>可以重写 <code>size</code> ，使其无论列表有多大，所需时间都保持相同。</p>
+<p>最简单的方法是我们只需在 <code>SLList</code> 类中添加一个 <code>size</code> 变量来跟踪当前的大小，从而得到下面的代码。这种保存重要数据以加快检索的实践有时被称为缓存（Caching）。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SLList</span> &#123;<br>    ... <span class="hljs-comment">/* IntNode declaration omitted. */</span><br>    <span class="hljs-keyword">private</span> IntNode first;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> size;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">SLList</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> </span>&#123;<br>        first = <span class="hljs-keyword">new</span> <span class="hljs-built_in">IntNode</span>(x, null);<br>        size = <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title">addFirst</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> </span>&#123;<br>        first = <span class="hljs-keyword">new</span> <span class="hljs-built_in">IntNode</span>(x, first);<br>        size += <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title">size</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> size;<br>    &#125;<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个修改使我们的 <code>size</code> 方法在列表大小无论多大时都变得极其高效。当然，它也会放慢我们的 <code>addFirst</code> 和 <code>addLast</code> 方法，并且也会增加我们类的内存使用，但只是微不足道的量。在这种情况下，这种权衡显然有利于为 size 创建一个缓存。</p>
+<h2 id="Improvement-6-The-Empty-List"><a href="#Improvement-6-The-Empty-List" class="headerlink" title="Improvement #6: The Empty List"></a>Improvement #6: The Empty List</h2><p>我们的 <code>SLList</code> 相比第 2.1 章的简单 <code>IntList</code> 有许多优势：</p>
+<ul>
+<li><code>SLList</code> 的使用者从不会看到 <code>IntList</code> 类。</li>
+<li>更易于使用。</li>
+<li>更高效的方法</li>
+<li>避免用户 <code>IntList</code> 的错误或不当行为</li>
+<li>比使用 <code>IntList</code> 更快的 <code>size</code> 方法。</li>
+</ul>
+<p>另一个自然的优势是，我们可以轻松地实现一个创建空列表的构造函数。如果列表为空，最自然的方式是将 <code>first</code> 设置为 <code>null</code> 。这产生了下面的构造函数（新的构造函数）：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs abnf">public SLList() &#123;<br>    first <span class="hljs-operator">=</span> null<span class="hljs-comment">;</span><br>    size <span class="hljs-operator">=</span> <span class="hljs-number">0</span><span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>但是很遗憾的是，这会导致我们的 <code>addLast</code> 方法在插入到空列表时崩溃。由于 <code>first</code> 是 <code>null</code> ，下面尝试访问 <code>p.next</code> 的 <code>while (p.next != null)</code> 会导致空指针异常。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-keyword">int</span> x) &#123;<br>    <span class="hljs-keyword">size</span> += <span class="hljs-number">1</span>;<br>    IntNode p = first;<br>    <span class="hljs-keyword">while</span> (p.<span class="hljs-keyword">next</span> != <span class="hljs-keyword">null</span>) &#123;<br>        p = p.<span class="hljs-keyword">next</span>;<br>    &#125;<br><br>    p.<span class="hljs-keyword">next</span> = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="练习-2-2-3"><a href="#练习-2-2-3" class="headerlink" title="练习 2.2.3"></a>练习 2.2.3</h2><p>练习 2.2.3 修复 <code>addLast</code> 方法。初始代码见：&#96;<a target="_blank" rel="noopener" href="https://github.com/Berkeley-CS61B/lectureCode/blob/master/lists2/DIY/fixAddLast/SLList.java">https://github.com/Berkeley-CS61B/lectureCode/blob/master/lists2/DIY/fixAddLast/SLList.java</a></p>
+<h2 id="sentinel-Nodes"><a href="#sentinel-Nodes" class="headerlink" title="sentinel Nodes"></a>sentinel Nodes</h2><p>修复 <code>addLast</code> 的一种解决方案是在代码中为空列表创建一个特殊处理情况，如下所示：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-keyword">int</span> x) &#123;<br>    <span class="hljs-keyword">size</span> += <span class="hljs-number">1</span>;<br><br>    <span class="hljs-keyword">if</span> (first == <span class="hljs-keyword">null</span>) &#123;<br>        first = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    IntNode p = first;<br>    <span class="hljs-keyword">while</span> (p.<span class="hljs-keyword">next</span> != <span class="hljs-keyword">null</span>) &#123;<br>        p = p.<span class="hljs-keyword">next</span>;<br>    &#125;<br><br>    p.<span class="hljs-keyword">next</span> = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>这个解决方案可行，但像上面所示的特殊案例代码在必要时应尽量避免。人类的短期记忆容量是有限的，因此我们希望尽可能控制复杂度。对于像 <code>SLList</code> 这样简单的数据结构，特殊案例的数量很少。而更复杂的结构如树，可能会变得极其丑陋。</p>
+<p>一种更干净但不太明显的解决方案是让所有的 <code>SLLists</code> 都成为“同一个”，即使它们是空的。我们可以通过创建一个特殊的节点来实现这一点，这个节点始终存在，我们称之为哨兵节点。哨兵节点将保存一个值，但我们不会关心这个值。</p>
+<p>例如，由 <code>SLList L = new SLList()</code> 创建的空列表如下所示：<br>（请你注意 <code>SLList()</code> 这个构造函数的作用）</p>
+<p><img src="/images/CS61B-ch4-note/Pasted%20image%2020251220153944.png" srcset="/img/loading.gif" lazyload></p>
+<p>并且一个包含项目 5、10 和 15 的 <code>SLList</code> 看起来会是这样的：</p>
+<p><img src="/images/CS61B-ch4-note/Pasted%20image%2020251220154042.png" srcset="/img/loading.gif" lazyload></p>
+<p>在上面的图中，薰衣草色的 ?? 值表示我们不关心该位置的值。由于 Java 不允许我们用问号填充整数，我们只需选择一个任意的值，比如-518273 或 63，或者其他任何值。</p>
+<p>由于一个有哨兵的 <code>SLList</code> 没有特殊的情况，我们可以简单地从我们的 <code>addLast</code> 方法中删除特殊处理，得到：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-keyword">int</span> x) &#123;<br>    <span class="hljs-keyword">size</span> += <span class="hljs-number">1</span>;<br>    IntNode p = sentinel;<br>    <span class="hljs-keyword">while</span> (p.<span class="hljs-keyword">next</span> != <span class="hljs-keyword">null</span>) &#123;<br>        p = p.<span class="hljs-keyword">next</span>;<br>    &#125;<br><br>    p.<span class="hljs-keyword">next</span> = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如你所见，这段代码要干净得多！</p>
+<h2 id="Invariants"><a href="#Invariants" class="headerlink" title="Invariants"></a>Invariants</h2><p>不变式是关于数据结构的一个事实，它被保证为真（假设你的代码中没有错误）。</p>
+<p>带有哨兵节点的 <code>SLList</code> 至少具有以下不变式：</p>
+<ul>
+<li><code>sentinel</code> 指针始终指向一个哨兵节点。</li>
+<li>如果存在，则最前面的元素始终位于 <code>sentinel.next.item</code> 。</li>
+<li><code>size</code> 变量始终表示已添加的元素总数。<br>不变量使得代码更容易理解，并且在确保代码正确运行时也提供了具体的目标。<br>对哨兵节点有多方便的真正理解，需要你深入钻研并自己实现一些内容。你在项目 1 中将获得大量练习机会。然而，我们建议你在完成本书的下一节内容后再开始项目 1。</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SLLists</div>
+      <div>https://augusteing.github.io/2025/12/20/CS61B-ch4-note/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/22/CS61B-ch5-note/" title="DLLists">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">DLLists</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/10/CS61B-ch3-note/" title="list">
+                        <span class="hidden-mobile">list</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

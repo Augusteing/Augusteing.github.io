@@ -1,0 +1,808 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="之前，我们一直关注如何节省编写程序的时间。现在，我们将学习如何最有效地利用计算机的时间和内存。 我们可以从两个不同的角度来考虑编写高效程序的过程： 1.编程成本（截至当前日期的课程内容）  你的程序开发需要多长时间？  你的代码容易阅读或修改吗  你的代码可维护性如何？（非常重要——大部分成本来自维护和可扩展性，而非开发！）2.执行成本（从本课程这一点开始的所有内容）  时间复杂度：你的程序执行需">
+<meta property="og:type" content="article">
+<meta property="og:title" content="An Introduction to Asymptotic Analysis">
+<meta property="og:url" content="https://augusteing.github.io/2026/01/17/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="之前，我们一直关注如何节省编写程序的时间。现在，我们将学习如何最有效地利用计算机的时间和内存。 我们可以从两个不同的角度来考虑编写高效程序的过程： 1.编程成本（截至当前日期的课程内容）  你的程序开发需要多长时间？  你的代码容易阅读或修改吗  你的代码可维护性如何？（非常重要——大部分成本来自维护和可扩展性，而非开发！）2.执行成本（从本课程这一点开始的所有内容）  时间复杂度：你的程序执行需">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116215142.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235325.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116230402.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235701.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235719.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235813.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117000254.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117000709.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117000722.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117155930.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117155950.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160040.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160200.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160220.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160724.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117163352.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117163415.png">
+<meta property="article:published_time" content="2026-01-17T08:34:16.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.484Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116215142.png">
+  
+  
+  
+  <title>An Introduction to Asymptotic Analysis - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="An Introduction to Asymptotic Analysis"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-17 16:34" pubdate>
+          2026年1月17日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          26 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">An Introduction to Asymptotic Analysis</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>之前，我们一直关注如何节省编写程序的时间。现在，我们将学习如何最有效地利用计算机的时间和内存。</p>
+<p>我们可以从两个不同的角度来考虑编写高效程序的过程：</p>
+<p>1.编程成本（截至当前日期的课程内容）<br>  你的程序开发需要多长时间？<br>  你的代码容易阅读或修改吗<br>  你的代码可维护性如何？（非常重要——大部分成本来自维护和可扩展性，而非开发！）<br>2.执行成本（从本课程这一点开始的所有内容）<br>  时间复杂度：你的程序执行需要多少时间？<br>  空间复杂度：你的程序需要多少内存？<br>为了了解接下来要讨论的内容，考虑一个已排序的数组。我们的目标是确定列表中是否存在重复元素。</p>
+<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mathematica"><span class="hljs-built_in">List</span><span class="hljs-operator">&lt;</span><span class="hljs-built_in">Integer</span><span class="hljs-operator">&gt;</span> <span class="hljs-variable">example</span> <span class="hljs-operator">=</span> <span class="hljs-punctuation">[</span><span class="hljs-operator">-</span><span class="hljs-number">3</span><span class="hljs-operator">,</span> <span class="hljs-operator">-</span><span class="hljs-number">1</span><span class="hljs-operator">,</span> <span class="hljs-number">2</span><span class="hljs-operator">,</span> <span class="hljs-number">4</span><span class="hljs-operator">,</span> <span class="hljs-number">4</span><span class="hljs-operator">,</span> <span class="hljs-number">8</span><span class="hljs-operator">,</span> <span class="hljs-number">10</span><span class="hljs-operator">,</span> <span class="hljs-number">12</span><span class="hljs-punctuation">]</span><span class="hljs-operator">;</span><br></code></pre></td></tr></table></figure>
+
+<p>一种简单的方法是逐一比较每一对元素。在上述例子中，我们会将-3 与列表中的每个元素进行比较，然后是-1，接着是 2，以此类推。</p>
+<p>一种<strong>更好的算法</strong>是利用列表的排序特性！我们不必逐一比较每一对元素，只需将每个元素与其相邻的元素进行比较即可。</p>
+<p>我们可以看到，简单算法似乎比更好的算法做了更多不必要的、重复的工作。但它究竟多做了多少工作？我们如何量化程序的效率？本章将为您提供比较各种算法效率的正式技术和工具！</p>
+<h1 id="Runtime-Characterization"><a href="#Runtime-Characterization" class="headerlink" title="Runtime Characterization"></a>Runtime Characterization</h1><p>我们希望能够表征先前看到的两种算法的运行时间。换句话说，我们希望提出某种代理指标，以传达每种算法的整体性能。</p>
+<p>在表征运行时间时，我们有两个目标：</p>
+<ul>
+<li>它们应该是简单但数学上严谨的。</li>
+<li>如果一种算法比另一种算法更好，它们应该清楚地展示出一种算法优于另一种算法。</li>
+</ul>
+<p>我们已经将朴素算法和更好的算法都转换成了 Java 代码。函数 dup1 对应于朴素算法，dup2 对应于更好的算法。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">// Naïve algorithm: compare everything</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">boolean</span> <span class="hljs-title">dup1</span><span class="hljs-params">(<span class="hljs-type">int</span>[] A)</span> </span>&#123;  <br>  <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; A.length; i += <span class="hljs-number">1</span>) &#123;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = i + <span class="hljs-number">1</span>; j &lt; A.length; j += <span class="hljs-number">1</span>) &#123;<br>      <span class="hljs-keyword">if</span> (A[i] == A[j]) &#123;<br>         <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>      &#125;<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">// Better algorithm: compare only neighbors</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">boolean</span> <span class="hljs-title">dup2</span><span class="hljs-params">(<span class="hljs-type">int</span>[] A)</span> </span>&#123;<br>  <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; A.length - <span class="hljs-number">1</span>; i += <span class="hljs-number">1</span>) &#123;<br>    <span class="hljs-keyword">if</span> (A[i] == A[i + <span class="hljs-number">1</span>]) &#123; <br>      <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>; <br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="Technique-1"><a href="#Technique-1" class="headerlink" title="Technique 1"></a>Technique 1</h2><p>我们将考虑用于运行时特征化的第一种技术是使用客户端程序直接测量执行时间（以秒为单位）。</p>
+<p>我们可以用几种方法来做这件事：</p>
+<ul>
+<li>使用物理秒表（不推荐）。</li>
+<li>使用 Unix 的内置 <code>time</code> 命令。</li>
+<li>使用普林斯顿标准库，它有一个 <code>stopwatch</code> 类。</li>
+</ul>
+<p>使用这些方法中的任何一种（准确度因是否选择物理秒表路径而异）都会显示，随着输入规模的增加， <code>dup1</code> 需要更长时间完成，而 <code>dup2</code> 则相对以大致相同的速率完成。</p>
+<p>看起来技术 1 在描述我们的运行时间方面效果完美！实验结果非常容易理解，而且实现起来也很简单。然而，它有一些严重的缺点，这使得我们不会用它来处理所有事情：</p>
+<ul>
+<li>运行完成可能需要很长时间。</li>
+<li>运行时间可能因机器、编译器、输入数据等因素而异。</li>
+</ul>
+<p>由于这些原因，技术 1 在描述运行时间方面并不符合我们的目标。它很简单，但缺乏数学严谨性。此外，基于机器、编译器、输入等因素的差异意味着结果可能无法清晰地展示 <code>dup1</code> 和 <code>dup2</code> 之间的关系。</p>
+<h2 id="Technique-2A"><a href="#Technique-2A" class="headerlink" title="Technique 2A"></a>Technique 2A</h2><p>与其实际计时算法运行所需的时间，我们可以转而计算每个算法完成的总操作次数！直观上，运行操作次数较少的算法会更为优越。我们可以将输入大小 <code>N</code> 固定为相同值，并比较两个算法运行的操作次数。</p>
+<p>让我们将这种方法应用于输入大小为 <code>N=10000</code> 的 <code>dup1</code> 算法：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">for</span> (int i = <span class="hljs-number">0</span>; <span class="hljs-attribute">i</span> &lt; A.length; <span class="hljs-attribute">i</span> += <span class="hljs-number">1</span>) &#123;<br>  <span class="hljs-attribute">for</span> (int j = i+<span class="hljs-number">1</span>; <span class="hljs-attribute">j</span> &lt; A.length; <span class="hljs-attribute">j</span> += <span class="hljs-number">1</span>) &#123;<br>    <span class="hljs-attribute">if</span> (A[i] == A[j]) &#123;<br>       <span class="hljs-attribute">return</span> <span class="hljs-literal">true</span>;<br>    &#125;<br>  &#125;<br>&#125;<br><span class="hljs-attribute">return</span> <span class="hljs-literal">false</span>;<br></code></pre></td></tr></table></figure>
+
+<p>操作 <code>i = 0</code> 仅在函数调用的最开始运行一次。 <code>j = i+1</code> 更复杂——在最好的情况下，当 <code>A[0] == A[1]</code> 时，它只运行一次（自己说服自己这一点！）。在最坏的情况下， <code>j</code> 为 <code>i</code> 在外层循环中取的每个值都初始化一次，因此总共初始化了 10000 次。</p>
+<p>随着我们进一步深入循环，计算确切次数变得越来越不可行。我们将在后面展示，确切的数字并不那么重要。</p>
+<p>总结技术 2A，我们解决了机器独立性的问题。不同机器的差异不会影响运行操作的总数（通常）。然而，计算每种操作的计数非常繁琐。此外，我们选择的输入大小是任意的，我们不知道实际运行需要多少时间。</p>
+<h2 id="Technique-2B"><a href="#Technique-2B" class="headerlink" title="Technique 2B"></a>Technique 2B</h2><p>我们可以通过计算符号计数来解决选择输入大小的问题，这意味着我们根据输入 <code>N</code> 来计算我们的计数。使用这种技术，我们可以更新我们的表格以包含符号计数：</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116215142.png" srcset="/img/loading.gif" lazyload></p>
+<p>使用符号计数使我们能够看到算法如何随输入规模扩展。然而，现在计算起来更加繁琐！它仍然无法告诉我们实际的时间。</p>
+<h2 id="Checkpoint-An-Exercise"><a href="#Checkpoint-An-Exercise" class="headerlink" title="Checkpoint: An Exercise"></a>Checkpoint: An Exercise</h2><p>练习：将技术 2A 和 2B 应用于 <code>dup2</code> 。</p>
+<ul>
+<li><p>Calculate the counts of each operation for the following code with respect to N.<br>计算以下代码相对于 N 的每种操作的计数。</p>
+</li>
+<li><p>Predict the <em><strong>rough</strong></em> magnitudes of each one.<br>  预测每种操作的大致量级。</p>
+</li>
+</ul>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">for</span> (int i = <span class="hljs-number">0</span>; <span class="hljs-attribute">i</span> &lt; A.length - <span class="hljs-number">1</span>; <span class="hljs-attribute">i</span> += <span class="hljs-number">1</span>)&#123;<br>  <span class="hljs-attribute">if</span> (A[i] == A[i + <span class="hljs-number">1</span>]) &#123; <br>    <span class="hljs-attribute">return</span> <span class="hljs-literal">true</span>; <br>  &#125;<br>&#125;<br><span class="hljs-attribute">return</span> <span class="hljs-literal">false</span>;<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235325.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们可以看到，在最坏情况下， <code>dup2</code> 的表现明显优于 <code>dup1</code> ！</p>
+<p>有一种合理的解释是， <code>dup2</code> 完成相同目标所需的操作比 <code>dup1</code> 更少。</p>
+<p>一个更好的认识是， <code>dup2</code> 算法在最坏情况下表现更好（例如 ( N2+3N+2)&#x2F;2N2+3N+2)&#x2F;2 vs NN ) 。</p>
+<p>甚至更好的认识是，抛物线 ( N2N2 ) 总是比直线 ( NN ) 增长得更快。</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116230402.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Asymptotic-Behavior"><a href="#Asymptotic-Behavior" class="headerlink" title="Asymptotic Behavior"></a>Asymptotic Behavior</h1><p>在大多数应用中，我们最关心的是当 NN 值非常大时会发生什么。这被称为渐近行为。我们希望了解哪些类型的算法能够处理大量数据。需要高效算法的应用实例包括：</p>
+<ul>
+<li>模拟数十亿粒子的相互作用</li>
+<li>维护一个拥有数十亿用户的社交网络</li>
+<li>编码数十亿字节的视频数据</li>
+</ul>
+<p>扩展性好的算法比扩展性差的算法具有更好的渐近运行时行为。</p>
+<p>让我们回到最初的问题，即描述我们的 <code>dup</code> 函数的运行时间。回想一下，我们希望这些描述具有以下特点：</p>
+<ul>
+<li>简单且数学上严谨。</li>
+<li>明确展示 dup2 比 dup1 更优越。</li>
+</ul>
+<p>我们已经完成了第二项任务！我们可以清楚地看到 <code>dup2</code> 的表现优于 <code>dup1</code> 。然而，我们没有以一种非常简单或数学严谨的方式完成它。幸运的是，我们可以应用一系列简化来解决这个问题。</p>
+<h2 id="Simplification-1-Consider-Only-the-Worst-Case"><a href="#Simplification-1-Consider-Only-the-Worst-Case" class="headerlink" title="Simplification 1: Consider Only the Worst Case"></a>Simplification 1: Consider Only the Worst Case</h2><p>在比较算法时，我们通常只关心最坏情况。最坏情况往往能展现出最有趣的效果，因此我们通常可以忽略除最坏情况之外的所有其他情况。</p>
+<h3 id="EXAMPLE"><a href="#EXAMPLE" class="headerlink" title="EXAMPLE"></a>EXAMPLE</h3><p>考虑以下算法的操作计数。你认为该算法的运行时间增长顺序会是什么？<br><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235701.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235719.png" srcset="/img/loading.gif" lazyload></p>
+<p>答案：当然是立方。直观上， N3N3 的增长速度比 N2N2 快，所以它会“主导”。为了进一步让你相信这一点，请考虑以下论证：</p>
+<p>假设 &lt; 运算符需要 α 纳秒，&gt; 运算符需要 β 纳秒，&amp;&amp; 运算符需要 γ 纳秒。</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260116235813.png" srcset="/img/loading.gif" lazyload></p>
+<p>对于非常大的 N ， 2βN3（n的三次方）项远大于其他项。</p>
+<p>译者注：用微积分的观点来思考可能会有帮助。当 NN 趋近于无穷大时会发生什么？哪一项最终会主导？</p>
+<h2 id="Simplification-2-Restrict-Attention-to-One-Operation"><a href="#Simplification-2-Restrict-Attention-to-One-Operation" class="headerlink" title="Simplification 2: Restrict Attention to One Operation"></a>Simplification 2: Restrict Attention to One Operation</h2><p>选择一个代表性的操作作为整体运行时间的代理。从我们的 <code>dup</code> 示例：</p>
+<ul>
+<li>好的选择： <code>increment</code> ，或者小于等于，或者数组访问。</li>
+<li>不好的选择： <code>j = i + 1</code> 的赋值，或者 <code>i = 0.</code></li>
+</ul>
+<p>我们选择的操作称为“成本模型”。</p>
+<h2 id="Simplification-3-Eliminate-Low-Order-Terms"><a href="#Simplification-3-Eliminate-Low-Order-Terms" class="headerlink" title="Simplification 3: Eliminate Low Order Terms"></a>Simplification 3: Eliminate Low Order Terms</h2><p>忽略低阶项。</p>
+<p>合理性检查：为什么这是有道理的？（与上述检查点相关！）</p>
+<h2 id="Simplification-4-Eliminate-Multiplicative-Constants"><a href="#Simplification-4-Eliminate-Multiplicative-Constants" class="headerlink" title="Simplification 4: Eliminate Multiplicative Constants"></a><strong>Simplification 4: Eliminate Multiplicative Constants</strong></h2><p>忽略乘法常数</p>
+<ul>
+<li>为什么？没有实际意义！</li>
+<li>通过选择单个代表性操作，我们已经“舍弃”了一些信息。</li>
+<li>某些操作的计数有 3N2 N2 、 N2&#x2F;2 等。一般来说，它们都属于 N2 的家族&#x2F;形状。</li>
+</ul>
+<h2 id="Checkpoint-Exercise"><a href="#Checkpoint-Exercise" class="headerlink" title="Checkpoint Exercise"></a>Checkpoint Exercise</h2><p>将我们的四条简化规则应用于 <code>dup2</code> 表。</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117000254.png" srcset="/img/loading.gif" lazyload></p>
+<p>答案：数组访问的顺序增长 N</p>
+<p>&lt;, &#x3D;&#x3D; 和 j&#x3D;i+1 也是可以的答案。</p>
+<h1 id="Simplified-Analysis-Process"><a href="#Simplified-Analysis-Process" class="headerlink" title="Simplified Analysis Process"></a>Simplified Analysis Process</h1><p><em>或许并不简单</em></p>
+<p>我们得到了最后的N经过了以下过程：</p>
+<ul>
+<li>构建所有可能操作的精确计数表（需要大量工作！）</li>
+<li>将表格转换为使用 4 个简化的最坏情况增长顺序。</li>
+</ul>
+<p>我们现在将提出一种替代方法，完全避免构建表格！</p>
+<p>我们的简化分析过程将包括：</p>
+<ul>
+<li>选择我们的成本模型，即我们想要计数的代表性操作。</li>
+<li>通过以下方式确定代表性操作计数的增长顺序：</li>
+<li>进行精确计数并丢弃不必要的部分或…</li>
+<li>使用直觉&#x2F;检查来确定增长顺序。这是通过实践获得的。</li>
+</ul>
+<h2 id="Example-Analysis-of-Nested-For-Loops-Exact-Counts"><a href="#Example-Analysis-of-Nested-For-Loops-Exact-Counts" class="headerlink" title="Example: Analysis of Nested For Loops - Exact Counts"></a>Example: Analysis of Nested For Loops - Exact Counts</h2><p>找出 <code>dup1</code> 最坏情况运行时的增长顺序。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">int</span> N = A.length;<br><span class="hljs-attribute">for</span> (int i = <span class="hljs-number">0</span>; <span class="hljs-attribute">i</span> &lt; N; <span class="hljs-attribute">i</span> += <span class="hljs-number">1</span>)<br>   for (int j = i + <span class="hljs-number">1</span>; <span class="hljs-attribute">j</span> &lt; N; <span class="hljs-attribute">j</span> += <span class="hljs-number">1</span>)<br>      if (A[i] == A[j])<br>         return <span class="hljs-literal">true</span>;<br><span class="hljs-attribute">return</span> <span class="hljs-literal">false</span>;<br></code></pre></td></tr></table></figure>
+
+<p>明显的是，当只有最后两个元素相等时，这个算法遇到了最坏的情况。</p>
+<p>我们将选择成本模型为&#x3D; &#x3D;操作的次数。</p>
+<p>观察循环的结构，内循环首先运行 j&#x3D;N-1 次。在第二次迭代中，i&#x3D;1，所以内循环再运行 j&#x3D;N-2 次。在第三次迭代中，i&#x3D;2，所以内循环再运行 j&#x3D;N-3 次。因此，循环总共运行的次数为：</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117000709.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117000722.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Example-Analysis-of-Nested-For-Loops-Geometric-Argument"><a href="#Example-Analysis-of-Nested-For-Loops-Geometric-Argument" class="headerlink" title="Example: Analysis of Nested For Loops - Geometric Argument"></a>Example: Analysis of Nested For Loops - Geometric Argument</h2><p><em>我十分推荐看一看这部分，朴素的数学直觉对于学习大有脾益</em></p>
+<p>我们可以看到，&#x3D; &#x3D;的数量可以通过一个直角三角形的面积来表示，该三角形的边长为 N−1和N 。</p>
+<p>这是高斯平均的几何解释，当你增长N的时候明显我们会有N^2</p>
+<p>这绝对不是一眼就能看出来的。需要时间和练习才能发现这些模式！</p>
+<h1 id="Big-Theta"><a href="#Big-Theta" class="headerlink" title="Big-Theta"></a>Big-Theta</h1><p><em>请别和O符号记混</em></p>
+<h2 id="Formalizing-Order-of-Growth"><a href="#Formalizing-Order-of-Growth" class="headerlink" title="Formalizing Order of Growth"></a>Formalizing Order of Growth</h2><p>给定某个函数 Q(N) ，我们可以应用我们最后两个简化方法来得到 Q(N) 的增长顺序。</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117155930.png" srcset="/img/loading.gif" lazyload></p>
+<p>从现在开始，我们将增长顺序称为 Θ （发音为”大θ”）。</p>
+<h2 id="Order-of-Growth-Examples"><a href="#Order-of-Growth-Examples" class="headerlink" title="Order of Growth Examples"></a>Order of Growth Examples</h2><p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117155950.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们不说一个函数具有___阶增长，而是说该函数属于Θ （） 。换句话说，它属于具有相同阶增长的函数家族。</p>
+<h2 id="Formal-Definition"><a href="#Formal-Definition" class="headerlink" title="Formal Definition"></a>Formal Definition</h2><p>对于具有阶增长 f(N) 的函数 R(N) ，我们记作：</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160040.png" srcset="/img/loading.gif" lazyload><br>（当然这是存在）</p>
+<h1 id="Big-O"><a href="#Big-O" class="headerlink" title="Big-O"></a>Big-O</h1><p>O（读作”大 O”）类似于 Θ 。它不是关于增长次序的”相等”，可以看作是”小于或等于”。</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160200.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Formal-Definition-1"><a href="#Formal-Definition-1" class="headerlink" title="Formal Definition"></a><strong>Formal Definition</strong></h2><p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160220.png" srcset="/img/loading.gif" lazyload></p>
+<p>注意到这是一个比 Θ 更宽松的条件，因为 O 不关心下界</p>
+<p>(但是很自然的我们使用O来表示算法的复杂度，它规定了算法的时间复杂度上届)</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>我们选取算法中最具代表性的操作（如何选择前文有提到，但是不成体系，只是一种经验的做法)</p>
+<p>计算他的操作次数随规模n的变化率。</p>
+<p>进行简化</p>
+<h1 id="Exercises"><a href="#Exercises" class="headerlink" title="Exercises"></a>Exercises</h1><ol>
+<li>分析以下代码的运行时间，以 <code>N</code> 为单位：</li>
+</ol>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs abnf">for (int i <span class="hljs-operator">=</span> <span class="hljs-number">0</span><span class="hljs-comment">; i &lt; N; i++) &#123;</span><br>    int j <span class="hljs-operator">=</span> <span class="hljs-number">0</span><span class="hljs-comment">;</span><br>    while (j &lt; N) &#123;<br>        j <span class="hljs-operator">=</span> N<span class="hljs-comment">;</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>A: 线性时间</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117160724.png" srcset="/img/loading.gif" lazyload></p>
+<p>A: 2、5、6正确</p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117163352.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/Pasted%20image%2020260117163415.png" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>An Introduction to Asymptotic Analysis</div>
+      <div>https://augusteing.github.io/2026/01/17/CS61B-ch13-note：渐进分析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/01/21/CS61B-CH15-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/" title="For Loops">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">For Loops</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/01/CS61B-ch-11-note/" title="There is no chapter 11 ,therefore ch11 note disppears">
+                        <span class="hidden-mobile">There is no chapter 11 ,therefore ch11 note disppears</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

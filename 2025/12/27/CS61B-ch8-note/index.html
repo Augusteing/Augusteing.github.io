@@ -1,0 +1,707 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="在本节中，我们将构建一个名为 AList 的新类，它可以用来存储任意长度的数据列表，类似于我们的 DLList 。与 DLList 不同， AList 将使用数组来存储数据，而不是链表。 Linked List Performance Puzzle假设我们想要为 DLList 编写一个名为 int get(int i) 的新方法。为什么 get 对于长列表来说比 getLast 慢？在什么输入下它">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ArrayList">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/27/CS61B-ch8-note/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="在本节中，我们将构建一个名为 AList 的新类，它可以用来存储任意长度的数据列表，类似于我们的 DLList 。与 DLList 不同， AList 将使用数组来存储数据，而不是链表。 Linked List Performance Puzzle假设我们想要为 DLList 编写一个名为 int get(int i) 的新方法。为什么 get 对于长列表来说比 getLast 慢？在什么输入下它">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch8-note/Pasted%20image%2020251227114731.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch8-note/Pasted%20image%2020251227130309.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch8-note/Pasted%20image%2020251227131802.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch8-note/Pasted%20image%2020251227182136.png">
+<meta property="article:published_time" content="2025-12-27T10:23:32.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.859Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch8-note/Pasted%20image%2020251227114731.png">
+  
+  
+  
+  <title>ArrayList - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ArrayList"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-27 18:23" pubdate>
+          2025年12月27日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">ArrayList</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>在本节中，我们将构建一个名为 <code>AList</code> 的新类，它可以用来存储任意长度的数据列表，类似于我们的 <code>DLList</code> 。与 <code>DLList</code> 不同， <code>AList</code> 将使用数组来存储数据，而不是链表。</p>
+<h2 id="Linked-List-Performance-Puzzle"><a href="#Linked-List-Performance-Puzzle" class="headerlink" title="Linked List Performance Puzzle"></a>Linked List Performance Puzzle</h2><p>假设我们想要为 <code>DLList</code> 编写一个名为 <code>int get(int i)</code> 的新方法。为什么 <code>get</code> 对于长列表来说比 <code>getLast</code> 慢？在什么输入下它会特别慢？</p>
+<p>您可能会发现下面的图形对于思考您的答案很有用。<br><img src="/images/CS61B-ch8-note/Pasted%20image%2020251227114731.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Linked-List-Performance-Puzzle-Solution"><a href="#Linked-List-Performance-Puzzle-Solution" class="headerlink" title="Linked List Performance Puzzle Solution"></a>Linked List Performance Puzzle Solution</h2><p>结果证明，无论你多么聪明，如果我们使用 2.3 节中描述的双向链表结构， <code>get</code> 方法通常会比 <code>getBack</code> 方法慢。</p>
+<p>这是因为，由于我们只有列表第一个和最后一个元素的引用，我们总需要从前面或后面遍历列表才能到达我们试图检索的元素。例如，如果我们想在一个长度为 10,000 的列表中获取第 417 个元素，我们将不得不跨越 417 个前向链接才能到达我们想要的元素。</p>
+<p>在最坏的情况下，该元素位于列表正中间，我们将需要遍历与列表长度成比例数量的元素（具体来说，是列表元素数量除以二）。换句话说，我们的 <code>get</code> 的最坏情况执行时间是整个列表大小的线性函数。这与 <code>getBack</code> 的运行时形成对比， <code>getBack</code> 的运行时与列表大小无关，始终是常数。在本课程后面，我们将用大 O 和大 Theta 符号正式定义运行时。目前，我们将坚持非正式的理解。</p>
+<h2 id="Our-First-Attempt-The-Naive-Array-Based-List"><a href="#Our-First-Attempt-The-Naive-Array-Based-List" class="headerlink" title="Our First Attempt: The Naive Array Based List"></a>Our First Attempt: The Naive Array Based List</h2><p>在现代计算机上，访问数组的 <code>i</code> 个元素需要常数时间。这表明基于数组的列表在 <code>get</code> 方面会比基于链表的解决方案表现得更好，因为它可以直接使用方括号表示法来获取感兴趣的元素。</p>
+<p>如果你想了解为什么数组具有常数时间访问特性，可以查看这个 Quora 帖子。</p>
+<p>请回顾有关引用类型的知识：数组是引用类型使用<code>new</code>关键词返回的是用于存储数组元素的<strong>首个</strong>内存盒的<strong>地址</strong>。（我知道有很多人有阅读困难症，我已经尽力标注出你必须了解到的知识）而这些内存盒子在内存上按顺序排列。比如有如下的数组：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">int</span>[] a = new &#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>new</code>关键词会返回1的内存盒的地址，比如为<code>1234</code>，我们知道<code>int</code>类型占据<code>4</code>个字节，那么如果a[0]存储于1234的话，a[1]将存储于1238，以此类推。</p>
+<p><strong>Optional Exercise 2.5.1:</strong> Try to build an AList class that supports <code>addLast</code>, <code>getLast</code>, <code>get</code>, and <code>size</code> operations. Your AList should work for any size array up to 100. For starter code, see <a target="_blank" rel="noopener" href="https://github.com/Berkeley-CS61B/lectureCode/tree/master/lists4/DIY">https://github.com/Berkeley-CS61B/lectureCode/tree/master/lists4/DIY</a>.</p>
+<p>我的解决方案如下：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Array based list.  </span><br><span class="hljs-comment"> *  @author Josh Hug  </span><br><span class="hljs-comment"> */</span>  <br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AList</span> &#123;  <br>    <span class="hljs-comment">/** Creates an empty list. */</span>  <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span>[] items = <span class="hljs-keyword">new</span> <span class="hljs-type">int</span>[<span class="hljs-number">100</span>];  <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> size;  <br>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">AList</span><span class="hljs-params">()</span> </span>&#123;  <br>        size = <span class="hljs-number">0</span>;  <br>        items = <span class="hljs-keyword">new</span> <span class="hljs-type">int</span>[<span class="hljs-number">10000000</span>];  <br>    &#125;  <br>  <br>    <span class="hljs-comment">/** Inserts X into the back of the list. */</span>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title">addLast</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> </span>&#123;  <br>        items[size] = x;  <br>        size++;  <br>    &#125;  <br>  <br>    <span class="hljs-comment">/** Returns the item from the back of the list. */</span>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title">getLast</span><span class="hljs-params">()</span> </span>&#123;  <br>        <span class="hljs-keyword">return</span> items[size - <span class="hljs-number">1</span>];  <br>    &#125;  <br>    <span class="hljs-comment">/** Gets the ith item in the list (0 is the front). */</span>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title">get</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> </span>&#123;  <br>  <br>        <span class="hljs-keyword">return</span> items[i];  <br>    &#125;  <br>  <br>    <span class="hljs-comment">/** Returns the number of items in the list. */</span>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title">size</span><span class="hljs-params">()</span> </span>&#123;  <br>        <span class="hljs-keyword">return</span> size;  <br>    &#125;  <br>  <br>    <span class="hljs-comment">/** Deletes item from back of the list and  </span><br><span class="hljs-comment">      * returns deleted item. */</span>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title">removeLast</span><span class="hljs-params">()</span> </span>&#123;  <br>        size--;  <br>        items[size] = <span class="hljs-number">0</span>;  <br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;  <br>    &#125;  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>解决方法具有以下的恒定特点：</p>
+<ul>
+<li>要插入的下一个项目的位置（使用 <code>addLast</code> ）始终是 <code>size</code> 。</li>
+<li>AList 中的项目数量始终是 <code>size</code> 。</li>
+<li>列表中最后一个项目的位置始终是 <code>size - 1</code> 。</li>
+</ul>
+<h3 id="removeLast"><a href="#removeLast" class="headerlink" title="removeLast"></a>removeLast</h3><p>我们需要支持的最后一个操作是 <code>removeLast</code> 。在开始之前，我们做一个关键观察：对列表的任何更改都必须反映在我们实现中的一个或多个内存框的更改中。</p>
+<p>这可能看起来很明显，但其中蕴含着深刻的意义。列表是一个抽象概念，而 <code>size</code> 、 <code>items</code> 和 <code>items[i]</code> 内存框是这个概念的具体表示。用户使用我们提供的抽象（ <code>addLast</code> 、 <code>removeLast</code> ）尝试对列表进行的任何更改，都必须以符合用户期望的方式反映在这些内存框的某些变化中。我们的不变式为我们提供了关于这些变化应该是什么样子的指导。</p>
+<p><strong>Optional Exercise 2.5.2:</strong> Try to write <code>removeLast</code>. Before starting, decide which of <code>size</code>, <code>items</code>, and <code>items[i]</code> needs to change so that our invariants are preserved after the operation, i.e. so that future calls to our methods provide the user of the list class with the behavior they expect.</p>
+<h2 id="Naive-Resizing-Arrays"><a href="#Naive-Resizing-Arrays" class="headerlink" title="Naive Resizing Arrays"></a>Naive Resizing Arrays</h2><p><strong>Optional Exercise 2.5.3:</strong> Suppose we have an AList in the state shown in the figure below. What will happen if we call <code>addLast(11)</code>? What should we do about this problem?</p>
+<p><img src="/images/CS61B-ch8-note/Pasted%20image%2020251227130309.png" srcset="/img/loading.gif" lazyload></p>
+<p>在 Java 中，答案是简单地构建一个足够大的新数组来容纳新数据。例如，我们可以想象以下方式添加新项：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-type">int</span>[] a = <span class="hljs-keyword">new</span> <span class="hljs-type">int</span>[size + <span class="hljs-number">1</span>];<br>System.<span class="hljs-built_in">arraycopy</span>(items, <span class="hljs-number">0</span>, a, <span class="hljs-number">0</span>, size);<br>a[size] = <span class="hljs-number">11</span>;<br>items = a;<br>size = size + <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+
+<p>创建一个新数组并将元素复制过去的过程通常被称为”调整大小”。这有点名不副实，因为数组实际上并没有改变大小，我们只是创建了一个更大的新数组。</p>
+<p><strong>Exercise 2.5.4:</strong> Try to implement the <code>addLast(int i)</code> method to work with resizing arrays.<br>练习 2.5.4：尝试实现 <code>addLast(int i)</code> 方法以处理可调整大小的数组。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title">addLast</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> </span>&#123;  <br>    <span class="hljs-keyword">if</span> (size == items.length) &#123;  <br>        <span class="hljs-type">int</span>[] a = <span class="hljs-keyword">new</span> <span class="hljs-type">int</span>[size * <span class="hljs-number">2</span>];  <br>        System.<span class="hljs-built_in">arraycopy</span>(items, <span class="hljs-number">0</span>, a, <span class="hljs-number">0</span>, size );  <br>        a[size] = x;  <br>        items = a;  <br>        size++;  <br>    &#125; <span class="hljs-keyword">else</span> &#123;  <br>        items[size] = x;  <br>        size++;  <br>    &#125;  <br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在之后的课程中我们会讲到为什么要乘以2.</p>
+<h3 id="Analyzing-the-Naive-Resizing-Array"><a href="#Analyzing-the-Naive-Resizing-Array" class="headerlink" title="Analyzing the Naive Resizing Array"></a>Analyzing the Naive Resizing Array</h3><p>我们在上一节中尝试的方法性能非常差。通过运行一个简单的计算实验，我们调用 <code>addLast</code> 100,000 次，发现 <code>SLList</code> 完成得如此之快，以至于我们甚至无法测量它。相比之下，我们的基于数组的列表需要几秒钟的时间。</p>
+<p>练习 2.5.5：假设我们有一个大小为 100 的数组。如果我们调用两次 insertBack，在整个过程中总共需要创建和填充多少个框？假设垃圾收集在数组最后一次引用丢失时立即发生，那么在任何时候我们总共有多少个框？</p>
+<p>练习 2.5.6：从一个大小为 100 的数组开始，如果我们调用 <code>addLast</code> 1,000 次，大约会创建并填充多少个内存框？</p>
+<p>A:显然地，有100 + 101 + …. + 1000；</p>
+<p>创建所有这些内存盒子并复制它们的内容需要时间。在下方的图中，我们绘制了 SLList 和基于简单调整大小数组的列表的总时间与操作次数的关系。SLList 显示为一条直线，这意味着对于每个 <code>add</code> 操作，列表需要相同的时间增量。这意味着每个单独的操作都只需要常数时间！你也可以这样理解：图是线性的，这表明每个操作都需要常数时间，因为常数的积分是一条直线。</p>
+<p>相比之下，基于简单调整大小数组列表呈现出抛物线形状，表明每次操作都需要线性时间，因为直线的积分是抛物线。这具有重大的现实意义。对于插入 100,000 个项目，我们可以通过计算 N^2&#x2F;N 的比值来粗略地计算出需要多长时间。将 100,000 个项目插入我们的数组列表需要(100,000^2)&#x2F;100,000，即 100,000 倍的时间。这显然是不可接受的。</p>
+<p><img src="/images/CS61B-ch8-note/Pasted%20image%2020251227131802.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Geometric-Resizing"><a href="#Geometric-Resizing" class="headerlink" title="Geometric Resizing"></a>Geometric Resizing</h2><p>我们可以通过将数组的大小按倍数增长，而不是按加数增长来修复我们的性能问题。也就是说，而不是增加等于某个调整大小因子的内存框的数量 <code>RFACTOR</code> :</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title">insertBack</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (size == items.length) &#123;<br>           <span class="hljs-built_in">resize</span>(size + RFACTOR);<br>    &#125;<br>    items[size] = x;<br>    size += <span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们改为通过将箱子数量乘以 <code>RFACTOR</code> 来调整大小。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title">insertBack</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (size == items.length) &#123;<br>           <span class="hljs-built_in">resize</span>(size * RFACTOR);<br>    &#125;<br>    items[size] = x;<br>    size += <span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>重复我们之前的计算实验，我们看到新的 <code>AList</code> 在极短的时间内完成了 10 万次插入，以至于我们甚至没有察觉到。我们将推迟对为什么会发生这种情况的全面分析，直到本书的最后一章。</p>
+<h2 id="Memory-Performance"><a href="#Memory-Performance" class="headerlink" title="Memory Performance"></a>Memory Performance</h2><p>我们的 <code>AList</code> 几乎完成了，但我们有一个主要问题。假设我们插入 1,000,000,000 个项目，然后后来删除 990,000,000 个项目。在这种情况下，我们只会使用 10,000,000 个我们的内存框，留下 99%完全未被使用。</p>
+<p>要解决这个问题，我们也可以在数组看起来空的时候缩小它。具体来说，我们定义一个”使用率”R，它等于列表的大小除以 <code>items</code> 数组的长度。例如，在下图中，使用率是 0.04。</p>
+<p><img src="/images/CS61B-ch8-note/Pasted%20image%2020251227182136.png" srcset="/img/loading.gif" lazyload></p>
+<p>在典型实现中，当 R 小于 0.25 时，我们将数组的大小减半。</p>
+<h2 id="Generic-ALists"><a href="#Generic-ALists" class="headerlink" title="Generic ALists"></a>Generic ALists</h2><p>就像之前一样，我们可以修改我们的 <code>AList</code> ，使其能够存储任何数据类型，而不仅仅是整数。为此，我们再次在我们的类中使用特殊的尖括号表示法，并在适当的地方用我们的任意类型参数替换整数。例如，在下面，我们使用 <code>Glorp</code> 作为我们的类型参数。</p>
+<p>有一个重要的语法差异：由于泛型实现方式上的一个模糊问题，Java 不允许我们创建一个泛型对象的数组。也就是说，我们不能做类似这样的事情：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf">Glorp[] items <span class="hljs-operator">=</span> new Glorp[<span class="hljs-number">8</span>]<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>相反，我们必须使用下面这种别扭的语法：</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs inform7">Glorp<span class="hljs-comment">[]</span> items = (Glorp <span class="hljs-comment">[]</span>) new Object<span class="hljs-comment">[8]</span>;<br></code></pre></td></tr></table></figure>
+
+<p>这会产生一个编译警告，但我们就只能这样了。我们将在后面的章节中更详细地讨论这个问题。</p>
+<p>我们做出的另一个改变是，我们将我们”删除”的任何项目置为 null。而之前，我们没有理由将已删除的元素置零，但对于通用对象，我们确实需要将存储对象的引用置为 null。这是为了避免”游荡”。回想一下，Java 只有在最后一个引用丢失时才会销毁对象。如果我们未能置为 null 引用，那么 Java 将不会垃圾回收已添加到列表中的对象。</p>
+<p>这是一个微妙且你可能不会察觉的性能问题，但在某些情况下可能会导致大量内存浪费。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ArrayList</div>
+      <div>https://augusteing.github.io/2025/12/27/CS61B-ch8-note/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月27日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/28/CS61B-ch9-note/" title="The Problem of Generality">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">The Problem of Generality</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/24/CS61B-ch7-note/" title="Testing and Selection Sort">
+                        <span class="hidden-mobile">Testing and Selection Sort</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

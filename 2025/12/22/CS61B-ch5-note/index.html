@@ -1,0 +1,702 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="在第 2.2 章中，我们构建了 SLList 类，它比我们之前使用的裸露递归 IntList 数据结构更好。在本节中，我们将结束对链表的讨论，同时开始学习我们之后需要用于基于数组的列表（我们将称之为 AList ）的基础知识。在这一过程中，我们还将揭示为什么在上一章中我们使用了那个笨拙的名称 SLList 的秘密。 addLast考虑上一章中的 addLast(int x) 方法。 1234567">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DLLists">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/22/CS61B-ch5-note/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="在第 2.2 章中，我们构建了 SLList 类，它比我们之前使用的裸露递归 IntList 数据结构更好。在本节中，我们将结束对链表的讨论，同时开始学习我们之后需要用于基于数组的列表（我们将称之为 AList ）的基础知识。在这一过程中，我们还将揭示为什么在上一章中我们使用了那个笨拙的名称 SLList 的秘密。 addLast考虑上一章中的 addLast(int x) 方法。 1234567">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222160800.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222160804.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222161114.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222161119.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222161127.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222161142.png">
+<meta property="article:published_time" content="2025-12-22T08:20:43.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.836Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch5-note/Pasted%20image%2020251222160800.png">
+  
+  
+  
+  <title>DLLists - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="DLLists"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-22 16:20" pubdate>
+          2025年12月22日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">DLLists</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>在第 2.2 章中，我们构建了 <code>SLList</code> 类，它比我们之前使用的裸露递归 <code>IntList</code> 数据结构更好。在本节中，我们将结束对链表的讨论，同时开始学习我们之后需要用于基于数组的列表（我们将称之为 <code>AList</code> ）的基础知识。在这一过程中，我们还将揭示为什么在上一章中我们使用了那个笨拙的名称 <code>SLList</code> 的秘密。</p>
+<h2 id="addLast"><a href="#addLast" class="headerlink" title="addLast"></a>addLast</h2><p>考虑上一章中的 <code>addLast(int x)</code> 方法。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-keyword">int</span> x) &#123;<br>    <span class="hljs-keyword">size</span> += <span class="hljs-number">1</span>;<br>    IntNode p = sentinel;<br>    <span class="hljs-keyword">while</span> (p.<span class="hljs-keyword">next</span> != <span class="hljs-keyword">null</span>) &#123;<br>        p = p.<span class="hljs-keyword">next</span>;<br>    &#125;<br><br>    p.<span class="hljs-keyword">next</span> = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个方法的问题是它很慢。对于长列表， <code>addLast</code> 方法必须遍历整个列表，就像我们在第 2.2 章中看到的 <code>size</code> 方法一样。同样，我们可以尝试通过添加一个 <code>last</code> 变量来加快速度，以加快我们的代码，如下所示：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> SLList &#123;<br>    <span class="hljs-keyword">private</span> IntNode sentinel;<br>    <span class="hljs-keyword">private</span> IntNode last;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-keyword">size</span>;    <br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> addLast(<span class="hljs-keyword">int</span> x) &#123;<br>        last.<span class="hljs-keyword">next</span> = <span class="hljs-keyword">new</span> IntNode(x, <span class="hljs-keyword">null</span>);<br>        last = last.<span class="hljs-keyword">next</span>;<br>        <span class="hljs-keyword">size</span> += <span class="hljs-number">1</span>;<br>    &#125;<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="练习2-3-1"><a href="#练习2-3-1" class="headerlink" title="练习2.3.1"></a>练习2.3.1</h2><p>练习 2.3.1：考虑上述 <code>SLList</code> 实现所表示的框和指针图，其中包括最后一个指针。假设我们想要支持 <code>addLast</code> 、 <code>getLast</code> 和 <code>removeLast</code> 操作。所显示的结构能否支持快速 <code>addLast</code> 、 <code>getLast</code> 和 <code>removeLast</code> 操作？如果不能，哪些操作会慢？</p>
+<p>A：实际上<code>addLast</code>、<code>getLast</code>会比较快，因为我们的数据结构对最终的节点有一个指针，但是很遗憾的是，<code>removeLast</code>需要倒数第二个节点的指针（因为我们需要将倒数第二个节点的<code>next</code>设为null）。</p>
+<h2 id="SecondToLast"><a href="#SecondToLast" class="headerlink" title="SecondToLast"></a>SecondToLast</h2><p>练习 2.3.1 中结构的问题在于，删除列表中最后一个元素的方法本质上会很慢。这是因为我们需要首先找到倒数第二个元素，然后将其 next 指针设置为 null。添加一个 <code>secondToLast</code> 指针也无济于事，因为那样我们还需要找到倒数第三个元素，以确保删除最后一个元素后 <code>secondToLast</code> 和 <code>last</code> 遵守适当的不变量。</p>
+<h3 id="练习-2-3-2"><a href="#练习-2-3-2" class="headerlink" title="练习 2.3.2"></a>练习 2.3.2</h3><p>尝试设计一个方案来加速 <code>removeLast</code> 操作，使其无论列表有多长，总是运行在常数时间内。不用担心实际编写解决方案，我们会留到项目 1 中。只需构思一下你打算如何修改列表的结构（即实例变量）</p>
+<h2 id="Improvement-7-Looking-Back"><a href="#Improvement-7-Looking-Back" class="headerlink" title="Improvement #7: Looking Back"></a>Improvement #7: Looking Back</h2><p>解决这个问题的最自然方法是为每个 <code>IntNode</code> 添加一个前向指针，即</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs axapta"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IntNode</span> &#123;<br>    <span class="hljs-keyword">public</span> IntNode prev;<br>    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> item;<br>    <span class="hljs-keyword">public</span> IntNode <span class="hljs-keyword">next</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>换句话说，我们现在的列表中每个节点都有两个链接。这种列表的一个常用术语是“双向链表”，我们将其简称为 <code>DLList</code> 。这与第 2.2 章的单向链表（即 <code>SLList</code> ）形成对比。<br>（Doubly vs Singe) 我是真的想吐槽这个很抽象的命名。</p>
+<p>添加这些额外的指针会导致代码复杂度增加。我们不会带你逐步讲解，而是在项目 1 中让你自己构建一个双向链表。下面的框和指针图更精确地展示了大小为 0 和大小为 2 的链表的双向链表结构。<br>（译者按：这部分请你着重查看project1的笔记）<br><img src="/images/CS61B-ch5-note/Pasted%20image%2020251222160800.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS61B-ch5-note/Pasted%20image%2020251222160804.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Improvement-8-Sentinel-Upgrade"><a href="#Improvement-8-Sentinel-Upgrade" class="headerlink" title="Improvement #8: Sentinel Upgrade"></a>Improvement #8: Sentinel Upgrade</h2><p>反向指针允许列表支持在常数时间内添加、获取和删除列表的前端和后端。这种设计存在一个微妙的问题，即 <code>last</code> 指针有时指向哨兵节点，有时指向实际节点。就像非哨兵版本的 <code>SLList</code> 一样，这导致代码中出现特殊情况，比我们进行第 8 次也是最后一次改进后得到的代码要丑得多。（你能想到 <code>DLList</code> 方法会有哪些特殊情况吗？）<br>（<code>sentinal</code>只指向哨兵节点，但是<code>last</code>可能指向最终的节点）</p>
+<p>一种解决方案是在链表的末尾添加一个第二个哨兵节点。这会导致以下框和指针图所示的结构。</p>
+<p><img src="/images/CS61B-ch5-note/Pasted%20image%2020251222161114.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS61B-ch5-note/Pasted%20image%2020251222161119.png" srcset="/img/loading.gif" lazyload></p>
+<p>另一种方法是实现一个循环列表，使得前后指针共享同一个哨兵节点。</p>
+<p><img src="/images/CS61B-ch5-note/Pasted%20image%2020251222161127.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS61B-ch5-note/Pasted%20image%2020251222161142.png" srcset="/img/loading.gif" lazyload></p>
+<p>请不要忘记我们将节点更新为双向的原因：因为对于尾部我们缺乏常数时间操作的方法。<br>也不要忘记我们为什么要更新哨兵：为了使得所有的<code>DLList</code>实现统一。</p>
+<p>两种双哨兵和循环哨兵方法都有效，并且生成的代码没有难看的特殊情况，虽然我个人认为循环方法更简洁，也更具美感。我们不会讨论这些实现的细节，因为你在项目 1 中将有机会探索其中一种或两种方法。</p>
+<h2 id="Generic-DLLists"><a href="#Generic-DLLists" class="headerlink" title="Generic DLLists"></a>Generic DLLists</h2><p>我们的 DLLists 存在一个主要限制：它们只能存储整数值。例如，假设我们想要创建一个字符串列表：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf">DLList d2 <span class="hljs-operator">=</span> new DLList(<span class="hljs-string">&quot;hello&quot;</span>)<span class="hljs-comment">;</span><br>d2.addLast(<span class="hljs-string">&quot;world&quot;</span>)<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>上面的代码会崩溃，因为我们的 <code>DLList</code> 构造函数和 <code>addLast</code> 方法只接受一个整数参数。</p>
+<p>幸运的是，在 2004 年（我刚出生），Java 的创建者将泛型添加到语言中，这将允许你，除其他外，创建可以存储任何引用类型的数据结构。</p>
+<p>这种语法一开始有点难以理解。基本思路是在你的类声明中，紧接在类名后面，使用尖括号内的任意占位符： <code>&lt;&gt;</code> 。然后，在你想要使用任意类型的地方，使用这个占位符代替。</p>
+<p>例如，我们之前的 <code>DLList</code> 声明是：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs perl">public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DLList</span> </span>&#123;<br>    private IntNode sentinel;<br>    private <span class="hljs-keyword">int</span> size;<br><br>    public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntNode</span> </span>&#123;<br>        public IntNode prev;<br>        public <span class="hljs-keyword">int</span> item;<br>        public IntNode <span class="hljs-keyword">next</span>;<br>        ...<br>    &#125;<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>一个可以容纳任何类型的通用 <code>DLList</code> 将如下所示：</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs perl">public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DLList</span>&lt;<span class="hljs-title">BleepBlorp</span>&gt; </span>&#123;<br>    private IntNode sentinel;<br>    private <span class="hljs-keyword">int</span> size;<br><br>    public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntNode</span> </span>&#123;<br>        public IntNode prev;<br>        public BleepBlorp item;<br>        public IntNode <span class="hljs-keyword">next</span>;<br>        ...<br>    &#125;<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这里， <code>BleepBlorp</code> 只是我随便起的名字，你可以用任何其他你想要的名字来代替，比如 <code>GloopGlop</code> 、 <code>Horse</code> 、 <code>TelbudorphMulticulus</code> 或者其他任何名字。(请你使用喜欢的)</p>
+<p>现在我们已经定义了一个通用的 <code>DLList</code> 类版本，我们也必须使用特殊的语法来实例化这个类。为此，我们在声明时将期望的类型放在尖括号中，并在实例化时使用空尖括号。例如：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf">DLList&lt;String&gt; d2 <span class="hljs-operator">=</span> new DLList&lt;&gt;(<span class="hljs-string">&quot;hello&quot;</span>)<span class="hljs-comment">;</span><br>d2.addLast(<span class="hljs-string">&quot;world&quot;</span>)<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>由于泛型只能与引用类型一起工作，我们不能将像 <code>int</code> 或 <code>double</code> 这样的原始类型放在尖括号内，例如 <code>&lt;int&gt;</code> 。相反，我们使用原始类型的引用版本，在 <code>int</code> 的情况下是 <code>Integer</code> ，例如</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf">DLList&lt;Integer&gt; d1 <span class="hljs-operator">=</span> new DLList&lt;&gt;(<span class="hljs-number">5</span>)<span class="hljs-comment">;</span><br>d1.insertFront(<span class="hljs-number">10</span>)<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>我认为这有一些在脱裤子放屁</p>
+<p>关于使用通用类型还有一些额外的细节，但我们将它们推迟到本书的后续章节，等到你有机会自己多进行一些实验之后。目前，请使用以下经验法则：</p>
+<ul>
+<li>在实现数据结构的.java 文件中，仅在类名之后的文件顶部指定一次你的泛型类型名。</li>
+<li>在其他 .java 文件中，使用你的数据结构时，在声明时指定具体的期望类型，并在实例化时使用空菱形操作符。</li>
+<li>如果你需要在一个原始类型上实例化一个泛型，请使用 <code>Integer</code> ， <code>Double</code> ， <code>Character</code> ， <code>Boolean</code> ， <code>Long</code> ， <code>Short</code> ， <code>Byte</code> ，或 <code>Float</code> 而不是它们的原始类型。</li>
+</ul>
+<p>小细节：在实例化时，你也可以在尖括号内声明类型，尽管这并非必要，只要你也在同一行声明变量即可。换句话说，以下代码行完全有效，尽管右侧的 <code>Integer</code> 是多余的。</p>
+<p><code>DLList&lt;Integer&gt; d1 = new DLList&lt;Integer&gt;(5);</code></p>
+<p>此时，你已经掌握了在项目 1 中实现 <code>LinkedListDeque</code> 项目所需的所有知识，你将在该项目中完善你在第 2.1、2.2 和 2.3 章中所学到的所有知识。<br>(Please finish it)</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>DLLists</div>
+      <div>https://augusteing.github.io/2025/12/22/CS61B-ch5-note/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/23/CS61B-ch6-note%EF%BC%9Aarrays/" title="Array Basics">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Array Basics</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/20/CS61B-ch4-note/" title="SLLists">
+                        <span class="hidden-mobile">SLLists</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

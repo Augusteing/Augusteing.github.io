@@ -1,0 +1,803 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="我们这样的人（比如你和我）居住在各自的国家里，并生活在这些国家中。 我们可以把每一个国家看作一个集合（set），而生活在这个国家里的所有人就是这个集合中的元素（elements）。 同一个人不可能在同一时间生活在两个不同的国家。 我们刚刚建立的这个模型，就是一个不相交集合（disjoint set）。 如果两个集合没有共同的元素，那么它们被称为不相交集合。不相交集合（或并查集）数据结构跟踪固定数量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Introduction">
+<meta property="og:url" content="https://augusteing.github.io/2026/09/20/CS61B-ch14-note%EF%BC%9Aunion/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="我们这样的人（比如你和我）居住在各自的国家里，并生活在这些国家中。 我们可以把每一个国家看作一个集合（set），而生活在这个国家里的所有人就是这个集合中的元素（elements）。 同一个人不可能在同一时间生活在两个不同的国家。 我们刚刚建立的这个模型，就是一个不相交集合（disjoint set）。 如果两个集合没有共同的元素，那么它们被称为不相交集合。不相交集合（或并查集）数据结构跟踪固定数量">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122134849.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122155050.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122160128.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122165444.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122165906.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122172917.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122174211.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122175032.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122175326.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122180225.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122190523.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122190538.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122195726.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122213347.png">
+<meta property="article:published_time" content="2026-09-20T11:08:54.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.509Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122134849.png">
+  
+  
+  
+  <title>Introduction - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Introduction"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-09-20 19:08" pubdate>
+          2026年9月20日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          24 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Introduction</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>我们这样的人（比如你和我）居住在各自的国家里，并生活在这些国家中。</p>
+<p>我们可以把<strong>每一个国家看作一个集合（set）</strong>，而生活在这个国家里的所有人就是这个集合中的<strong>元素（elements）</strong>。</p>
+<p>同一个人不可能在同一时间生活在两个不同的国家。</p>
+<p>我们刚刚建立的这个模型，就是一个<strong>不相交集合（disjoint set）</strong>。</p>
+<p>如果两个集合没有共同的元素，那么它们被称为<strong>不相交集合</strong>。不相交集合（或并查集）数据结构跟踪固定数量的元素，这些元素被划分成若干个不相交的集合。该数据结构有两个操作：</p>
+<ol>
+<li><code>connect(x, y)</code> : 连接 <code>x</code> 和 <code>y</code> 。也称为 <code>union</code></li>
+<li><code>isConnected(x, y)</code> : 如果 <code>x</code> 和 <code>y</code> 连接（即属于同一集合），则返回 true。</li>
+</ol>
+<p>一个不相交集合数据结构包含固定数量的元素，每个元素最初都在自己的子集中。通过调用 <code>connect(x, y)</code> 对某些元素 <code>x</code> 和 <code>y</code> ，我们可以将子集合并在一起。</p>
+<p>（你或许会感到疑惑，接下来的例子会让你明白的）</p>
+<p>例如，假设我们有四个元素，我们称之为 A、B、C、D。一开始，每个元素都在自己的集合中：</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122134849.png" srcset="/img/loading.gif" lazyload></p>
+<p>调用 <code>connect(A, B)</code> 之后</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122155050.png" srcset="/img/loading.gif" lazyload></p>
+<p>请注意子集 A 和 B 已经合并。让我们检查一些 <code>isConnected</code> 调用的输出：</p>
+<p><code>isConnected(A, B) -&gt; true</code></p>
+<p><code>isConnected(A, C) -&gt; false</code></p>
+<p>  调用 <code>connect(A, D)</code> 之后：</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122160128.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们发现集合 A 属于的部分，并将其与集合 D 属于的部分合并，创建一个大的 A、B、D 集合。C 保持不变。</p>
+<p><code>isConnected(A, D) -&gt; true</code> <code>isConnected(A, C) -&gt; false</code></p>
+<p>基于这种直觉，让我们正式定义我们的 DisjointSets 接口看起来是怎样的。作为提醒，一个接口决定了数据结构应该具有哪些行为（但不是如何实现这些行为）。以这种方式，任何实现 <code>DisjointSets</code> 接口的类都知道要始终包含以下函数： <code>connect(int p, int q)</code> 和 <code>isConnected(int p, int q)</code> 。目前，我们将只处理非负整数集合。这并不是一个限制，因为在生产环境中，我们可以将整数值分配给任何我们想要表示的事物。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-symbol">DisjointSets</span> &#123;<br>    <span class="hljs-comment">/** connects two items P and Q */</span><br>    <span class="hljs-built_in">void</span> connect(<span class="hljs-built_in">int</span> p, <span class="hljs-built_in">int</span> q);<br><br>    <span class="hljs-comment">/** checks to see if two items are connected */</span><br>    <span class="hljs-built_in">bool</span>ean isConnected(<span class="hljs-built_in">int</span> p, <span class="hljs-built_in">int</span> q); <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>但我们如何存储这些不相交集合的数据，以查看哪个成员属于其对应的集合？我们将使用哪些数据结构来表示这个令人惊叹的数据结构？除了学习如何实现一个有趣的数据结构外，本章还将是一个观察数据结构实现如何演变的良机。在满足之前，我们将讨论不相交集合设计的四次迭代：Quick Find → Quick Union → 带权 Quick Union（WQU）→ 带路径压缩的 WQU。我们将看到设计决策如何极大地影响渐近运行时间和代码复杂度。</p>
+<h1 id="快速查找"><a href="#快速查找" class="headerlink" title="快速查找"></a>快速查找</h1><h2 id="List-of-Sets-集合列表"><a href="#List-of-Sets-集合列表" class="headerlink" title="List of Sets  集合列表"></a>List of Sets  集合列表</h2><p>直观上，我们可能会首先考虑将不相交集合表示为一系列集合，例如 <code>List&lt;Set&lt;Integer&gt;&gt;</code> 。</p>
+<p>例如，如果我们有 N&#x3D;6 个元素且尚未有任何连接，我们的集合列表看起来像这样： <code>[&#123;0&#125;, &#123;1&#125;, &#123;2&#125;, &#123;3&#125;, &#123;4&#125;, &#123;5&#125;, &#123;6&#125;]</code> 。看起来不错。然而，考虑如何完成像 <code>connect(5, 6)</code> 这样的操作。我们需要遍历多达 <code>N</code> 个集合来查找 5，遍历 <code>N</code> 个集合来查找 6。我们的运行时间变为 <code>O(N)</code> 。而且，如果你尝试实现这个，代码会相当复杂。</p>
+<pre><code class="hljs">要吸取的教训是，初始设计决策决定了我们的代码复杂性和运行时间。
+</code></pre>
+<h2 id="Quick-Find-快速查找"><a href="#Quick-Find-快速查找" class="headerlink" title="Quick Find  快速查找"></a>Quick Find  快速查找</h2><p>让我们考虑另一种使用单个整数数组的方法。</p>
+<ul>
+<li>数组的索引代表我们集合的元素。</li>
+<li>索引处的值是它所属的集合编号。</li>
+</ul>
+<p>例如，我们表示 <code>&#123;0, 1, 2, 4&#125;, &#123;3, 5&#125;, &#123;6&#125;</code> 为</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122165444.png" srcset="/img/loading.gif" lazyload></p>
+<p>数组索引（0…6）是元素。 <code>id[i]</code> 中的值表示它所属的集合。只要同一集合中的所有元素共享相同的 id，具体的集合编号并不重要。</p>
+<h2 id="connect-x-y"><a href="#connect-x-y" class="headerlink" title="connect(x, y)"></a><strong>connect(x, y)</strong></h2><p>让我们看看连接操作会如何工作。目前， <code>id[2] = 4</code> 和 <code>id[3] = 5</code> 。调用 <code>connect(2, 3)</code> 后，所有 id 为 4 和 5 的元素应该具有相同的 id。我们暂时将它们都分配为 5：</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122165906.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="isConnected-x-y"><a href="#isConnected-x-y" class="headerlink" title="isConnected(x, y)"></a><strong>isConnected(x, y)</strong></h2><p>要检查 <code>isConnected(x, y)</code> ，我们只需检查 <code>id[x] == id[y]</code> 。请注意，这是一个常数时间操作！</p>
+<p>我们将这种实现称为”快速查找”，因为判断元素是否连接只需要常数时间。</p>
+<h2 id="Code-Runtimes"><a href="#Code-Runtimes" class="headerlink" title="Code &amp; Runtimes"></a>Code &amp; Runtimes</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">QuickFindDS</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">DisjointSets</span> &#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span>[] id;<br><br>    <span class="hljs-comment">/* Θ(N) */</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">QuickFindDS</span><span class="hljs-params">(<span class="hljs-type">int</span> N)</span>&#123;<br>        id = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[N];<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; N; i++)&#123;<br>            id[i] = i;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">/* need to iterate through the array =&gt; Θ(N) */</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">connect</span><span class="hljs-params">(<span class="hljs-type">int</span> p, <span class="hljs-type">int</span> q)</span>&#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">pid</span> <span class="hljs-operator">=</span> id[p];<br>        <span class="hljs-type">int</span> <span class="hljs-variable">qid</span> <span class="hljs-operator">=</span> id[q];<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; id.length; i++)&#123;<br>            <span class="hljs-keyword">if</span> (id[i] == pid)&#123;<br>                id[i] = qid;<br>            &#125;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">/* Θ(1) */</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isConnected</span><span class="hljs-params">(<span class="hljs-type">int</span> p, <span class="hljs-type">int</span> q)</span>&#123;<br>        <span class="hljs-keyword">return</span> (id[p] == id[q]);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>N &#x3D; DisjointSets 数据结构中元素的数量</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122172917.png" srcset="/img/loading.gif" lazyload></p>
+<ol>
+<li>我们没有讨论这一点，但你可以推断出最初必须创建 N 个不同的集合是Θ(N) ↩</li>
+</ol>
+<h1 id="Quick-Union"><a href="#Quick-Union" class="headerlink" title="Quick Union"></a>Quick Union</h1><p>假设我们优先考虑使 <code>connect</code> 操作快速。我们仍然用数组来表示我们的集合。我们不再为每个元素分配一个 id，而是分配其父元素的索引。如果一个元素没有父元素，那么它是一个’根’，我们分配它一个负值。</p>
+<p>这种方法使我们能够将每个集合想象成一棵树。例如，我们表示 <code>&#123;0, 1, 2, 4&#125;, &#123;3, 5&#125;, &#123;6&#125;</code> 为：</p>
+<p>注意，我们仅使用数组来表示集合。我们将其可视化为自己想象中的树。</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122174211.png" srcset="/img/loading.gif" lazyload><br>这种不变性是人为赋予的<br>对于 QuickUnion，我们定义了一个辅助函数 <code>find(int item)</code> ，它返回树 <code>item</code> 所在的根。例如，对于上面的集合， <code>find(4) == 0</code> 、 <code>find(1) == 0</code> 、 <code>find(5) == 3</code> 等。每个元素都有一个唯一的根。</p>
+<h2 id="connect-x-y-1"><a href="#connect-x-y-1" class="headerlink" title="connect(x, y)"></a><strong>connect(x, y)</strong></h2><p>要连接两个元素，我们找到每个元素所属的集合（它们各自树的根），并将其中一个设为另一个的子节点。示例：</p>
+<p><code>connect(5, 2)</code>:</p>
+<ol>
+<li><p><code>find(5)</code> -&gt; 3</p>
+</li>
+<li><p><code>find(2)</code> -&gt; 0</p>
+</li>
+<li><p>将 <code>find(5)</code> 的值设置为 <code>find(2)</code> ，即 <code>parent[3] = 0</code></p>
+</li>
+</ol>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122175032.png" srcset="/img/loading.gif" lazyload></p>
+<p>在最好的情况下，如果 <code>x</code> 和 <code>y</code> 都是它们各自的树的根，那么 <code>connect(x, y)</code> 只需让 <code>x</code> 指向 <code>y</code> ，这是一个 Θ(1) 操作！（因此得名 QuickUnion）</p>
+<p>如果两个元素属于同一个集合，那么它们将位于同一棵树中。因此，它们将拥有相同的根。所以对于 <code>isConnected(x, y)</code> 我们只需检查 <code>find(x) == find(y)</code> 。</p>
+<h2 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h2><p>QuickUnion 存在一个潜在的性能问题：树可能会变得非常长。在这种情况下，查找元素 <code>find(item)</code> 的根会变得非常昂贵。考虑下面的树：</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122175326.png" srcset="/img/loading.gif" lazyload></p>
+<p>在最坏情况下，我们需要遍历所有项目才能到达根节点，这需要Θ(N)的时间复杂度。由于我们需要对 <code>connect</code> 和 <code>isConnected</code> 都调用 <code>find</code> ，因此这两个操作的时间复杂度都被 O(N)所限制。</p>
+<h2 id="Summary-and-Code"><a href="#Summary-and-Code" class="headerlink" title="Summary and Code"></a>Summary and Code</h2><p>N &#x3D; DisjointSets 数据结构中元素的数量</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122180225.png" srcset="/img/loading.gif" lazyload></p>
+<p>从运行时图表来看，QuickUnion 似乎比 QuickFind 更差！然而需要注意的是，O(N)只是一个上界。当我们的树是平衡的时候， <code>connect</code> 和 <code>isConnected</code> 都能表现得相当好。在下一节中，我们将看到如何保证它们表现良好。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">QuickUnionDS</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">DisjointSets</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span>[] parent;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">QuickUnionDS</span><span class="hljs-params">(<span class="hljs-type">int</span> num)</span> &#123;<br>        parent = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[num];<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; num; i++) &#123;<br>            parent[i] = -<span class="hljs-number">1</span>;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-title function_">find</span><span class="hljs-params">(<span class="hljs-type">int</span> p)</span> &#123;<br>        <span class="hljs-keyword">while</span> (parent[p] &gt;= <span class="hljs-number">0</span>) &#123;<br>            p = parent[p];<br>        &#125;<br>        <span class="hljs-keyword">return</span> p;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">connect</span><span class="hljs-params">(<span class="hljs-type">int</span> p, <span class="hljs-type">int</span> q)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> find(p);<br>        <span class="hljs-type">int</span> <span class="hljs-variable">j</span> <span class="hljs-operator">=</span> find(q);<br>        parent[i] = j;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isConnected</span><span class="hljs-params">(<span class="hljs-type">int</span> p, <span class="hljs-type">int</span> q)</span> &#123;<br>        <span class="hljs-keyword">return</span> find(p) == find(q);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Weighted-Quick-Union-WQU"><a href="#Weighted-Quick-Union-WQU" class="headerlink" title="Weighted Quick Union (WQU)"></a>Weighted Quick Union (WQU)</h1><p>改进快速联合算法的关键在于一个核心洞察：每当我们调用 <code>find</code> 时，都必须爬到一棵树的根。因此，树越短，所需时间越快！</p>
+<p><strong>新规则</strong>：每当我们调用 <code>connect</code> 时，我们总是将较小树的根连接到较大树。</p>
+<p>遵循这个规则将使您的树的最大高度为 $logN$ ，其中 N 是我们不相交集合中元素的数量。这对 <code>connect</code> 和 <code>isConnected</code> 的运行时有什么影响？</p>
+<p>让我们通过一个例子来说明这个优势。考虑连接下面的两个集合 T1 和 T2：</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122190523.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们有两种连接它们的方式：</p>
+<p>第一种方式我们将 T1 连接到 T2。在第二种方式中，我们将 T2 连接到 T1。</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122190538.png" srcset="/img/loading.gif" lazyload></p>
+<p>第二种方式更可取，因为它的高度只有 2，而不是 3。根据我们的新规则，我们也会选择第二种方式，因为 T2 比 T1 小（T2 的大小为 3，而 T1 为 6）。</p>
+<p>我们通过树中的元素数量来确定大小关系。因此，在连接两棵树时，我们需要知道它们的大小（或权重）。我们可以通过用 <code>-(size of tree)</code> 替换 <code>-1</code> 来将此信息存储在树的根节点中。</p>
+<h2 id="Maximum-height-Log-N"><a href="#Maximum-height-Log-N" class="headerlink" title="Maximum height: Log N"></a><strong>Maximum height: Log N</strong></h2><p>遵循上述规则可以确保任何树的最大高度为 Θ(log N)。N 是我们的不相交集合中的元素数量。由此推及， <code>**connect**</code> 和 <code>**isConnected**</code> 的运行时间均受 O(log N) 的限制。</p>
+<p>有关为什么是$logn$的证明：</p>
+<h3 id="为什么是-log-N-？"><a href="#为什么是-log-N-？" class="headerlink" title="为什么是 $\log N$？"></a>为什么是 $\log N$？</h3><p>下面提供一个可选的数学解释，说明为什么树的最大高度是<br>$$<br>\log_2 N.<br>$$</p>
+<p>设想树 $T_1$ 中的任意一个元素 $x$。<br>元素 $x$ 的深度只会在一种情况下增加 1：当树 $T_1$ 被放到另一棵树 $T_2$ 的下面时。</p>
+<p>而一旦发生这种情况，合并后得到的新树的规模至少会是 $T_1$ 规模的两倍，因为<br>$$<br>\text{size}(T_2) \ge \text{size}(T_1).<br>$$</p>
+<p>包含元素 $x$ 的这棵树，在总元素数达到 $N$ 之前，最多只能发生如下次数的“翻倍”：<br>$$<br>\log_2 N,<br>$$<br>因为<br>$$<br>2^{\log_2 N} &#x3D; N.<br>$$</p>
+<p>因此，这样的翻倍过程最多发生 $\log_2 N$ 次；而每发生一次翻倍，树的高度就增加一层。<br>所以，这棵树的最大高度就是<br>$$<br>\log_2 N.<br>$$</p>
+<p>你可能想知道为什么我们不根据高度而不是权重来链接树。事实证明，这更复杂来实现，并且仍然给我们相同的Θ(log N)高度限制。</p>
+<p><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122195726.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Weighted-Quick-Union-with-Path-Compression"><a href="#Weighted-Quick-Union-with-Path-Compression" class="headerlink" title="Weighted Quick Union with Path Compression"></a>Weighted Quick Union with Path Compression</h1><p>巧妙之处在于意识到每当我们调用 <code>find(x)</code> 时，都必须从 <code>x</code> 到根遍历路径。因此，在途中我们可以将所有访问到的项连接到它们的根，而不会产生额外的渐近成本。</p>
+<p>在途中将所有项连接到根将有助于使我们的树在每次调用 <code>find</code> 时变得更短。</p>
+<p>回想起来， <code>**connect(x, y)**</code> 和 <code>**isConnected(x, y)**</code> 总是调用 <code>**find(x)**</code> 和 <code>**find(y)**</code> 。因此，在调用 <code>connect</code> 或 <code>isConnected</code> 足够次数后，基本上所有元素都会直接指向它们的根。</p>
+<p>由此推论， <code>connect</code> 和 <code>isConnected</code> 的平均运行时间在长期内几乎变得恒定！这被称为摊还运行时间。</p>
+<p>更具体地说，对于在 $N$ 个元素上执行的 $M$ 次操作，<br>带路径压缩的加权并查集（WQU with Path Compression）的时间复杂度为<br>$$<br>O!\left(N + M(\lg^* N)\right).<br>$$</p>
+<p>其中，$\lg^* N$ 表示迭代对数（iterated logarithm）。<br>对于任何现实世界中的输入规模，$\lg^* N$ 的值都小于 $5$。<br><img src="/images/CS61B-ch14-note%EF%BC%9Aunion/Pasted%20image%2020260122213347.png" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Introduction</div>
+      <div>https://augusteing.github.io/2026/09/20/CS61B-ch14-note：union/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年9月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/10/08/CS61B-ch34%EF%BC%9A%E6%8E%92%E5%BA%8F%E4%B8%8A%E9%99%90%E6%8E%A8%E5%AF%BC/" title="排序的上限">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">排序的上限</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/09/20/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" title="21.1 Priority Queues">
+                        <span class="hidden-mobile">21.1 Priority Queues</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

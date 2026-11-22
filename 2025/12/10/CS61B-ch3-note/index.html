@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="如果你有python的使用经验，那么对这个数据结构不会陌生 12L &#x3D; [1, 2, 3]print(L)  虽然 Java 有内置的 List 类型，但我们现在暂时不使用它。在本章中，我们将从头开始构建自己的列表，同时学习一些 Java 的关键特性 The Mystery of the Walrus开始我们的旅程，我们将首先思考海象的深奥之谜。（原文用了profound这个词汇，实在是有点美式幽">
+<meta property="og:type" content="article">
+<meta property="og:title" content="list">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/10/CS61B-ch3-note/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="如果你有python的使用经验，那么对这个数据结构不会陌生 12L &#x3D; [1, 2, 3]print(L)  虽然 Java 有内置的 List 类型，但我们现在暂时不使用它。在本章中，我们将从头开始构建自己的列表，同时学习一些 Java 的关键特性 The Mystery of the Walrus开始我们的旅程，我们将首先思考海象的深奥之谜。（原文用了profound这个词汇，实在是有点美式幽">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210115324.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210115534.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210115704.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210120533.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123157.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123208.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123258.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123427.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123433.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123810.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210123830.png">
+<meta property="article:published_time" content="2025-12-10T05:13:15.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.744Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch3-note/Pasted%20image%2020251210115324.png">
+  
+  
+  
+  <title>list - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="list"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-10 13:13" pubdate>
+          2025年12月10日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">list</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>如果你有python的使用经验，那么对这个数据结构不会陌生</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">L = <span class="hljs-selector-attr">[1, 2, 3]</span><br><span class="hljs-function"><span class="hljs-title">print</span><span class="hljs-params">(L)</span></span><br></code></pre></td></tr></table></figure>
+
+<p>虽然 Java 有内置的 List 类型，但我们现在暂时不使用它。在本章中，我们将从头开始构建自己的列表，同时学习一些 Java 的关键特性</p>
+<h1 id="The-Mystery-of-the-Walrus"><a href="#The-Mystery-of-the-Walrus" class="headerlink" title="The Mystery of the Walrus"></a>The Mystery of the Walrus</h1><p>开始我们的旅程，我们将首先思考海象的深奥之谜。<br>（原文用了profound这个词汇，实在是有点美式幽默在）</p>
+<p>尝试预测运行以下代码会发生什么。对 b 的修改会影响 a 吗？提示：如果你来自 Python，Java 的行为是相同的。</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">Walrus a = <span class="hljs-built_in">new</span> Walrus(<span class="hljs-number">1000</span>, <span class="hljs-number">8.3</span>);<br>Walrus b;<br>b = a;<br>b.weight = <span class="hljs-number">5</span>;<br><span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(a);<br><span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(b);<br></code></pre></td></tr></table></figure>
+
+<p>现在尝试预测运行以下代码会发生什么。对 x 的修改会影响 y 吗？</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs stylus">int <span class="hljs-attribute">x</span> = <span class="hljs-number">5</span>;<br>int <span class="hljs-attribute">y</span>;<br><span class="hljs-attribute">y</span> = x;<br><span class="hljs-attribute">x</span> = <span class="hljs-number">2</span>;<br>System<span class="hljs-selector-class">.out</span><span class="hljs-selector-class">.println</span>(<span class="hljs-string">&quot;x is: &quot;</span> + <span class="hljs-attribute">x</span>);<br>System<span class="hljs-selector-class">.out</span><span class="hljs-selector-class">.println</span>(<span class="hljs-string">&quot;y is: &quot;</span> + <span class="hljs-attribute">y</span>);<br></code></pre></td></tr></table></figure>
+
+<p>虽然这些概念看似微妙，但它们对于本课程中我们将实现的数据结构的效率至关重要，而且对这个问题的深入理解也会导致更安全、更可靠的代码。</p>
+<h1 id="bits"><a href="#bits" class="headerlink" title="bits"></a>bits</h1><p>信息论中对于此概念有更深刻的论述，如果你对此感兴趣，可以看一看台湾交通大学陈伯宁的课程。</p>
+<p>你电脑中的所有信息都以一串一和零的形式存储在内存中。一些例子：</p>
+<ul>
+<li><p>72 is often stored as 01001000<br>  72 通常存储为 01001000</p>
+</li>
+<li><p>205.75 is often stored as 01000011 01001101 11000000 00000000<br>  205.75 通常被存储为 01000011 01001101 11000000 00000000</p>
+</li>
+<li><p>The letter H is often stored as 01001000 (same as 72)<br>  字母 H 通常被存储为 01001000（与 72 相同）</p>
+</li>
+<li><p>The true value is often stored as 00000001<br>  真值通常被存储为 00000001</p>
+</li>
+</ul>
+<p>或许你会疑惑，72和字母H（capital）是同样的01组合，那么计算机遇到这个01组合的时候该如何处理呢？</p>
+<p>答案是通过类型！例如，考虑下面的代码：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-type">char</span> c = <span class="hljs-string">&#x27;H&#x27;</span>;<br><span class="hljs-type">int</span> x = c;<br><span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(c);<br><span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(x);<br></code></pre></td></tr></table></figure>
+
+<p>如果我们运行这段代码，会得到：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">H</span><br><span class="hljs-number">72</span><br></code></pre></td></tr></table></figure>
+
+
+<p>在这种情况下，x 和 c 变量包含相同的位（好吧，几乎相同），但 Java 解释器在打印时会将它们视为不同的值。</p>
+<p>在 Java 中，共有 8 种原始类型：byte、short、int、long、float、double、boolean 和 char。每种类型都有不同的特性，我们将在整个课程中讨论，除了 short 和 float，你很可能永远不会使用它们。<br>（这句话是对的，犹如马尔克斯的时间笔法）</p>
+<h1 id="Declaring-a-Variable-Simplified"><a href="#Declaring-a-Variable-Simplified" class="headerlink" title="Declaring a Variable (Simplified)"></a>Declaring a Variable (Simplified)</h1><p>你可以将你的计算机想象成包含大量用于存储信息的内存位，每个位都有一个唯一的地址。现代计算机可以提供数十亿个这样的位。</p>
+<p>当你声明一个特定类型的变量时，Java 会找到一个恰好能容纳该类型数据的连续位块。例如，如果你声明一个 int 类型，你会得到一个 32 位的块；如果你声明一个 byte 类型，你会得到一个 8 位的块。每种数据类型在 Java 中占用的位数都不同。这个确切的位数对于我们这门课来说并不是特别重要。</p>
+<p>为了有一个方便的比喻，我们将其中一个这样的块称为“比特盒”。</p>
+<p>除了分配内存外，Java 解释器还在一个内部表中创建一个条目，将每个变量名映射到该盒子中第一个比特的位置。</p>
+<p>例如，如果你声明了 <code>int x</code> 和 <code>double y</code> ，那么 Java 可能会决定使用你计算机内存中的第 352 到 384 位来存储 x，第 20800 到 20864 位来存储 y。解释器随后会记录 int x 从第 352 位开始，y 从第 20800 位开始。例如，在执行了以下代码之后：</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210115324.png" srcset="/img/loading.gif" lazyload></p>
+<p>Java 语言没有提供任何方法让你知道盒子的位置，例如，你无法以某种方式得知 x 位于位置 352。换句话说，确切的内存地址是在我们 Java 可访问的抽象层次之下。这与像 C 这样的语言不同，在 C 中你可以向语言询问某段数据的确切地址。因此，我从上面的图中省略了地址。<br>(这也是语言的设计哲学)</p>
+<p>这一 Java 特性是一种权衡！将内存位置隐藏起来虽然让程序员失去了部分控制权，从而无法进行某些类型的优化，但它也避免了大量非常棘手的编程错误。在当今计算成本极低的时代，这种权衡通常是非常值得的。正如智慧的 Donald Knuth 曾经所说：“我们应该忘记那些小的效率优化，大约占 97%的时间：过早的优化是万恶之源。”</p>
+<p>作为一个类比，你并不能直接控制自己的心跳。虽然这限制了你在某些情况下优化的能力，但也避免了像不小心把它关掉这样的愚蠢错误的可能性。（哈哈哈哈哈哈哈哈哈哈哈哈）</p>
+<p>Java中没有默认值的概念，如果你只声明了变量，但是没有赋予相应的值，在你使用之前，Java会拒绝并编译错误。</p>
+<p>当你向一个内存盒赋值时，它会被你指定的位填满。例如，如果我们执行以下代码行：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf"><span class="hljs-attribute">x</span> <span class="hljs-operator">=</span> -<span class="hljs-number">1431195969</span><span class="hljs-comment">;</span><br><span class="hljs-attribute">y</span> <span class="hljs-operator">=</span> <span class="hljs-number">567213.112</span><span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>然后，如上所述的内存框被填充，如下所示，这就是我所说的框表示法。</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210115534.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Simplified-Box-Notation"><a href="#Simplified-Box-Notation" class="headerlink" title="Simplified Box Notation"></a>Simplified Box Notation</h2><p>虽然我们在上一节中使用的盒子表示法对于理解底层大致发生了什么很有帮助，但它在实际应用中并不实用，因为我们不知道如何解释二进制位。（毕竟二进制是计算机的语言）</p>
+<p>因此，我们不再用二进制表示内存框中的内容，而是用人类可读的符号来表示。我们将在整个课程的其余部分都这样做。例如，在执行以下代码后：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs abnf">int x<span class="hljs-comment">;</span><br>double y<span class="hljs-comment">;</span><br><span class="hljs-attribute">x</span> <span class="hljs-operator">=</span> -<span class="hljs-number">1431195969</span><span class="hljs-comment">;</span><br><span class="hljs-attribute">y</span> <span class="hljs-operator">=</span> <span class="hljs-number">567213.112</span><span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210115704.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="The-Golden-Rule-of-Equals-GRoE"><a href="#The-Golden-Rule-of-Equals-GRoE" class="headerlink" title="The Golden Rule of Equals (GRoE)"></a>The Golden Rule of Equals (GRoE)</h1><p>你已经理解了在内存层次上计算机的变量表示方法，所以我们可开始解决海象之谜</p>
+<p>事实证明，我们的谜题有一个简单的解决方法：当你写 <code>y = x</code> 时，你是在告诉 Java 解释器将 x 的位复制到 y 中。等号的黄金法则（GRoE）是理解海象之谜的根本真理。<br>（也就是说，仅仅是将y盒子中的bit位全部复制到x的盒子中）</p>
+<h2 id="Reference-Types"><a href="#Reference-Types" class="headerlink" title="Reference Types"></a>Reference Types</h2><p>上面我们提到有 8 种原始类型：byte、short、int、long、float、double、boolean、char。除此之外的所有内容，包括数组，都不是原始类型，而是一种 <code>reference type</code> 。</p>
+<h3 id="object-instantiation"><a href="#object-instantiation" class="headerlink" title="object instantiation"></a>object instantiation</h3><p>当使用 <code>new</code> （例如 Dog，Walrus，Planet）实例化一个对象时，Java 首先为类的每个实例变量分配一个盒子，并用默认值填充它们。然后构造函数通常（但不总是）将每个盒子填充为其他值。</p>
+<p>例如，如果我们的海象类是：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Walrus</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> weight;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> tuskSize;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Walrus</span><span class="hljs-params">(<span class="hljs-type">int</span> w, <span class="hljs-type">double</span> ts)</span> </span>&#123;<br>          weight = w;<br>          tuskSize = ts;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们使用 <code>new Walrus(1000, 8.3);</code> 创建一个海豹，然后最终得到一个由两个分别包含 32 位和 64 位的盒子组成的海豹：</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210120533.png" srcset="/img/loading.gif" lazyload></p>
+<p>在 Java 编程语言的实际实现中，每个对象实际上还有一些额外的开销，因此一个海象占用的位数略多于 96 位。然而，对于我们来说，将忽略这些开销，因为我们不会直接与之交互。</p>
+<p>我们创建的海豚是匿名的，也就是说它已经被创建，但并没有存储在任何变量中。现在我们来讨论存储对象的变量。(实际上我们丢失了这个海象)</p>
+<h3 id="Reference-Variable-Declaration"><a href="#Reference-Variable-Declaration" class="headerlink" title="Reference Variable Declaration"></a>Reference Variable Declaration</h3><p>当我们声明任何引用类型（如 Walrus、Dog、Planet、数组等）的变量时，Java 都会分配一个 64 位的盒子，不管对象的类型是什么。</p>
+<p>乍一看，这似乎会导致一个海豹悖论。我们上一节中的海豹需要超过 64 位来存储。此外，无论对象的类型如何，我们只能得到 64 位来存储它，这似乎很奇怪。</p>
+<p>然而，这个问题可以通过以下信息轻松解决：64 位的盒子中并不包含关于海象的数据，而是包含海象在内存中的地址。(请关注这条消息，十分重要)</p>
+<p>例如，假设我们调用：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Walrus</span> someWalrus;<br><span class="hljs-attribute">someWalrus</span> = new Walrus(<span class="hljs-number">1000</span>, <span class="hljs-number">8</span>.<span class="hljs-number">3</span>);<br></code></pre></td></tr></table></figure>
+
+<p><em>注意接下来的内容十分重要</em></p>
+<p>上文说到：我们使用64位的比特盒用于存储海象在内存中的<strong>地址</strong>。</p>
+<p>第一行创建了一个 64 位的盒子。第二行创建了一个新的海象，地址由 <code>new</code> 运算符返回。随后，这些位根据 GRoE（请你回忆）被复制到 <code>someWalrus</code> 盒子中。new 运算符在这里起到了类似于函数的作用。</p>
+<p>如果我们想象我们的海象体重从内存的第 <code>5051956592385990207</code> 位开始存储，而 tuskSize 从第 <code>5051956592385990239</code> 位开始存储，我们可能会将 <code>5051956592385990207</code> 存储在 Walrus 变量中。在二进制中， <code>5051956592385990207</code> 由 64 位 <code>0100011000011100001001111100000100011101110111000001111000111111</code> 表示，用盒子表示法可以表示为：</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123157.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们也可以将特殊值 <code>null</code> 赋给一个引用变量，对应全零的值<br><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123208.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="Box-and-Pointer-Notation-盒指针记号"><a href="#Box-and-Pointer-Notation-盒指针记号" class="headerlink" title="Box and Pointer Notation  盒指针记号"></a><strong>Box and Pointer Notation  盒指针记号</strong></h3><p>和以前一样，很难解释一个引用变量中的位集合，那只是给机器看的，因此我们将为引用变量创建一个简化的盒子表示法，如下所示：</p>
+<ul>
+<li><p>If an address is all zeros, we will represent it with null.<br>如果一个地址全为零，我们将用 null 来表示。</p>
+</li>
+<li><p>A non-zero address will be represented by an <strong>arrow</strong> pointing at an object instantiation.<br>  一个非零地址将用指向对象实例的箭头表示。</p>
+</li>
+</ul>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123258.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="Resolving-Walrus"><a href="#Resolving-Walrus" class="headerlink" title="Resolving Walrus"></a>Resolving Walrus</h3><p>我们现在终于准备好彻底、完全地解决海象之谜了。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Walrus</span> a = new Walrus(<span class="hljs-number">1000</span>, <span class="hljs-number">8</span>.<span class="hljs-number">3</span>);<br><span class="hljs-attribute">Walrus</span> b;<br><span class="hljs-attribute">b</span> = a;<br></code></pre></td></tr></table></figure>
+
+<p>执行第一行之后，我们有：</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123427.png" srcset="/img/loading.gif" lazyload></p>
+<p>执行了第二行之后，我们有：</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123433.png" srcset="/img/loading.gif" lazyload></p>
+<p>请注意，b只是没有定义，并不是null</p>
+<p>根据 GRoE，最后一行仅仅是将 <code>a</code> 盒子里的位复制到 <code>b</code> 盒子里。或者用我们视觉上的隐喻来说，这意味着 b 将复制 a 中的箭头，并现在指向同一个对象。</p>
+<p>以上为全部的答案，没有更复杂的东西了</p>
+<h1 id="Parameter-Passing"><a href="#Parameter-Passing" class="headerlink" title="Parameter Passing"></a>Parameter Passing</h1><p>当你将参数传递给一个函数时，你所做的也只是复制位。换句话说，GRoE 同样适用于参数传递。复制位通常被称为“按值传递”。在 Java 中，我们<strong>总是</strong>按值传递。（这里和C++的两种传递方式不同）</p>
+<p>例如，考虑下面的函数：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">double</span> <span class="hljs-title">average</span><span class="hljs-params">(<span class="hljs-type">double</span> a, <span class="hljs-type">double</span> b)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> (a + b) / <span class="hljs-number">2</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>假设我们以如下方式调用这个函数：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">String</span>[] args)</span> </span>&#123;<br>    <span class="hljs-type">double</span> x = <span class="hljs-number">5.5</span>;<br>    <span class="hljs-type">double</span> y = <span class="hljs-number">10.5</span>;<br>    <span class="hljs-type">double</span> avg = <span class="hljs-built_in">average</span>(x, y);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在执行此函数的前两行之后，main 方法将有两个标记为 <code>x</code> 和 <code>y</code> 的盒子，其中包含如下所示的值：</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123810.png" srcset="/img/loading.gif" lazyload></p>
+<p>当函数被调用时， <code>average</code> 函数拥有<strong>自己</strong>的作用域，其中包含两个新标记为 <code>a</code> 和 <code>b</code> 的盒子，位被简单地复制进去。这种位的复制就是我们所说的“按值传递”。</p>
+<p><img src="/images/CS61B-ch3-note/Pasted%20image%2020251210123830.png" srcset="/img/loading.gif" lazyload></p>
+<p>如果 <code>average</code> 函数要修改 <code>a</code> ，那么 main 中的 <code>x</code> 将保持不变，因为 GRoE 告诉我们，我们只是在标记为 <code>a</code> 的盒子中填入新的位。</p>
+<p>按值传递的函数对于原来的值没有任何影响</p>
+<h2 id="Test-Your-Understandging"><a href="#Test-Your-Understandging" class="headerlink" title="Test Your Understandging"></a>Test Your Understandging</h2><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">PassByValueFigure</span> &#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span>(<span class="hljs-params">String[] <span class="hljs-keyword">args</span></span>)</span> &#123;<br>           Walrus walrus = <span class="hljs-keyword">new</span> Walrus(<span class="hljs-number">3500</span>, <span class="hljs-number">10.5</span>);<br>           <span class="hljs-built_in">int</span> x = <span class="hljs-number">9</span>;<br><br>           doStuff(walrus, x);<br>           System.<span class="hljs-keyword">out</span>.println(walrus);<br>           System.<span class="hljs-keyword">out</span>.println(x);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">doStuff</span>(<span class="hljs-params">Walrus W, <span class="hljs-built_in">int</span> x</span>)</span> &#123;<br>           W.weight = W.weight - <span class="hljs-number">100</span>;<br>           x = x - <span class="hljs-number">5</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>对于 Walrus 会有影响，但是对于x没有</p>
+<h1 id="Instantiation-of-Arrays"><a href="#Instantiation-of-Arrays" class="headerlink" title="Instantiation of Arrays"></a>Instantiation of Arrays</h1><p>如上所述，存储数组的变量也是引用变量，与其他变量一样。例如，考虑下面的声明：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs css">int<span class="hljs-selector-attr">[]</span> <span class="hljs-attribute">x</span>;<br>Planet<span class="hljs-selector-attr">[]</span> planets;<br></code></pre></td></tr></table></figure>
+
+<p>这两种声明都创建了 64 位的比特框。 <code>x</code> 只能保存 <code>int</code> 数组的地址，而 <code>planets</code> 只能保存 <code>Planet</code> 数组的地址。</p>
+<p>数组的实例化与对象的实例化非常相似。例如，如果我们按照下面的方式创建一个大小为 5 的整型数组：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">x</span> = new int[]&#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">95</span>, <span class="hljs-number">4</span>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>然后 <code>new</code> 关键字创建了 5 个 32 位的盒子，并返回整体对象的地址以赋值给 x。</p>
+<p>如果丢失了对应地址的位，对象也会丢失。例如，如果某个特定海象的地址唯一地存储在 <code>x</code> 中，那么 <code>x = null</code> 将导致你永久地失去这个海象。这不一定是坏事，因为通常你会决定不再使用某个对象，因此直接丢弃引用是安全的。我们将在本章后面构建列表时看到这一点。</p>
+<h1 id="vs-Arrays-equals"><a href="#vs-Arrays-equals" class="headerlink" title="&#x3D;&#x3D; vs. Arrays.equals"></a>&#x3D;&#x3D; vs. Arrays.equals</h1><p>类似于 &#x3D;，我们也可以从位的角度来理解 &#x3D;&#x3D; 运算符。每次我们编写 <code>x==y</code> ，我们是在要求 Java 比较内存盒 <code>x</code> 和 <code>y</code> 中的字面位。</p>
+<p>For example, suppose we have the code:<br>例如，假设我们有如下代码：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">int</span>[] x = new int[]&#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">95</span>, <span class="hljs-number">4</span>&#125;;<br><span class="hljs-attribute">int</span>[] y = new int[]&#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">95</span>, <span class="hljs-number">4</span>&#125;;<br><span class="hljs-attribute">System</span>.out.println(x == y); #false<br></code></pre></td></tr></table></figure>
+
+<p>因为 new返回的是数组的地址，很遗憾的是相同内容的数组的地址肯定不一致。</p>
+<p>这段代码将打印 false，因为 <code>x</code> 和 <code>y</code> 分别包含内存中两个不同数组的 64 位地址，尽管这两个数组恰好包含相同的信息。如果我们想要比较两个数组的内容，可以使用 Arrays.equals，例如：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">int</span>[] x = new int[]&#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">95</span>, <span class="hljs-number">4</span>&#125;;<br><span class="hljs-attribute">int</span>[] y = new int[]&#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">95</span>, <span class="hljs-number">4</span>&#125;;<br><span class="hljs-attribute">System</span>.out.println(Arrays.equals(x, y)); #true<br></code></pre></td></tr></table></figure>
+
+<h1 id="IntLists"><a href="#IntLists" class="headerlink" title="IntLists"></a>IntLists</h1><figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IntList</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> first;<br>    <span class="hljs-keyword">public</span> <span class="hljs-built_in">IntList</span> rest;        <br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">IntList</span>(<span class="hljs-type">int</span> f, <span class="hljs-built_in">IntList</span> r) &#123;<br>        first = f;<br>        rest = r;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>相当之简单，一个构造函数。</p>
+<p>这样一个列表使用起来很不美观。例如，如果我们想要创建一个包含数字 5、10 和 15 的列表，我们可以这样做：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">IntList</span> <span class="hljs-variable">L</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">5</span>, <span class="hljs-literal">null</span>);<br>L.rest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">10</span>, <span class="hljs-literal">null</span>);<br>L.rest.rest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IntList</span>(<span class="hljs-number">15</span>, <span class="hljs-literal">null</span>);<br></code></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">IntList L</span> = new IntList(15, null);<br><span class="hljs-attribute">L</span> = new IntList(10, L);<br><span class="hljs-attribute">L</span> = new IntList(5, L);<br></code></pre></td></tr></table></figure>
+<p>虽然从理论上讲你可以使用 IntList 来存储任何整数列表，但得到的代码会相当丑陋并且容易出错。我们将采用面向对象编程的常规策略，为我们的类添加辅助方法来执行基本任务。</p>
+<h1 id="size-and-iterative-size"><a href="#size-and-iterative-size" class="headerlink" title="size and iterative size"></a>size and iterative size</h1><p>我们希望在 <code>IntList</code> 类中添加一个方法 <code>size</code> ，这样当你调用 <code>L.size()</code> 时，会返回 <code>L</code> 中的项目数量</p>
+<p>在阅读本章其余内容之前，考虑先编写 <code>size</code> 和 <code>iterativeSize</code> 方法。 <code>size</code> 应该使用递归，而 <code>iterativeSize</code> 则不应该使用。你通过自己尝试后再看我的实现方式，可能会学到更多。这两个视频提供了一个实时演示，展示了如何实现这些方法。</p>
+<p>这是我的答案</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">IntList</span> &#123;  <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> first;  <br>    <span class="hljs-keyword">public</span> <span class="hljs-built_in">IntList</span> rest;  <br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">IntList</span>(<span class="hljs-type">int</span> f, <span class="hljs-built_in">IntList</span> r) &#123;  <br>        first = f;  <br>        rest = r;  <br>    &#125;  <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-built_in">size</span>() &#123;  <br>        <span class="hljs-keyword">if</span> (<span class="hljs-variable">this</span>.<span class="hljs-property">rest</span> == <span class="hljs-literal">null</span> ) &#123;  <br>            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;  <br>        &#125;  <br>        <span class="hljs-keyword">else</span> &#123;  <br>            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span> + <span class="hljs-variable">this</span>.<span class="hljs-property">rest</span>.<span class="hljs-property">size</span>();  <br>        &#125;  <br>    &#125;  <br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">iterativeSize</span>() &#123;  <br>        <span class="hljs-built_in">IntList</span> p = <span class="hljs-variable">this</span>;  <br>        <span class="hljs-type">int</span> <span class="hljs-built_in">size</span> = <span class="hljs-number">0</span>;  <br>        <span class="hljs-keyword">while</span> (p.<span class="hljs-property">rest</span> != <span class="hljs-literal">null</span>) &#123;  <br>            <span class="hljs-built_in">size</span> += <span class="hljs-number">1</span>;  <br>            p = p.<span class="hljs-property">rest</span>;  <br>        &#125;  <br>        <span class="hljs-built_in">size</span> += <span class="hljs-number">1</span>;  <br>        <span class="hljs-keyword">return</span> <span class="hljs-built_in">size</span>;  <br>    &#125;  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>练习：你可能会想知道为什么我们不这样做像 <code>if (this == null) return 0;</code> 这样的操作。为什么这不会起作用？</p>
+<p>答案：想一想当你调用 size 方法时会发生什么。你是在一个对象上调用它，例如 L.size()。如果 L 是 null，那么你将会得到一个 NullPointer 错误！</p>
+<h1 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h1><p>虽然 <code>size</code> 方法可以让我们获取列表的大小，但我们没有简单的方法来获取列表的第 i 个元素。</p>
+<p>练习：编写一个方法 <code>get(int i)</code> ，返回列表中的第 i 个元素。例如，如果 <code>L</code> 是 5 -&gt; 10 -&gt; 15，那么 <code>L.get(0)</code> 应该返回 5， <code>L.get(1)</code> 应该返回 10， <code>L.get(2)</code> 应该返回 15。对于无效的 <code>i</code> ，无论太大还是太小，你的代码可以有任意行为。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs"><br></code></pre></td></tr></table></figure>
+
+
+<p>请注意，我们编写的方法需要线性时间！也就是说，如果你有一个长度为 1,000,000 的列表，那么获取最后一个元素将比在小列表中花费更长的时间。我们将在以后的课程中看到另一种实现列表的方法，以避免这个问题。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>list</div>
+      <div>https://augusteing.github.io/2025/12/10/CS61B-ch3-note/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月10日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/20/CS61B-ch4-note/" title="SLLists">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SLLists</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/09/CS61B-ch2-note/" title="Static vs. Non-Static Methods">
+                        <span class="hidden-mobile">Static vs. Non-Static Methods</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

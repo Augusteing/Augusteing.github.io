@@ -1,0 +1,831 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="对于中级到高级程序员来说，最重要的技能之一就是能够判断自己的代码是否正确。在本章中，我们将讨论如何编写测试来评估代码的正确性。在这个过程中，我们还将讨论一种名为选择排序的排序算法。 A New Way当你编写程序时，它可能会有错误。在课堂环境中，你通过用户交互、代码分析和自动评分器测试的组合来获得代码正确性的信心，在许多情况下，尤其是作为你获得分数的方式，自动评分器测试最为重要。（分数万岁是吧）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Testing and Selection Sort">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/24/CS61B-ch7-note/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="对于中级到高级程序员来说，最重要的技能之一就是能够判断自己的代码是否正确。在本章中，我们将讨论如何编写测试来评估代码的正确性。在这个过程中，我们还将讨论一种名为选择排序的排序算法。 A New Way当你编写程序时，它可能会有错误。在课堂环境中，你通过用户交互、代码分析和自动评分器测试的组合来获得代码正确性的信心，在许多情况下，尤其是作为你获得分数的方式，自动评分器测试最为重要。（分数万岁是吧）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch7-note/Pasted%20image%2020251224113015.png">
+<meta property="og:image" content="https://cs61b-2.gitbook.io/cs61b-textbook/~gitbook/image?url=https://lh7-us.googleusercontent.com/BRu_eKYg7yRI7jAqgGXnHzN4CvNiKWtVMq-SbDC9vzjS2Vd8rNbGB-GBUWcGxyinejZWzO-dmWbJ2WGa3jRDpJ56yPXHExjkUJYfCL46V7stzGSFT2dOO0FsrIQqgOLdE6iFfrVvCfr0n6IN1EjQcRXYnw=s2048&width=300&dpr=4&quality=100&sign=7eb65227&sv=2">
+<meta property="article:published_time" content="2025-12-24T03:42:11.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.843Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch7-note/Pasted%20image%2020251224113015.png">
+  
+  
+  
+  <title>Testing and Selection Sort - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Testing and Selection Sort"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-24 11:42" pubdate>
+          2025年12月24日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          58 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Testing and Selection Sort</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>对于中级到高级程序员来说，最重要的技能之一就是能够判断自己的代码是否正确。在本章中，我们将讨论如何编写测试来评估代码的正确性。在这个过程中，我们还将讨论一种名为选择排序的排序算法。</p>
+<h2 id="A-New-Way"><a href="#A-New-Way" class="headerlink" title="A New Way"></a>A New Way</h2><p>当你编写程序时，它可能会有错误。在课堂环境中，你通过用户交互、代码分析和自动评分器测试的组合来获得代码正确性的信心，在许多情况下，尤其是作为你获得分数的方式，自动评分器测试最为重要。（分数万岁是吧）</p>
+<p>自动评分器当然不是魔法。它们是讲师编写的代码，本质上与你们正在编写的代码并没有太大区别。在现实世界中，这些测试是由程序员自己编写的，而不是某个像 Josh-Hug 一样仁慈的第三方。（Josh-Hug是本课程的教授）</p>
+<p>在这一章中，我们将探讨如何编写自己的测试。我们的目标将是创建一个名为 <code>Sort</code> 的类，该类提供一个名为 <code>sort(String[] x)</code> 的方法，该方法会破坏性地对数组 <code>x</code> 中的字符串进行排序。</p>
+<p>作为一种全新的思维方式，我们将首先编写 <code>testSort()</code> ，只有在完成测试之后，我们才会继续编写实际的排序代码。</p>
+<h2 id="Ad-Hoc-Testing"><a href="#Ad-Hoc-Testing" class="headerlink" title="Ad Hoc Testing"></a>Ad Hoc Testing</h2><p>为 <code>Sort.sort</code> 编写测试相对简单，尽管有些繁琐。我们只需创建一个输入，调用 <code>sort</code> ，并检查方法的输出是否正确。如果输出不正确，我们打印出第一个不匹配项并终止测试。例如，我们可以按如下方式创建一个测试类：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">TestSort</span> &#123;<br>    <span class="hljs-comment">/** Tests the sort method of the Sort class. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testSort</span>()</span> &#123;<br>        String[] input = &#123;<span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>&#125;;<br>        String[] expected = &#123;<span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;i&quot;</span>&#125;;<br>        Sort.sort(input);<br>        <span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; input.length; i += <span class="hljs-number">1</span>) &#123;<br>            <span class="hljs-keyword">if</span> (!input[i].<span class="hljs-keyword">equals</span>(expected[i])) &#123;<br>                System.<span class="hljs-keyword">out</span>.println(<span class="hljs-string">&quot;Mismatch in position &quot;</span> + i + <span class="hljs-string">&quot;, expected: &quot;</span> + expected + <span class="hljs-string">&quot;, but got: &quot;</span> + input[i] + <span class="hljs-string">&quot;.&quot;</span>);<br>                <span class="hljs-keyword">break</span>;<br>            &#125;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span>(<span class="hljs-params">String[] <span class="hljs-keyword">args</span></span>)</span> &#123;<br>        testSort();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们可以通过创建一个空的 <code>Sort.sort</code> 方法来测试我们的测试(这句话很容易理解），如下所示：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Sort</span> &#123;<br>    <span class="hljs-comment">/** Sorts strings destructively. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123;        <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果我们用这个空白的 <code>Sort.sort</code> 方法运行 <code>testSort()</code> 方法，我们会得到：</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nix">Mismatch <span class="hljs-keyword">in</span> position <span class="hljs-number">0</span>, <span class="hljs-params">expected:</span> an, but <span class="hljs-params">got:</span> i.<br></code></pre></td></tr></table></figure>
+
+<p>我们得到错误消息实际上是件好事！这意味着我们的测试正在工作。非常有趣的是，我们现在为自己创造了一个小游戏，目标是修改 <code>Sort.sort</code> 的代码，以使这个错误消息不再出现。这是一种心理技巧，但许多程序员发现为自己创造这些小型谜题几乎会上瘾。</p>
+<p>实际上，这很像你在课堂上有一个自动评分器，而你发现自己沉迷于让自动评分器给你它的喜爱和认可。你现在有能力为你自己的代码创建一个评分器，只有通过正确地完成代码，你才能赢得它的尊重。</p>
+<p><strong>重要提示</strong>：你可能会问“为什么你要遍历整个数组？为什么不用 <code>==</code> 来检查数组是否相等？”原因在于，当我们测试两个对象的相等性时，不能简单地使用 <code>==</code> 运算符。 <code>==</code> 运算符比较内存盒子中的字面值，例如 <code>input == expected</code> 会测试 <code>input</code> 和 <code>expected</code> 的地址是否相同，而不是测试数组中的值是否相同。相反，我们在 <code>testSort</code> 中使用了循环，并打印出第一个不匹配的地方。你也可以使用内置方法 <code>java.util.Arrays.equals</code> 来代替循环。</p>
+<p>虽然上面的单个测试工作不算太多，但编写一套这样的临时测试会非常繁琐，因为它需要编写许多不同的循环和打印语句。在下一节中，我们将看到 <code>org.junit</code> 库如何为我们节省大量工作。</p>
+<h2 id="JUnit-Testing"><a href="#JUnit-Testing" class="headerlink" title="JUnit Testing"></a>JUnit Testing</h2><p>谷歌真理库提供了一些有助于简化测试编写的方法和实用功能。例如，我们可以用以下方式替换我们上面简单的临时测试：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">import</span> <span class="hljs-keyword">static</span> com.<span class="hljs-property">google</span>.<span class="hljs-property">common</span>.<span class="hljs-property">truth</span>.<span class="hljs-property">Truth</span>.<span class="hljs-property">assertThat</span>;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestSort</span> &#123;<br>   <span class="hljs-comment">/** Tests the sort method of the Sort class. */</span><br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">testSort</span>(<span class="hljs-params"></span>) &#123;<br>       <span class="hljs-title class_">String</span>[] input = &#123;<span class="hljs-string">&quot;cows&quot;</span>, <span class="hljs-string">&quot;dwell&quot;</span>, <span class="hljs-string">&quot;above&quot;</span>, <span class="hljs-string">&quot;clouds&quot;</span>&#125;;<br>       <span class="hljs-title class_">String</span>[] expected = &#123;<span class="hljs-string">&quot;above&quot;</span>, <span class="hljs-string">&quot;clouds&quot;</span>, <span class="hljs-string">&quot;cows&quot;</span>, <span class="hljs-string">&quot;dwell&quot;</span>&#125;;<br>       <span class="hljs-title class_">Sort</span>.<span class="hljs-title function_">sort</span>(input);<br><br>       <span class="hljs-title function_">assertThat</span>(input).<span class="hljs-title function_">isEqualTo</span>(expected);<br>   &#125;<br><br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">main</span>(<span class="hljs-params"><span class="hljs-title class_">String</span>[] args</span>) &#123;<br>       <span class="hljs-title function_">testSort</span>();<br>   &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>我们省略了循环，只需要提供输入和期望的输出还有魔法语句：<code>       assertThat(input).isEqualTo(expected);</code></p>
+<p><strong>这段代码要简单得多</strong>，而且几乎做了完全相同的事情，即如果数组不相等，它会告诉我们第一个不匹配的位置。例如，如果我们在一个什么也不做的 <code>Sort.sort</code> 方法上运行 <code>testSort()</code> ，我们会得到：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">Exception in thread <span class="hljs-string">&quot;main&quot;</span> arrays first <span class="hljs-keyword">differed </span><span class="hljs-built_in">at</span> element [<span class="hljs-number">0</span>]<span class="hljs-comment">; expected:&lt;[an]&gt; but was:&lt;[i]&gt;</span><br>    <span class="hljs-built_in">at</span> <span class="hljs-keyword">org.junit.internal.ComparisonCriteria.arrayEquals(ComparisonCriteria.java:55)</span><br><span class="hljs-keyword"></span>    <span class="hljs-built_in">at</span> <span class="hljs-keyword">org.junit.Assert.internalArrayEquals(Assert.java:532)</span><br><span class="hljs-keyword"></span>    ...<br></code></pre></td></tr></table></figure>
+
+<p>虽然这个输出比我们的临时测试稍微难看一点，但我们将在本章的末尾看到如何让它变得更好看。</p>
+<h2 id="Selection-Sort"><a href="#Selection-Sort" class="headerlink" title="Selection Sort"></a>Selection Sort</h2><p>在我们可以编写一个 <code>Sort.sort</code> 方法之前，我们需要一些排序算法。也许最简单的排序算法是”选择排序。”选择排序包括三个步骤：</p>
+<ul>
+<li>找到最小项</li>
+<li>把它移到前面。</li>
+<li>对剩下的 N-1 个项目进行选择排序（不触及第一个项目）。</li>
+</ul>
+<p>例如，假设我们有一个数组 <code>&#123;6, 3, 7, 2, 8, 1&#125;</code> 。这个数组中最小的元素是 <code>1</code> ，因此我们会将 <code>1</code> 移到最前面。有两种自然的方法来做这件事：一种是把 <code>1</code> 放在前面，然后把所有的数字都滑过去，即 <code>&#123;1, 6, 3, 7, 2, 8&#125;</code> 。然而，更高效的方法是直接将 <code>1</code> 与原来的最前面的元素（在这个例子中是 <code>6</code> ）交换，得到 <code>&#123;1, 3, 7, 2, 8, 6&#125;</code> 。</p>
+<p>我们会简单地重复相同的过程来处理剩余的数字，即 <code>... 3, 7, 2, 8, 6&#125;</code> 中最小的元素是 <code>2</code> 。将其交换到最前面，我们得到 <code>&#123;1, 2, 7, 3, 8, 6&#125;</code> 。重复这个过程直到我们得到一个排序好的数组，我们会得到 <code>&#123;1, 2, 3, 7, 8, 6&#125;</code> ，然后是 <code>&#123;1, 2, 3, 6, 8, 7&#125;</code> ，最后是 <code>&#123;1, 2, 3, 6, 7, 8&#125;</code> 。</p>
+<p>我们可以通过使用在第 2.4 章中最初引入的不变性概念，从<strong>数学</strong>上证明这个排序算法在任何数组上的正确性，尽管我们不会在本书中这样做。在进行下一步之前，尝试自己写出一个短数字数组，并对其进行选择排序，这样你就能确保你理解了这个概念。</p>
+<p>现在我们已经知道选择排序的工作原理，我们可以在空白 <code>Sort.sort</code> 方法中写下几行简短的注释来指导我们的思考：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Sort</span> &#123;<br>    <span class="hljs-comment">/** Sorts strings destructively. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>           <span class="hljs-comment">// find the smallest item</span><br>           <span class="hljs-comment">// move it to the front</span><br>           <span class="hljs-comment">// selection sort the rest (using recursion?)</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在接下来的章节中，我将尝试完成选择排序的一个实现。我会以一种类似学生可能会处理问题的方式来做，所以我会故意犯一些错误。这些故意犯的错误是好事，因为它们将有助于展示测试的用处。如果你在阅读时发现了任何错误，不用担心，我们最终会回到并纠正它们。</p>
+<h2 id="有关排序算法的数学证明（译者按）"><a href="#有关排序算法的数学证明（译者按）" class="headerlink" title="有关排序算法的数学证明（译者按）"></a>有关排序算法的数学证明（译者按）</h2><p>如果你学习过一些算法的时间复杂度和空间复杂度的知识，应该明白：在排序对象完全混沌的情况下，我们排序算法的时间复杂度应该是 nlogn。<br>以下是译者对于这个问题的证明：</p>
+<p>排序的本质是消除不确定度，因此我们考虑等概率序列的香农熵：</p>
+<h3 id="findSmallest"><a href="#findSmallest" class="headerlink" title="findSmallest"></a>findSmallest</h3><p>最自然的开始方式是编写一个查找列表中最小项的方法。和 <code>Sort.sort</code> 一样，我们会在完成方法之前先编写一个测试。首先，我们将创建一个返回任意值的<code>findSmallest</code> 方法：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Sort</span> &#123;<br>    <span class="hljs-comment">/** Sorts strings destructively. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>           <span class="hljs-comment">// find the smallest item</span><br>           <span class="hljs-comment">// move it to the front</span><br>           <span class="hljs-comment">// selection sort the rest (using recursion?)</span><br>    &#125;<br><br>    <span class="hljs-comment">/** Returns the smallest string in x. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">String</span> <span class="hljs-title">findSmallest</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> x[<span class="hljs-number">2</span>];<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这显然是错误的，而且甚至有可能编译不通过！因为你的数组可能只有两个元素。</p>
+<p>但我们选择在编写测试后再考虑 <code>findSmallest</code> 是如何工作的。使用 <code>org.junit</code> 库，将此类测试添加到我们的 <code>TestSort</code> 类中非常简单，如下所示：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestSort</span> &#123;<br>   <span class="hljs-meta">@Test</span><br>   <span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">testFindSmallest</span>(<span class="hljs-params"></span>) &#123;<br>       <span class="hljs-title class_">String</span>[] input = &#123;<span class="hljs-string">&quot;rawr&quot;</span>, <span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;zaza&quot;</span>, <span class="hljs-string">&quot;newway&quot;</span>&#125;;<br>       <span class="hljs-title class_">String</span> expected = <span class="hljs-string">&quot;zaza&quot;</span>;<br>       <span class="hljs-title class_">String</span> actual = <span class="hljs-title class_">Sort</span>.<span class="hljs-title function_">findSmallest</span>(input);<br>       <span class="hljs-title function_">assertThat</span>(actual).<span class="hljs-title function_">isEqualTo</span>(expected);<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>与 <code>TestSort.testsort</code> 类似，我们接着运行我们的 <code>TestSort.testFindSmallest</code> 方法以确保它失败。当我们运行这个测试时，我们会发现它实际上通过了，即没有消息出现。这是因为我们恰好硬编码了正确的返回值 <code>x[2]</code> 。让我们修改我们的 <code>findSmallest</code> 方法，使其返回一个明显错误的结果：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Returns the smallest string in x. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">String</span> <span class="hljs-title">findSmallest</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> x[<span class="hljs-number">3</span>];<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在做出这个更改后，当我们运行 <code>TestSort.testFindSmallest</code> 时，我们会得到一个错误，这是个好事：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stylus">Exception <span class="hljs-keyword">in</span> thread <span class="hljs-string">&quot;main&quot;</span> java<span class="hljs-selector-class">.lang</span><span class="hljs-selector-class">.AssertionError</span>: expected:&lt;<span class="hljs-selector-attr">[an]</span>&gt; but was:&lt;<span class="hljs-selector-attr">[null]</span>&gt;<br>    at org<span class="hljs-selector-class">.junit</span><span class="hljs-selector-class">.Assert</span><span class="hljs-selector-class">.failNotEquals</span>(Assert<span class="hljs-selector-class">.juava</span>:<span class="hljs-number">834</span>)<br>    at TestSort<span class="hljs-selector-class">.testFindSmallest</span>(TestSort<span class="hljs-selector-class">.java</span>:<span class="hljs-number">9</span>)<br>    at TestSort<span class="hljs-selector-class">.main</span>(TestSort<span class="hljs-selector-class">.java</span>:<span class="hljs-number">24</span>)<br></code></pre></td></tr></table></figure>
+
+<p>和之前一样，我们为自己设置了一个小游戏，目标是修改 <code>Sort.findSmallest</code> 的代码，让这个错误不再出现。这个目标比让 <code>Sort.sort</code> 工作要小一些，后者可能会更加令人上瘾。</p>
+<p>侧面说明：我似乎只是碰巧返回了正确的值 <code>x[2]</code> ，这看起来有些刻意。然而，当我录制这个讲座视频时，我实际上确实犯了这个错误，而且并非有意为之！</p>
+<p>接下来我们转向实际编写 <code>findSmallest</code> 。这似乎应该相对简单。如果你是 Java 新手，你可能会写出类似这样的代码：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/**  Returns the smallest string in x. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">String</span> <span class="hljs-title">findSmallest</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123;<br>    <span class="hljs-type">String</span> smallest = x[<span class="hljs-number">0</span>];<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; x.length; i += <span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-keyword">if</span> (x[i] &lt; smallest) &#123;<br>            smallest = x[i];<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> smallest;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然而，这将导致编译错误”&lt;不能应用于’java.lang.String’”&gt;。问题在于 Java 不允许使用&lt;运算符比较字符串。</p>
+<p>当你编程时遇到像这样容易描述的问题而卡住，最好还是去搜索搜索引擎。例如，我们可能会用 Google 搜索”less than strings Java”。这样的搜索可能会得到像这个 Stack Overflow 帖子这样的结果。</p>
+<p>其中一个流行的答案解释说， <code>str1.compareTo(str2)</code> 方法如果 <code>str1 &lt; str2</code> 会返回负数，如果相等会返回 0，如果 <code>str1 &gt; str2</code> 会返回正数。</p>
+<p>将这个整合到我们的代码中，我们可能会得到：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Returns the smallest string in x. </span><br><span class="hljs-comment">  * @source Got help with string compares from https://goo.gl/a7yBU5. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">String</span> <span class="hljs-title">findSmallest</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123;<br>    <span class="hljs-type">String</span> smallest = x[<span class="hljs-number">0</span>];<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; x.length; i += <span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-type">int</span> cmp = x[i].<span class="hljs-built_in">compareTo</span>(smallest);<br>        <span class="hljs-keyword">if</span> (cmp &lt; <span class="hljs-number">0</span>) &#123;<br>            smallest = x[i];<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> smallest;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>请注意，我们使用了 <code>@source</code> 标签来引用我们的来源。我通过举例向那些将 61B 作为正式课程学习的你们展示这一点。这不是一个典型的现实世界做法。</p>
+<p>由于我们正在使用对我们来说完全新的语法特性，我们可能对自己的 <code>findSmallest</code> 方法是否正确没有信心。幸运的是，我们刚刚写了那个测试。如果我们尝试运行它，我们会看到什么都没有打印出来，这意味着我们的代码可能是正确的。</p>
+<p>我们可以通过添加更多测试用例来增强我们的测试，从而提高我们的信心。例如，我们可以更改 <code>testFindSmallest</code> ，使其按以下方式读取：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">void</span> <span class="hljs-title function_">testFindSmallest</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-title class_">String</span>[] input = &#123;<span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>&#125;;<br>    <span class="hljs-title class_">String</span> expected = <span class="hljs-string">&quot;an&quot;</span>;<br><br>    <span class="hljs-title class_">String</span> actual = <span class="hljs-title class_">Sort</span>.<span class="hljs-title function_">findSmallest</span>(input);<br>    <span class="hljs-title function_">assertThat</span>(actual).<span class="hljs-title function_">isEqualTo</span>(expected);     <br><br>    <span class="hljs-title class_">String</span>[] input2 = &#123;<span class="hljs-string">&quot;there&quot;</span>, <span class="hljs-string">&quot;are&quot;</span>, <span class="hljs-string">&quot;many&quot;</span>, <span class="hljs-string">&quot;pigs&quot;</span>&#125;;<br>    <span class="hljs-title class_">String</span> expected2 = <span class="hljs-string">&quot;are&quot;</span>;<br><br>    <span class="hljs-title class_">String</span> actual2 = <span class="hljs-title class_">Sort</span>.<span class="hljs-title function_">findSmallest</span>(input2);<br>    <span class="hljs-title function_">assertThat</span>(actual2).<span class="hljs-title function_">isEqualTo</span>(expected2);  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>重新运行测试，我们发现它仍然通过。我们并不能完全确定它是否正常工作，但我们比没有测试时更有把握。</p>
+<h3 id="Swap"><a href="#Swap" class="headerlink" title="Swap"></a>Swap</h3><p>看看我们下面的 <code>sort</code> 方法，接下来我们需要编写的一个辅助方法是移动一个元素到前面，我们将其称为 <code>swap</code> 。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>       <span class="hljs-comment">// find the smallest item</span><br>       <span class="hljs-comment">// move it to the front</span><br>       <span class="hljs-comment">// selection sort the rest (using recursion?)</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>编写一个 <code>swap</code> 方法非常直接，你之前可能已经做过。一个正确的实现可能如下所示：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span> </span>&#123;<br>    <span class="hljs-type">String</span> temp = x[a];<br>    x[a] = x[b];<br>    x[b] = temp;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果你学过C++的课程，对此不会陌生。</p>
+<p>然而，目前让我们引入一个故意错误，以便我们可以展示测试的效用。一个更天真的程序员可能会做类似的事情：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span> </span>&#123;    <br>    x[a] = x[b];<br>    x[b] = x[a];<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>使用 JUnit 编写这个方法的测试非常简单。下面是一个示例测试。请注意，我们还编辑了主方法，使其调用 <code>testSwap</code> 而不是 <code>testFindSmallest</code> 或 <code>testSort</code> 。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestSort</span> &#123;<br>    ...    <br><br>    <span class="hljs-comment">/** Test the Sort.swap method. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">testSwap</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-type">String</span>[] input = &#123;<span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>&#125;;<br>        <span class="hljs-type">int</span> a = <span class="hljs-number">0</span>;<br>        <span class="hljs-type">int</span> b = <span class="hljs-number">2</span>;<br>        <span class="hljs-type">String</span>[] expected = &#123;<span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>&#125;;<br><br>        Sort.<span class="hljs-built_in">swap</span>(input, a, b);<br>        <span class="hljs-built_in">assertThat</span>(expected).<span class="hljs-built_in">isEqualTo</span>(input);<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">String</span>[] args)</span> </span>&#123;<br>        <span class="hljs-built_in">testSwap</span>();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>运行这个测试在我们的有错误的 <code>swap</code> 上会产生错误，正如我们所预期的那样。</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">Exception <span class="hljs-keyword">in</span> thread <span class="hljs-string">&quot;main&quot;</span> arrays <span class="hljs-keyword">first</span> differed <span class="hljs-keyword">in</span> <span class="hljs-keyword">element</span> [<span class="hljs-number">2</span>]; expected:&lt;[i]&gt; but was:&lt;[<span class="hljs-keyword">an</span>]&gt;<br>    <span class="hljs-keyword">at</span> TestSort.testSwap(TestSort.java:<span class="hljs-number">36</span>)<br></code></pre></td></tr></table></figure>
+
+<p>值得简要指出的是，我们只调用 <code>testSwap</code> 很重要，而不是也调用 <code>testSort</code> 。例如，如果我们的 <code>main</code> 方法如下，整个 <code>main</code> 方法会在 <code>testSort</code> 失败时立即终止执行，而 <code>testSwap</code> 将永远不会运行：</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs scss">public static void <span class="hljs-selector-tag">main</span>(String[] args) &#123;<br>    <span class="hljs-built_in">testSort</span>();<br>    <span class="hljs-built_in">testFindSmallest</span>();<br>    <span class="hljs-built_in">testSwap</span>();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们将在本章末尾学习一种更优雅的方法来处理多个测试，这将避免手动指定要运行的测试的需要。</p>
+<p>现在我们有一个失败的测试，可以用它来帮助我们调试。一种方法是在 <code>swap</code> 方法中设置断点，并使用 IntelliJ 中的可视化调试功能。如果你想要更多关于调试的信息和练习，可以查看 Lab3。逐行调试代码可以立即清楚地发现错误（见视频或亲自尝试），然后我们可以通过更新代码来修复它，就像本节开头添加的临时变量那样。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span> </span>&#123;<br>    <span class="hljs-type">String</span> temp = x[a];<br>    x[a] = x[b];<br>    x[b] = temp;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>重新运行测试，我们看到它现在通过了。</p>
+<h3 id="Revising-findSmallest"><a href="#Revising-findSmallest" class="headerlink" title="Revising findSmallest"></a>Revising findSmallest</h3><p>现在我们已经完成了方法中的多个部分，可以开始尝试将它们连接起来，创建一个 <code>Sort</code> 方法。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>       <span class="hljs-comment">// find the smallest item</span><br>       <span class="hljs-comment">// move it to the front</span><br>       <span class="hljs-comment">// selection sort the rest (using recursion?)</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>很明显如何使用我们的 <code>findSmallest</code> 和 <code>swap</code> 方法，但当我们这样做时，我们立即意识到存在一些不匹配： <code>findSmallest</code> 返回一个 <code>String</code> ，而 <code>swap</code> 期望两个索引。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>       <span class="hljs-comment">// find the smallest item</span><br>       <span class="hljs-type">String</span> smallest = <span class="hljs-built_in">findSmallest</span>(x);<br><br>       <span class="hljs-comment">// move it to the front</span><br>       <span class="hljs-built_in">swap</span>(x, <span class="hljs-number">0</span>, smallest);<br><br>       <span class="hljs-comment">// selection sort the rest (using recursion?)</span><br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<p>换句话说， <code>findSmallest</code> 应该返回的是最小 String 的索引，而不是 String 本身。犯这种愚蠢的错误是正常的，而且很容易犯，如果你发现自己做了类似的事情，不要担心。迭代设计是编写代码过程中的一个部分。</p>
+<p>幸运的是，这个新设计可以很容易地改变。我们只需要调整 <code>findSmallest</code> 以返回一个 <code>int</code> ，如下所示：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs abnf">public static int findSmallest(String[] x) &#123;<br>    int smallestIndex <span class="hljs-operator">=</span> <span class="hljs-number">0</span><span class="hljs-comment">;</span><br>    for (int i <span class="hljs-operator">=</span> <span class="hljs-number">0</span><span class="hljs-comment">; i &lt; x.length; i += 1) &#123;</span><br>        int cmp <span class="hljs-operator">=</span> x[i].compareTo(x[smallestIndex])<span class="hljs-comment">;</span><br>        if (cmp &lt; <span class="hljs-number">0</span>) &#123;<br>            smallestIndex <span class="hljs-operator">=</span> i<span class="hljs-comment">;</span><br>        &#125;<br>    &#125;<br>    return smallestIndex<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>由于这是一个非平凡的更改，我们也应该更新 <code>testFindSmallest</code> 并确保 <code>findSmallest</code> 仍然有效。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">testFindSmallest</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-type">String</span>[] input = &#123;<span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>&#125;;<br>    <span class="hljs-type">int</span> expected = <span class="hljs-number">2</span>;<br><br>    <span class="hljs-type">int</span> actual = Sort.<span class="hljs-built_in">findSmallest</span>(input);<br>    <span class="hljs-built_in">assertThat</span>(actual).<span class="hljs-built_in">isEqualTo</span>(expected); <br><br>    <span class="hljs-type">String</span>[] input2 = &#123;<span class="hljs-string">&quot;there&quot;</span>, <span class="hljs-string">&quot;are&quot;</span>, <span class="hljs-string">&quot;many&quot;</span>, <span class="hljs-string">&quot;pigs&quot;</span>&#125;;<br>    <span class="hljs-type">int</span> expected2 = <span class="hljs-number">1</span>;<br><br>    <span class="hljs-type">int</span> actual2 = Sort.<span class="hljs-built_in">findSmallest</span>(input);<br>    <span class="hljs-built_in">assertThat</span>(actual2).<span class="hljs-built_in">isEqualTo</span>(expected2); <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在修改 <code>TestSort</code> 以运行此测试，并运行 <code>TestSort.main</code> 后，我们看到我们的代码通过了测试。现在，通过修改 sort，我们可以完成排序算法的前两个步骤。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>   <span class="hljs-comment">// find the smallest item</span><br>   <span class="hljs-comment">// move it to the front</span><br>   <span class="hljs-comment">// selection sort the rest (using recursion?)</span><br>   <span class="hljs-type">int</span> smallestIndex = <span class="hljs-built_in">findSmallest</span>(x);<br>   <span class="hljs-built_in">swap</span>(x, <span class="hljs-number">0</span>, smallestIndex);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>剩下的就是以某种方式选择排序剩余的项，也许可以使用递归。（自然的想法）我们将在下一节中解决这个问题。</p>
+<p>回顾我们所取得的成就，值得注意的是我们<strong>首先</strong>创建了测试，并利用这些测试来建立信心，确保实际方法在尝试使用它们之前是有效的。这是一个极其重要的理念，如果你决定采用它，它将对你大有裨益。</p>
+<h3 id="Recursive-Helper-Methods"><a href="#Recursive-Helper-Methods" class="headerlink" title="Recursive Helper Methods"></a>Recursive Helper Methods</h3><p>要开始这一节，考虑一下你可能如何做出完成 <code>sort</code> 所需的递归调用：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively. */</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x)</span> </span>&#123; <br>   <span class="hljs-type">int</span> smallestIndex = <span class="hljs-built_in">findSmallest</span>(x);<br>   <span class="hljs-built_in">swap</span>(x, <span class="hljs-number">0</span>, smallestIndex);<br>   <span class="hljs-comment">// recursive call??</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>对于那些习惯于 Python 等语言的人来说，可能会想尝试使用类似切片表示法，例如</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-comment">/** Sorts strings destructively. */</span><br>public static void <span class="hljs-built_in">sort</span>(String<span class="hljs-selector-attr">[]</span> <span class="hljs-attribute">x</span>) &#123; <br>   int smallestIndex = <span class="hljs-built_in">findSmallest</span>(<span class="hljs-attribute">x</span>);<br>   <span class="hljs-built_in">swap</span>(<span class="hljs-attribute">x</span>, <span class="hljs-number">0</span>, smallestIndex);<br>   <span class="hljs-built_in">sort</span>(<span class="hljs-attribute">x</span>[<span class="hljs-number">1</span>:])<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然而，在 Java 中不存在指向子数组的引用，也就是说我们不能直接传递数组中下一个元素的地址。</p>
+<p><strong>需要仅考虑较大数组的一个子集的问题非常常见</strong>。一个典型的解决方案是创建一个私有的辅助方法，该方法具有一个额外的参数（或多个参数），用于界定要考虑的数组部分。例如，我们可以编写一个名为 <code>sort</code> 的私有辅助方法，该方法仅考虑从 <code>start</code> 开始的项目。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively starting from item start. */</span><br><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> start)</span> </span>&#123; <br>    <span class="hljs-comment">// TODO</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>与我们的公共排序方法不同，现在有了额外的参数 <code>start</code> ，使用递归相对直接，如下所示。我们将在下一节中测试此方法。</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-comment">/** Sorts strings destructively starting from item start. */</span><br>private static void <span class="hljs-built_in">sort</span>(String<span class="hljs-selector-attr">[]</span> <span class="hljs-attribute">x</span>, int start) &#123; <br>   int smallestIndex = <span class="hljs-built_in">findSmallest</span>(<span class="hljs-attribute">x</span>);<br>   <span class="hljs-built_in">swap</span>(<span class="hljs-attribute">x</span>, start, smallestIndex);<br>   <span class="hljs-built_in">sort</span>(<span class="hljs-attribute">x</span>, start + <span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>现在我们有了辅助方法，需要设置正确的原始调用。如果我们将起始位置设为 0，实际上会对整个数组进行排序。</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-comment">/** Sorts strings destructively. */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-built_in">sort</span>(<span class="hljs-built_in">String</span>[] x) &#123; <br>   <span class="hljs-built_in">sort</span>(x, <span class="hljs-number">0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这种方法在尝试对非天生递归的数据结构（如数组）使用递归时相当常见。</p>
+<p>也就是创建辅助方法，创建参数来进行递归。</p>
+<h3 id="Debugging-and-Completing-Sort"><a href="#Debugging-and-Completing-Sort" class="headerlink" title="Debugging and Completing Sort"></a>Debugging and Completing Sort</h3><p>运行我们的 <code>testSort</code> 方法，我们立即遇到了一个问题：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">Exception <span class="hljs-keyword">in</span> thread <span class="hljs-string">&quot;main&quot;</span> java<span class="hljs-selector-class">.lang</span><span class="hljs-selector-class">.ArrayIndexOutOfBoundsException</span>: <span class="hljs-number">4</span><br>    at Sort<span class="hljs-selector-class">.swap</span>(Sort<span class="hljs-selector-class">.java</span>:<span class="hljs-number">16</span>)<br></code></pre></td></tr></table></figure>
+
+<p>使用 Java 调试器，我们看到问题在于 <code>start</code> 某种情况下达到了值 4。仔细逐步调试代码（见上方视频），我们发现问题是我们忘记在我们的递归 <code>sort</code> 方法中包含基本情况（递归包含基本情况还有递归情况）。修复这个问题很简单：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively starting from item start. */</span><br><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> start)</span> </span>&#123; <br>   <span class="hljs-keyword">if</span> (start == x.length) &#123;<br>       <span class="hljs-keyword">return</span>;<br>   &#125;<br>   <span class="hljs-type">int</span> smallestIndex = <span class="hljs-built_in">findSmallest</span>(x);<br>   <span class="hljs-built_in">swap</span>(x, start, smallestIndex);<br>   <span class="hljs-built_in">sort</span>(x, start + <span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>再次运行这个测试，我们又得到了另一个错误：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">Exception <span class="hljs-keyword">in</span> thread <span class="hljs-string">&quot;main&quot;</span> arrays <span class="hljs-keyword">first</span> differed <span class="hljs-keyword">at</span> <span class="hljs-keyword">element</span> [<span class="hljs-number">0</span>]; <br>   expected&lt;[<span class="hljs-keyword">an</span>]&gt; bit was:&lt;[have]&gt;<br></code></pre></td></tr></table></figure>
+
+<p>再次使用 IntelliJ 调试器（见视频），我们可以识别出结果不符合我们预期的代码行。值得注意的是，我调试代码的抽象层次比你可能要高，这是通过使用 <code>Step Over</code> 多于 <code>Step Into</code> 实现的。正如实验 3 中讨论的，在较高的抽象层次上调试可以节省你大量的时间和精力，因为它允许你将整个函数调用的结果与你的预期进行比较。</p>
+<p>具体来说，我们发现当对最后 3（总共 4 个）项进行排序时， <code>findSmallest</code> 方法在输入 <code>&#123;&quot;an&quot;, &quot;have&quot;, &quot;i&quot;, &quot;egg&quot;&#125;</code> 上调用时，将第 0 项（ <code>&quot;an&quot;</code> ）而不是第 3 项（ <code>&quot;egg&quot;</code> ）作为结果返回。仔细查看 <code>findSmallest</code> 的定义，这种行为并不令人意外，因为 <code>findSmallest</code> 查看的是整个数组，而不仅仅是从位置 <code>start</code> 开始的项。这种设计缺陷非常常见，编写测试和使用调试器是解决这类问题的好方法。</p>
+<p>为了修复我们的代码，我们修订了 <code>findSmallest</code> ，使其接受第二个参数 <code>start</code> ，即 <code>findSmallest(String[] x, int start)</code> 。这样，我们确保只从最后尚未排序的元素中找到最小值。修订后的代码如下：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">int</span> <span class="hljs-title">findSmallest</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> start)</span> </span>&#123;<br>    <span class="hljs-type">int</span> smallestIndex = start;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = start; i &lt; x.length; i += <span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-type">int</span> cmp = x[i].<span class="hljs-built_in">compareTo</span>(x[smallestIndex]);<br>        <span class="hljs-keyword">if</span> (cmp &lt; <span class="hljs-number">0</span>) &#123;<br>            smallestIndex = i;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> smallestIndex;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>鉴于我们对其中一个构建模块进行了重大更改，即 <code>findSmallest</code> ，我们应该确保我们的更改是正确的。</p>
+<p>我们首先修改 <code>testFindSmallest</code> ，使其使用我们的新参数，如下所示：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">testFindSmallest</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-type">String</span>[] input = &#123;<span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;have&quot;</span>, <span class="hljs-string">&quot;an&quot;</span>, <span class="hljs-string">&quot;egg&quot;</span>&#125;;<br>    <span class="hljs-type">int</span> expected = <span class="hljs-number">2</span>;<br><br>    <span class="hljs-type">int</span> actual = Sort.<span class="hljs-built_in">findSmallest</span>(input, <span class="hljs-number">0</span>);<br>    <span class="hljs-built_in">assertThat</span>(actual).<span class="hljs-built_in">isEqualTo</span>(expected);        <br><br>    <span class="hljs-type">String</span>[] input2 = &#123;<span class="hljs-string">&quot;there&quot;</span>, <span class="hljs-string">&quot;are&quot;</span>, <span class="hljs-string">&quot;many&quot;</span>, <span class="hljs-string">&quot;pigs&quot;</span>&#125;;<br>    <span class="hljs-type">int</span> expected2 = <span class="hljs-number">2</span>;<br><br>    <span class="hljs-type">int</span> actual2 = Sort.<span class="hljs-built_in">findSmallest</span>(input2, <span class="hljs-number">2</span>);<br>    <span class="hljs-built_in">assertThat</span>(actual2).<span class="hljs-built_in">isEqualTo</span>(expected2); <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们随后修改 <code>TestSort.main</code> ，使其运行 <code>testFindSmallest</code> 。这个测试通过了，强烈表明我们对 <code>findSmallest</code> 的修改是正确的。</p>
+<p>我们接下来修改 <code>Sort.sort</code> ，使其在 <code>findSmallest</code> 中使用新的 <code>start</code> 参数：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">/** Sorts strings destructively starting from item start. */</span><br><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">sort</span><span class="hljs-params">(<span class="hljs-type">String</span>[] x, <span class="hljs-type">int</span> start)</span> </span>&#123; <br>   <span class="hljs-keyword">if</span> (start == x.length) &#123;<br>       <span class="hljs-keyword">return</span>;<br>   &#125;<br>   <span class="hljs-type">int</span> smallestIndex = <span class="hljs-built_in">findSmallest</span>(x, start);<br>   <span class="hljs-built_in">swap</span>(x, start, smallestIndex);<br>   <span class="hljs-built_in">sort</span>(x, start + <span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们随后修改 <code>TestSort</code> ，使其运行 <code>TestSort.sort</code> ，哇，方法就正常工作了。我们完成了！现在你已经看到了本讲座开头的”新方法”，我们将在本章剩余部分进行反思。</p>
+<h1 id="Reflections-on-the-Development-Process"><a href="#Reflections-on-the-Development-Process" class="headerlink" title="Reflections on the Development Process"></a>Reflections on the Development Process</h1><p>当你编写和调试程序时，你经常会发现自己在不同上下文之间切换。试图同时在大脑中记住太多内容，在最坏的情况下会导致灾难，在最好的情况下也会导致进展缓慢。</p>
+<p>拥有一套自动化测试有助于减轻这种认知负担。例如，我们正在编写 <code>sort</code> 时，突然发现 <code>findSmallest</code> 中存在一个 bug。我们能够切换到考虑 <code>findSmallest</code> ，并使用我们的 <code>testFindSmallest</code> 方法确认它是正确的，然后切换回 <code>sort</code> 。这与更简单的方法形成鲜明对比，那种方法只是反复调用 <code>sort</code> ，试图判断整体算法的行为是否表明 <code>findSmallest</code> 方法是正确的。</p>
+<p>打个比方，你可以通过坐飞机、起飞、跳伞并拉下拉索，看看降落伞是否打开来测试降落伞的拉索是否有效。然而，你也可以直接在地面拉一下，看看会发生什么。同样，使用 <code>sort</code> 来尝试 <code>findSmallest</code> 也是不必要的。</p>
+<p>如本章前面所述，测试还允许你对你程序的基本部分建立信心，这样如果出了问题，你就能更好地知道从哪里开始查找</p>
+<p>最后，测试使重构代码变得更容易。假设你决定重写 <code>findSmallest</code> ，使其更快或更易读。我们可以通过做出所需更改并查看测试是否仍然有效来安全地这样做。</p>
+<h1 id="More-Testing-Features"><a href="#More-Testing-Features" class="headerlink" title="More Testing Features"></a>More Testing Features</h1><p>如果我们在一个方法前添加 <code>@Test</code> 并且使函数非静态，就会出现绿色箭头。</p>
+<ul>
+<li>testSort 旁边的单个绿色箭头表示“运行这个函数”。</li>
+<li>双绿色箭头表示运行这个类中的所有测试。</li>
+<li><img src="/images/CS61B-ch7-note/Pasted%20image%2020251224113015.png" srcset="/img/loading.gif" lazyload></li>
+<li>函数必须是非静态的原因尚不清楚，尽管这可能与后台发生的事情有关。</li>
+<li>做这件事的一个额外好处是 IntelliJ 现在会将 bug 修复和设计游戏化。你会有具体的子目标，并且你的进度会在左下角汇总。当你每个测试都获得绿色对勾时，你就赢了。</li>
+</ul>
+<p><img src="https://cs61b-2.gitbook.io/cs61b-textbook/~gitbook/image?url=https://lh7-us.googleusercontent.com/BRu_eKYg7yRI7jAqgGXnHzN4CvNiKWtVMq-SbDC9vzjS2Vd8rNbGB-GBUWcGxyinejZWzO-dmWbJ2WGa3jRDpJ56yPXHExjkUJYfCL46V7stzGSFT2dOO0FsrIQqgOLdE6iFfrVvCfr0n6IN1EjQcRXYnw=s2048&width=300&dpr=4&quality=100&sign=7eb65227&sv=2" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Testing-Philosophy-测试哲学"><a href="#Testing-Philosophy-测试哲学" class="headerlink" title="Testing Philosophy  测试哲学"></a>Testing Philosophy  测试哲学</h1><h2 id="Correctness-Tool-1-Autograder"><a href="#Correctness-Tool-1-Autograder" class="headerlink" title="**Correctness Tool #1: Autograder"></a>**Correctness Tool #1: Autograder</h2><p>让我们回到起点。自动评分器很可能是你接触到的第一个正确性工具。我们的自动评分器实际上是基于 JUnit 加上一些额外的自定义库构建的。</p>
+<p>自动评分系统有一些显著的好处。最重要的是，它能帮你验证正确性，让你不必费心编写所有自己的测试，从而节省时间和精力。它还通过提供有吸引力的分数来激励学生追求正确性，使评估过程游戏化。但这也可能适得其反，如果学生花费过多时间追逐那些实际上不会影响他们的成绩或学习进度的分数。</p>
+<p>然而，自动评分系统在现实中并不存在，依赖自动评分系统可能会养成不良习惯。你的工作流程会被频繁上传代码并等待自动评分系统运行所阻碍。自动评分驱动开发是这种情况的极端版本，学生编写所有代码，修复编译错误，然后提交给自动评分系统。收到错误后，学生可能会尝试进行一些修改，添加打印语句，再次提交。如此反复。最终，如果你依赖自动评分系统，你将无法控制自己的工作流程或代码。</p>
+<h2 id="Correctness-Tool-2-JUnit-Tests"><a href="#Correctness-Tool-2-JUnit-Tests" class="headerlink" title="**Correctness Tool #2: JUnit Tests"></a>**Correctness Tool #2: JUnit Tests</h2><p>正如我们所见，JUnit 测试为你打开了一个新世界。你不再依赖别人编写的自动评分器，而是为你的程序的每一部分编写测试。我们将每一部分称为一个单元。这让你对你的代码的每个单元都有信心——你可以依赖它们。这也帮助你减少调试时间，因为你可以一次专注于一个代码单元（通常是一个单独的方法）。单元测试还迫使你明确每个代码单元应该完成什么任务。</p>
+<p>然而，单元测试也有一些缺点。首先，编写全面的测试需要花费时间。很容易写出不完整的单元测试，从而给你的代码带来虚假的信心。此外，为依赖于其他单元的单元编写测试也很困难（考虑一下你的 <code>addFirst</code> 中的 <code>LinkedListDeque</code> 方法）。</p>
+<h2 id="Test-Driven-Development-TDD"><a href="#Test-Driven-Development-TDD" class="headerlink" title="**Test-Driven Development (TDD)"></a>**Test-Driven Development (TDD)</h2><p>TDD is a development process in which we write tests for code before writing the code itself. The steps are as follows:<br>测试驱动开发（TDD）是一种在编写代码之前先为代码编写测试的开发过程。步骤如下：</p>
+<ol>
+<li><p>Identify a new feature.  识别一个新功能。</p>
+</li>
+<li><p>Write a unit test for that feature.<br> 为该功能编写一个单元测试。</p>
+</li>
+<li><p>Run the test. It should fail.<br> 运行测试。它应该失败。</p>
+</li>
+<li><p>Write code that passes the test. Yay!<br> 编写通过该测试的代码。太棒了！</p>
+</li>
+<li><p>Optional: refactor code to make it faster, cleaner, etc. Except now we have a reference to tests that should pass.<br> 可选：重构代码使其更快、更简洁等。但现在我们有参考需要通过的测试。</p>
+</li>
+</ol>
+<p>Test-Driven Development is not required in this class and may not be your style but unit testing in general is most definitely a good idea.<br>测试驱动开发在本课程中不是必需的，也可能不是你的风格，但单元测试总的来说绝对是个好主意。</p>
+<h2 id="Correctness-Tool-3-Integration-Testing"><a href="#Correctness-Tool-3-Integration-Testing" class="headerlink" title="**Correctness Tool #3: Integration Testing"></a>**Correctness Tool #3: Integration Testing</h2><p>单元测试很棒，但我们还应该确保这些单元能正确地协同工作（不像这个梗图）。集成测试验证组件能否正确地交互。实际上 JUnit 可以用在这方面。你可以想象单元测试是最细致的，而集成测试是比这更高层次的抽象。<br>集成测试的挑战在于手动执行起来很繁琐，而自动化又很困难。从高层次抽象来看，很容易错过微妙或罕见错误。</p>
+<p>总结来说，你确实应该写测试，但只有在它们可能有用的时候才写！借鉴测试驱动开发（TDD）的思路，在编写代码之前先写测试在某些情况下也非常有帮助。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Testing and Selection Sort</div>
+      <div>https://augusteing.github.io/2025/12/24/CS61B-ch7-note/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月24日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/27/CS61B-ch8-note/" title="ArrayList">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">ArrayList</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/23/CS61B-ch6-note%EF%BC%9Aarrays/" title="Array Basics">
+                        <span class="hidden-mobile">Array Basics</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

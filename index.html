@@ -230,6 +230,492 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
+        <a href="/2026/10/09/CS61B%EF%BC%9A%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" target="_self">
+          问题：归并排序、LSD 处理字符串
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/10/09/CS61B%EF%BC%9A%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" target="_self">
+        <div>
+          现在抛出一个问题：归并排序要处理长度为 $W$ 的字符串，问它的运行时时间分析。 我们可以写一个字符串的比较器，比较两个字符串之间的大小，在最坏情况下他会有：$O(W)$ 的运行时间。（可能我们需要比较到最后一位） 所以对于归并排序来说，总的运行时为：$O(W* NlogN)$ 。 但如果字符串的首字母都不同，也就是说比较两个字符串的时间在 $\theta(1)$ ，则仍然具有 $O(nlogN)
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-10-09 18:13" pubdate>
+              2026-10-09
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/10/08/CS61B-ch36-%EF%BC%9Aradix-sort/" target="_self">
+          稳定性
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/10/08/CS61B-ch36-%EF%BC%9Aradix-sort/" target="_self">
+        <div>
+          Java 内部使用两种排序算法：  基础类型：QuickSort 其余类型：MergeSort  这样使用算法的原因是：QuickSort 在霍尔分区下速度很快，在三分区下速度很慢，三分区下虽然具有稳定性。 归并排序具有稳定性，这样就使得不同类的排序不会破坏自身的结构（毕竟有的狗终究和其他的狗不一样） 计数排序想象一下，如果我们不再驾驶缓慢的本田思域，而是开始驾驶一辆快速的法拉利。不幸的是，我们
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-10-08 00:40" pubdate>
+              2026-10-08
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/10/08/CS61B-ch34%EF%BC%9A%E6%8E%92%E5%BA%8F%E4%B8%8A%E9%99%90%E6%8E%A8%E5%AF%BC/" target="_self">
+          排序的上限
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/10/08/CS61B-ch34%EF%BC%9A%E6%8E%92%E5%BA%8F%E4%B8%8A%E9%99%90%E6%8E%A8%E5%AF%BC/" target="_self">
+        <div>
+          目前我们已经看到许多的算法，似乎他们的时间上线都是 $\theta(nlogn)$  最直观的用途当然是将事物按特定顺序排列。  但它也可以用来解决其他任务，有时是以非常巧妙（non-trivial）的方式：  排序将“查找重复项”问题的复杂度从朴素的 $O(N^2)$ 优化到了 $O(N \log N)$。  排序将“3SUM”问题的复杂度从朴素的 $O(N^3)$ 优化到了 $O(N^2)$。
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-10-08 00:09" pubdate>
+              2026-10-08
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/09/20/CS61B-ch14-note%EF%BC%9Aunion/" target="_self">
+          Introduction
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B-ch14-note%EF%BC%9Aunion/" target="_self">
+        <div>
+          我们这样的人（比如你和我）居住在各自的国家里，并生活在这些国家中。 我们可以把每一个国家看作一个集合（set），而生活在这个国家里的所有人就是这个集合中的元素（elements）。 同一个人不可能在同一时间生活在两个不同的国家。 我们刚刚建立的这个模型，就是一个不相交集合（disjoint set）。 如果两个集合没有共同的元素，那么它们被称为不相交集合。不相交集合（或并查集）数据结构跟踪固定数量
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-09-20 19:08" pubdate>
+              2026-09-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/09/20/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" target="_self">
+          21.1 Priority Queues
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" target="_self">
+        <div>
+          #cs61b  二叉搜索树让我们能够高效地搜索树，时间复杂度仅为$$log(N)$$这是因为我们可以在搜索的每一步中排除树中一半的元素。但如果我们更关心快速找到最小或最大的元素，而不是快速搜索呢？ 现在我们来介绍优先队列这一抽象数据类型。为了理解这个 ADT，想象一个装有物品的袋子。你可以往这个袋子里添加物品，也可以从中移除物品，等等。但有一个限制：你只能与这个袋子中最小的物品进行交互。 1234
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-09-20 19:06" pubdate>
+              2026-09-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/09/20/CS61B-ch25-note%EF%BC%9A%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/" target="_self">
+          定义
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B-ch25-note%EF%BC%9A%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/" target="_self">
+        <div>
+          最小生成树是从图中生成出的一个概念 其定义为：  链接所有的节点 不含有环 其边的权重总和最小  cut 性质 我们将一个图的节点分成两个不为空的集合，上图中我用紫色和白色区分这两个集合。 对于链接两个集合的节点的边，其中最小的边就存在于这张图的MST中。 证明我们已经得到了一个最小生成树，如上图中的加粗黑线所示。 我们使用反证法证明，假设存在一条边是最小的链接两个集合节点的边，但却不存在于MST
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-09-20 18:14" pubdate>
+              2026-09-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/09/20/CS61B%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%9B%9B/" target="_self">
+          API
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%9B%9B/" target="_self">
+        <div>
+          在理想的世界中，我们认为一个大型项目应该完全被拆分为不同的模块。 但是这很难实现，因为为了实现不同的功能，总会出现模块之间耦合的情况。  一个 Java 类的API可以分为：  形式化 API (Formal Part)：指方法签名的列表（The list of method signatures）。这包括方法名、参数类型列表和返回值类型。 非形式化 API (Informal Part)：指那些
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-09-20 17:37" pubdate>
+              2026-09-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/09/19/CS61B-ch33%EF%BC%9AQuickSort/" target="_self">
+          快速排序变体：动机
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/19/CS61B-ch33%EF%BC%9AQuickSort/" target="_self">
+        <div>
+          在深入探讨如何改进快速排序算法的精彩思路之前，先回顾一下快速排序（或分区排序）的工作原理。 回想一下，我们版本的快速排序具有以下特性：  最左侧的元素始终作为基准（pivot） 我们的分区算法始终保留小于等于和大于等于元素的相对顺序。  并且请记住，即使我们有一个始终“良好”的枢轴，这会导致最佳情况运行时间为 $θ(NlogN$) ，但在实践中仍然可能发生罕见的 worst case 运行时间 $
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-09-19 16:50" pubdate>
+              2026-09-19
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/08/27/CS61B-ch32%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%EF%BC%882%EF%BC%89/" target="_self">
+          CS61B ch32：软件工程（2）
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/27/CS61B-ch32%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%EF%BC%882%EF%BC%89/" target="_self">
+        <div>
+          这不是课程的笔记只是我一点点思考而已。 在课程中教授们提到：复杂度是衡量阅读和理解、改造代码难易程度的度量。随着系统越来越复杂，功能越来越多，代码量变大是一种事物的必然性，是系统如何变化的知识。 很多时候我们都在应对生活中的复杂，乱麻一般的东西堆在一起，大多时候我都会吐槽：一把火烧了得了。 但我很喜欢的一个动作叫做梳理，很显然大家都会去梳头发，（我对脱发症人士抱以歉意）梳过打结的发丝还会自动发出嘶
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-08-27 18:49" pubdate>
+              2026-08-27
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
         <a href="/2026/08/20/pytorch%E7%AC%94%E8%AE%B0/" target="_self">
           PyTorch 基础张量操作与代数直觉
         </a>
@@ -257,110 +743,13 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2025/06/06/hello-world/" target="_self">
-          Hello World
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/06/06/hello-world/" target="_self">
-        <div>
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2025-06-06 18:17" pubdate>
-              2025-06-06
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2024/06/07/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0/" target="_self">
-          我的第一篇文章
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2024/06/07/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0/" target="_self">
-        <div>
-          欢迎来到我的博客！这是我的第一篇文章，用来测试我的 Hexo 博客是否搭建成功。 我计划在这个网站上记录我的学习笔记、项目经验和个人思考。 为什么搭建这个博客？ 知识整理：通过写作来更好地整理和巩固所学的知识。 分享交流：希望我的学习过程和经验能对他人有所帮助。 技能展示：作为个人作品集的一部分，展示我的技术能力和持续学习的态度。  未来计划我将不定期更新关于编程、数据科学、阅读心得等内容。如果你
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2024-06-07 10:30" pubdate>
-              2024-06-07
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/%E4%B8%AA%E4%BA%BA%E6%88%90%E9%95%BF/" class="category-chain-item">个人成长</a>
-  
-  
-    <span>></span>
-    
-  <a href="/categories/%E4%B8%AA%E4%BA%BA%E6%88%90%E9%95%BF/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" class="category-chain-item">技术分享</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E5%AD%A6%E4%B9%A0/">#学习</a>
-            
-              <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">#博客搭建</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
 
 
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/#board">5</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+    </span>
+  </nav>
 
 
 

@@ -1,0 +1,811 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="#cs61b  二叉搜索树让我们能够高效地搜索树，时间复杂度仅为$$log(N)$$这是因为我们可以在搜索的每一步中排除树中一半的元素。但如果我们更关心快速找到最小或最大的元素，而不是快速搜索呢？ 现在我们来介绍优先队列这一抽象数据类型。为了理解这个 ADT，想象一个装有物品的袋子。你可以往这个袋子里添加物品，也可以从中移除物品，等等。但有一个限制：你只能与这个袋子中最小的物品进行交互。 1234">
+<meta property="og:type" content="article">
+<meta property="og:title" content="21.1 Priority Queues">
+<meta property="og:url" content="https://augusteing.github.io/2026/09/20/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="#cs61b  二叉搜索树让我们能够高效地搜索树，时间复杂度仅为$$log(N)$$这是因为我们可以在搜索的每一步中排除树中一半的元素。但如果我们更关心快速找到最小或最大的元素，而不是快速搜索呢？ 现在我们来介绍优先队列这一抽象数据类型。为了理解这个 ADT，想象一个装有物品的袋子。你可以往这个袋子里添加物品，也可以从中移除物品，等等。但有一个限制：你只能与这个袋子中最小的物品进行交互。 1234">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://joshhug.gitbooks.io/hug61b/content/assets/heap-13.2.1.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165639.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165651.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165708.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165759.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165831.png">
+<meta property="article:published_time" content="2026-09-20T11:06:24.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.613Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://joshhug.gitbooks.io/hug61b/content/assets/heap-13.2.1.png">
+  
+  
+  
+  <title>21.1 Priority Queues - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="21.1 Priority Queues"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-09-20 19:06" pubdate>
+          2026年9月20日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          18 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">21.1 Priority Queues</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>#cs61b </p>
+<p>二叉搜索树让我们能够高效地搜索树，时间复杂度仅为$$log(N)$$这是因为我们可以在搜索的每一步中排除树中一半的元素。但如果我们更关心快速找到最小或最大的元素，而不是快速搜索呢？</p>
+<p>现在我们来介绍优先队列这一抽象数据类型。为了理解这个 ADT，想象一个装有物品的袋子。你可以往这个袋子里添加物品，也可以从中移除物品，等等。但有一个限制：你只能与这个袋子中最小的物品进行交互。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/** (Min) Priority Queue: Allowing tracking and removal of </span><br><span class="hljs-comment">  * the smallest item in a priority queue. */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">MinPQ</span>&lt;Item&gt; &#123;<br>    <span class="hljs-comment">/** Adds the item to the priority queue. */</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">add</span><span class="hljs-params">(Item x)</span>;<br>    <span class="hljs-comment">/** Returns the smallest item in the priority queue. */</span><br>    <span class="hljs-keyword">public</span> Item <span class="hljs-title function_">getSmallest</span><span class="hljs-params">()</span>;<br>    <span class="hljs-comment">/** Removes the smallest item from the priority queue. */</span><br>    <span class="hljs-keyword">public</span> Item <span class="hljs-title function_">removeSmallest</span><span class="hljs-params">()</span>;<br>    <span class="hljs-comment">/** Returns the size of the priority queue. */</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">size</span><span class="hljs-params">()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="Using-Priority"><a href="#Using-Priority" class="headerlink" title="Using Priority "></a>Using Priority <a href="#using-priority" id="using-priority"></a></h3><p>这种数据结构究竟会在哪些场景中派上用场？</p>
+<ul>
+<li>设想这样一个场景：我们正在监控公民之间的短信往来，需要追踪那些不和谐的对话。</li>
+<li>每天，你都需要利用 <code>HarmoniousnessComparator</code> ，整理出一份包含 $$M$$条最不和谐消息的报告</li>
+</ul>
+<p>我们可以采取这样的方法：将全天收到的所有消息收集到一个列表中，对该列表进行排序，然后返回前$M$ 条消息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> List&lt;String&gt; <span class="hljs-title function_">unharmoniousTexts</span><span class="hljs-params">(Sniffer sniffer, <span class="hljs-type">int</span> M)</span> &#123;<br>    ArrayList&lt;String&gt;allMessages = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;String&gt;();<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">Timer</span> <span class="hljs-variable">timer</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Timer</span>(); timer.hours() &lt; <span class="hljs-number">24</span>; ) &#123;<br>        allMessages.add(sniffer.getNextMessage());<br>    &#125;<br><br>    Comparator&lt;String&gt; cmptr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HarmoniousnessComparator</span>();<br>    Collections.sort(allMessages, cmptr, Collections.reverseOrder());<br><br>    <span class="hljs-keyword">return</span> allMessages.sublist(<span class="hljs-number">0</span>, M);<br></code></pre></td></tr></table></figure>
+
+<p>潜在缺点？这种方法实际只需使用 $$Θ(N)$$空间却会占用$$Θ(M)$$空间</p>
+<p><strong>Exercise 13.1.1.</strong> Complete the method listed above, <code>unharmoniousTexts</code> with the same functionality as described using only Θ(M) space.</p>
+<h3 id="Priority-Queue-Implementation"><a href="#Priority-Queue-Implementation" class="headerlink" title="Priority Queue Implementation "></a>Priority Queue Implementation <a href="#priority-queue-implementation" id="priority-queue-implementation"></a></h3><p>我们使用优先队列 ADT 解决了同样的问题，使内存利用更高效。可以观察到代码略微复杂，但并非总是如此。</p>
+<p>请记住，ADT 类似于接口，其具体实现仍有待定义。让我们考虑使用已知数据结构实现来构建优先队列，并分析所需操作在最坏情况下的运行时间：</p>
+<ul>
+<li>Ordered Array<ul>
+<li><code>add</code>: $$Θ(N)$$</li>
+<li><code>getSmallest</code>: $$Θ(1)$$</li>
+<li><code>removeSmallest</code>: $$Θ(1)$$</li>
+</ul>
+</li>
+<li>Bushy BST<ul>
+<li><code>add</code>: $$Θ(logN)$$</li>
+<li><code>getSmallest</code>: $$Θ(logN)$$</li>
+<li><code>removeSmallest</code>: $$Θ(logN)$$</li>
+</ul>
+</li>
+<li>HashTable<ul>
+<li><code>add</code>: $$Θ(1)$$</li>
+<li><code>getSmallest</code>: $$Θ(N)$$</li>
+<li><code>removeSmallest</code>: $$Θ(N)$$</li>
+</ul>
+</li>
+</ul>
+<p>习题 13.1.2。解释上述每种运行时间。每种数据结构的缺点是什么？描述一种修改其中一种数据结构以提高性能的方法。</p>
+<p>我们能做得比这些建议的数据结构更好吗？</p>
+<p>Hashtable具有最明显的缺点，getSmallest竟然是线性时间，这实在是不可以接受</p>
+<h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary "></a>Summary <a href="#summary" id="summary"></a></h3><ul>
+<li>优先队列是一种抽象数据类型，它针对处理最小或最大元素进行了优化。</li>
+<li>使用这种专用数据结构可以带来空间&#x2F;内存方面的优势。</li>
+<li>我们目前所知的 ADT 实现，无法为优先队列操作提供高效的运行时间。<ul>
+<li>二叉搜索树是这些结构中最有效率的</li>
+</ul>
+</li>
+</ul>
+<h1 id="21-2-Heaps"><a href="#21-2-Heaps" class="headerlink" title="21.2 Heaps"></a>21.2 Heaps</h1><p>如何实现我们的优先队列呢？</p>
+<p>我们之前看到，对于优先队列操作，已知数据结构中运行时间最优的是二叉搜索树。通过修改其结构和约束条件，我们可以进一步改善这些操作的运行时间和效率。</p>
+<p>我们将二叉最小堆定义为完全二叉树，且满足最小堆性质：</p>
+<ul>
+<li>最小堆：每个节点都小于或等于其两个子节点</li>
+<li>完全性：缺失项仅出现在最底层（如果有的话），所有节点都尽可能靠左排列。</li>
+</ul>
+<p><img src="https://joshhug.gitbooks.io/hug61b/content/assets/heap-13.2.1.png" srcset="/img/loading.gif" lazyload></p>
+<p>如上图所示，绿色的堆是有效的，而红色的则不是。最后两个无效是因为它们至少违反了上述定义的性质之一。</p>
+<p>现在让我们思考这种结构如何实现上一章描述的抽象数据类型。我们将通过分析所需操作来探讨这个问题。</p>
+<p><strong>Exercise 13.2.1.</strong> 练习 13.2.1。基于这种堆结构，确定优先队列接口的每个方法将如何实现。不要编写实际代码，只需给出伪代码！</p>
+<h3 id="Heap-Operations"><a href="#Heap-Operations" class="headerlink" title="Heap Operations "></a>Heap Operations <a href="#heap-operations" id="heap-operations"></a></h3><p>对于优先队列 ADT，我们关注三个核心方法： <code>add</code> 、 <code>getSmallest</code> 和 <code>removeSmallest</code> 。首先从概念层面说明，如何基于给定的堆结构实现这些方法。</p>
+<ul>
+<li><code>add</code> ：暂时将元素添加到堆的末尾，然后通过上浮操作将其调整到正确位置。<ul>
+<li>上浮操作会在子节点小于父节点时交换两者位置</li>
+</ul>
+</li>
+<li><code>getSmallest</code> ：返回堆的根节点（根据最小堆性质，该节点必定是最小值）</li>
+<li><code>removeSmallest</code> ：将堆中的最后一个元素交换到根节点，然后向下沉降至合适位置。<ul>
+<li>下沉操作会在父节点大于子节点时进行交换。为保持最小堆性质，需与最小的子节点交换。</li>
+</ul>
+</li>
+</ul>
+<p>很好！我们已经确定了如何高效实现 PriorityQueue 接口所规定的操作。但具体该如何编写代码呢？</p>
+<h3 id="Tree-Representation"><a href="#Tree-Representation" class="headerlink" title="Tree Representation "></a>Tree Representation <a href="#tree-representation" id="tree-representation"></a></h3><p>我们可以用多种方式来表示树。</p>
+<h4 id="Approach-1a-1b-and-1c"><a href="#Approach-1a-1b-and-1c" class="headerlink" title="Approach 1a, 1b, and 1c "></a>Approach 1a, 1b, and 1c <a href="#approach-1a-1b-and-1c" id="approach-1a-1b-and-1c"></a></h4><p>让我们考虑最直观且之前使用过的树表示法。我们将创建节点与其子节点之间的映射关系。目前有几种实现方式，我们将逐一探讨。</p>
+<ul>
+<li>在 Tree1A 方案中，我们考虑创建指向子节点的指针，并将值存储在节点对象内部。这些是硬编码的链接，为我们提供了固定宽度的节点。我们可以观察以下代码：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Tree1A</span>&lt;Key&gt; &#123;<br>  Key k;<br>  Tree1A left;<br>  Tree1A middle;<br>  Tree1A right;<br>  ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这种结构的可视化如下所示。</p>
+<p><img src="/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165639.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>或者，在 Tree1B 中，我们探索了使用数组来表示子节点与节点之间的映射关系。这种方式能让我们获得可变宽度的节点，但遍历操作会变得繁琐，性能也会更差。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Tree1B</span>&lt;Key&gt; &#123;<br>  Key k;<br>  Tree1B[] children;<br>  ...<br><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165651.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>最后，我们可以采用 Tree1C 的方法。这与我们通常见到的方法略有不同。我们不再仅表示节点的子节点，而是让节点也可以维护对其兄弟节点的引用。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Tree1C</span>&lt;Key&gt; &#123;<br>  Key k;<br>  Tree1C favoredChild;<br>  Tree1C sibling;<br>  ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165708.png" srcset="/img/loading.gif" lazyload></p>
+<p>在所有这些方法中，我们都显式存储了指向下层节点的引用。这些显式引用以指针的形式指向作为子节点的实际树对象。现在让我们思考一些更独特的方法，这些方法不显式存储对子节点的引用。</p>
+<h4 id="Approach-2"><a href="#Approach-2" class="headerlink" title="Approach 2 "></a>Approach 2 <a href="#approach-2" id="approach-2"></a></h4><p>回顾一下并查集抽象数据类型。我们表示加权快速合并结构的方式是通过数组。对于树的表示，我们可以同时存储键数组和父节点数组。键数组表示哪个索引映射到哪个键，而父节点数组则表示哪个键是另一个键的子节点。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Tree2</span>&lt;Key&gt; &#123;<br>  Key[] keys;<br>  <span class="hljs-type">int</span>[] parents;<br>  ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>花些时间确认左侧的树结构与右侧数组表示之间的对应关系。</p>
+<p>现在，我们要得出一个非常重要的观察结论！根据树的结构，以及数组表示与树形图之间的关系，我们可以发现：</p>
+<ol>
+<li>这棵树是完全的。这是我们之前定义过的一个性质。</li>
+<li>parents 数组呈现出一种冗余模式，元素只是简单地重复出现。</li>
+<li>按层序遍历这棵树，我们会发现其顺序与 keys 数组中键的顺序完全一致。</li>
+</ol>
+<p><img src="/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165759.png" srcset="/img/loading.gif" lazyload></p>
+<p>这一切意味着什么？我们知道 parents 数组是冗余的，因此可以忽略它，同时也知道一棵树可以通过层序遍历的方式用数组来表示。</p>
+<h4 id="Approach-3"><a href="#Approach-3" class="headerlink" title="Approach 3 "></a>Approach 3 <a href="#approach-3" id="approach-3"></a></h4><p>在这种方法中，我们假设树是完全的。这是为了确保数组表示内部没有”空隙”。因此，我们将把树这种复杂的二维结构展平为一个数组。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TreeC</span>&lt;Key&gt; &#123;<br>  Key[] keys;<br>  ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/Pasted%20image%2020260529165831.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="Swim"><a href="#Swim" class="headerlink" title="Swim "></a>Swim <a href="#swim" id="swim"></a></h4><p>基于此实现，我们为”堆操作”一节中描述的”上浮”操作定义如下代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">swim</span><span class="hljs-params">(<span class="hljs-type">int</span> k)</span> &#123;<br>    <span class="hljs-keyword">if</span> (keys[parent(k)] ≻ keys[k]) &#123;<br>       swap(k, parent(k));<br>       swim(parent(k));              <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>parent 方法的作用是什么？它使用方式 3 中的表示法返回给定 k 的父节点。</p>
+<p><strong>Exercise 13.2.3.</strong> Write the parent method. For extra challenge, try to write the methods for finding the left child and right child of a given item.</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>21.1 Priority Queues</div>
+      <div>https://augusteing.github.io/2026/09/20/CS61B-ch21-note-优先队列/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年9月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/09/20/CS61B-ch14-note%EF%BC%9Aunion/" title="Introduction">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Introduction</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/09/20/CS61B-ch25-note%EF%BC%9A%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/" title="定义">
+                        <span class="hidden-mobile">定义</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

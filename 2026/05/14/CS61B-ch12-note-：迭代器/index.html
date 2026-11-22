@@ -1,0 +1,857 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="本节中，我们将学习如何使用 Java 的内置 List 和 Set 数据结构，以及构建我们自己的 ArraySet  Lists in Real Java Code我们从头开始构建了一个列表，但 Java 提供了一个内置的 List 接口和几个实现，例如 ArrayList 。记住，由于 List 是一个接口，我们不能实例化它！我们必须实例化它的某个实现。 要访问这个，我们可以使用类&#x2F;接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lists and Sets in Java">
+<meta property="og:url" content="https://augusteing.github.io/2026/05/14/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="本节中，我们将学习如何使用 Java 的内置 List 和 Set 数据结构，以及构建我们自己的 ArraySet  Lists in Real Java Code我们从头开始构建了一个列表，但 Java 提供了一个内置的 List 接口和几个实现，例如 ArrayList 。记住，由于 List 是一个接口，我们不能实例化它！我们必须实例化它的某个实现。 要访问这个，我们可以使用类&#x2F;接">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104225515.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104175517.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260105123317.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260105123718.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104225258.png">
+<meta property="article:published_time" content="2026-05-14T11:34:28.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.442Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104225515.png">
+  
+  
+  
+  <title>Lists and Sets in Java - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Lists and Sets in Java"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-05-14 19:34" pubdate>
+          2026年5月14日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Lists and Sets in Java</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>本节中，我们将学习如何使用 Java 的内置 <code>List</code> 和 <code>Set</code> 数据结构，以及构建我们自己的 <code>ArraySet</code> </p>
+<h2 id="Lists-in-Real-Java-Code"><a href="#Lists-in-Real-Java-Code" class="headerlink" title="Lists in Real Java Code"></a>Lists in Real Java Code</h2><p>我们从头开始构建了一个列表，但 Java 提供了一个内置的 <code>List</code> 接口和几个实现，例如 <code>ArrayList</code> 。记住，由于 <code>List</code> 是一个接口，我们不能实例化它！我们必须实例化它的某个实现。</p>
+<p>要访问这个，我们可以使用类&#x2F;接口的全名（规范名）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs JAVA">java.util.List&lt;Integer&gt; L = <span class="hljs-keyword">new</span> <span class="hljs-title class_">java</span>.util.ArrayList&lt;&gt;();<br></code></pre></td></tr></table></figure>
+
+<p>然而，这有点啰嗦。我们可以直接导入 java 库：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.util.List;<br><span class="hljs-keyword">import</span> java.util.ArrayList;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Example</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        List&lt;Integer&gt; L = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        L.add(<span class="hljs-number">5</span>);<br>        L.add(<span class="hljs-number">10</span>);<br>        System.out.println(L);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Sets"><a href="#Sets" class="headerlink" title="Sets"></a>Sets</h1><p>集合是唯一元素的集合——每个元素只能有一个副本。与列表不同，集合也没有顺序的概念：你不能对集合进行索引，也无法控制每个元素插入的位置。</p>
+<h2 id="Java-Sets"><a href="#Java-Sets" class="headerlink" title="Java Sets"></a>Java Sets</h2><p>Java 有 <code>Set</code> 接口及其实现，例如 <code>HashSet</code> 。如果你不想使用全名，记得要导入它们！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.util.Set;<br><span class="hljs-keyword">import</span> java.util.HashSet;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">Set</span>&lt;String&gt; s = <span class="hljs-built_in">new</span> HashSet&lt;&gt;();<br>s.<span class="hljs-keyword">add</span>(&quot;Tokyo&quot;);<br>s.<span class="hljs-keyword">add</span>(&quot;Lagos&quot;);<br><span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(s.contains(&quot;Tokyo&quot;)); // <span class="hljs-keyword">true</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="Python-Equivalent"><a href="#Python-Equivalent" class="headerlink" title="Python Equivalent"></a>Python Equivalent</h1><p>在 Python 中，我们直接调用 <code>set()</code> 。要检查 <code>contains</code> ，我们不使用方法，而是使用关键字 <code>in</code> 。这里有一个例子：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stylus">s = <span class="hljs-built_in">set</span>()<br>s<span class="hljs-selector-class">.add</span>(<span class="hljs-string">&quot;Tokyo&quot;</span>)<br>s<span class="hljs-selector-class">.add</span>(<span class="hljs-string">&quot;Lagos&quot;</span>)<br><span class="hljs-function"><span class="hljs-title">print</span><span class="hljs-params">(<span class="hljs-string">&quot;Tokyo&quot;</span> in s)</span></span> <span class="hljs-comment">// True</span><br></code></pre></td></tr></table></figure>
+
+<p>（如果你没有学过python，这很有用）</p>
+<h1 id="DIY-ArraySet"><a href="#DIY-ArraySet" class="headerlink" title="DIY: ArraySet"></a>DIY: ArraySet</h1><p>我们的目标是创建自己的集合 <code>ArraySet</code> ，并实现以下方法：</p>
+<ul>
+<li><code>add(value)</code> : 如果值不在集合中，则将其添加到集合中</li>
+<li><code>contains(value)</code> : 检查数组集是否包含该键</li>
+<li><code>size()</code> : 返回值的数量</li>
+</ul>
+<h1 id="Exceptions"><a href="#Exceptions" class="headerlink" title="Exceptions"></a>Exceptions</h1><p>在这一节中，我们将学习如何抛出异常，以有效处理代码中可能出现的错误。</p>
+<p>我们上一节的 <code>ArraySet</code> 实现存在一个小错误。当我们向 ArraySet 添加 <code>null</code> 时，会得到一个 NullPointerException。</p>
+<p>问题出在我们检查 <code>items[i].equals(x)</code> 的 <code>contains</code> 方法中。如果 <code>items[i]</code> 处的值为 null，那么我们就调用了 <code>null.equals(x)</code> ，从而引发 NullPointerException。</p>
+<p>异常会导致正常控制流停止。事实上，我们可以选择抛出自定义的异常。在 Python 中，你可能见过 <code>raise</code> 关键字。在 Java 中，异常是对象，我们使用以下格式抛出异常：</p>
+<p><code>throw new ExceptionObject(parameter1, ...)</code>******</p>
+<p>当用户尝试将 null 添加到我们的 <code>ArraySet</code> 时，让我们抛出一个异常。我们将抛出一个 <code>IllegalArgumentException</code> ，它接受一个参数（一个 <code>String</code> 消息）。</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-comment">/* Associates the specified value with the specified key in this map.</span><br><span class="hljs-comment">   Throws an IllegalArgumentException if the key is null. */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-built_in">add</span>(T x) &#123;<br>    <span class="hljs-keyword">if</span> (x == <span class="hljs-literal">null</span>) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new </span><span class="hljs-class title_">IllegalArgumentException</span>(<span class="hljs-string">&quot;can&#x27;t add null&quot;</span>);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">contains</span>(x)) &#123;<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br>    items[<span class="hljs-built_in">size</span>] = x;<br>    <span class="hljs-built_in">size</span> += <span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>无论哪种情况，我们都得到一个异常——为什么这样更好？</p>
+<ul>
+<li>我们有控制代码的能力：我们有意决定在何时停止程序的流程</li>
+<li>更有用的异常类型和有助于使用我们代码的错误消息</li>
+</ul>
+<p>然而，如果程序完全不崩溃会更好。在这种情况下，我们可以做不同的事情。以下是一些方法：</p>
+<p>方法 1：如果 <code>add</code> 被传递到 <code>null</code> ，则不要将其添加到数组中</p>
+<p>方法 2：更改 <code>contains</code> 方法，以考虑 <code>items[i] == null</code> 的情况</p>
+<p>无论你做出什么决定，重要的是让用户知道他们可以期待什么。这就是为什么文档（例如关于你方法注释）非常重要。</p>
+<h1 id="Iteration"><a href="#Iteration" class="headerlink" title="Iteration"></a>Iteration</h1><p>我们可以使用 Java 的 <code>HashSet</code> 来编写一个干净的增强型 for 循环</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">Set</span>&lt;String&gt; s = <span class="hljs-built_in">new</span> HashSet&lt;&gt;();<br>s.<span class="hljs-keyword">add</span>(&quot;Tokyo&quot;);<br>s.<span class="hljs-keyword">add</span>(&quot;Lagos&quot;);<br><span class="hljs-keyword">for</span> (String city : s) &#123;<br>    <span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(city);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>你应该在<code>hw0b</code>中见过了</p>
+<p>但是，如果我们尝试用我们的 <code>ArraySet</code> 来做同样的事情，我们会得到一个错误。我们该如何启用这个功能？</p>
+<h2 id="Enhanced-For-Loop"><a href="#Enhanced-For-Loop" class="headerlink" title="Enhanced For Loop"></a>Enhanced For Loop</h2><p>让我们先理解一下使用增强型 for 循环时发生了什么。我们可以将增强型 for 循环”翻译”成一种丑陋的、手动的方法。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs lasso"><span class="hljs-built_in">Set</span>&lt;<span class="hljs-built_in">String</span>&gt; s = <span class="hljs-literal">new</span> HashSet&lt;&gt;();<br><span class="hljs-params">...</span><br>for (<span class="hljs-built_in">String</span> city : s) &#123;<br>    <span class="hljs-params">...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>上述代码翻译为：</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs lasso"><span class="hljs-built_in">Set</span>&lt;<span class="hljs-built_in">String</span>&gt; s = <span class="hljs-literal">new</span> HashSet&lt;&gt;();<br><span class="hljs-params">...</span><br>Iterator&lt;<span class="hljs-built_in">String</span>&gt; seer = s.iterator();<br><span class="hljs-keyword">while</span> (seer.hasNext()) &#123;<br>    <span class="hljs-built_in">String</span> city = seer.next();<br>    <span class="hljs-params">...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>让我们剥离掉魔法，以便我们可以构建支持这种功能的自己的类。</p>
+<p>关键在于一个称为迭代器的对象。</p>
+<p>在我们的例子中，在 List.java 中，我们可能会定义一个返回迭代器对象的 <code>iterator()</code> 方法。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-function"><span class="hljs-keyword">public</span> Iterator&lt;E&gt; <span class="hljs-title">iterator</span>()</span>;<br></code></pre></td></tr></table></figure>
+
+<p>现在，我们可以使用那个对象来遍历我们列表中的所有条目：</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs lasso"><span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">Integer</span>&gt; friends = <span class="hljs-literal">new</span> ArrayList&lt;<span class="hljs-built_in">Integer</span>&gt;();<br><span class="hljs-params">...</span><br>Iterator&lt;<span class="hljs-built_in">Integer</span>&gt; seer = friends.iterator();<br><br><span class="hljs-keyword">while</span> (seer.hasNext()) &#123;<br>System.out.println(seer.next());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这段代码的行为与上面 foreach 循环版本完全相同。</p>
+<p>在我们的迭代器方法中有三种关键方法：</p>
+<p>首先，我们用 <code>Iterator&lt;Integer&gt; seer = friends.iterator();</code> 获取一个新的迭代器对象</p>
+<p>接下来，我们用 while 循环遍历列表。我们用 <code>seer.hasNext()</code> 检查是否还有剩余的项目，如果还有未查看的项目，它将返回 true，如果所有项目都已处理，则返回 false。</p>
+<p>最后， <code>seer.next()</code> 同时做两件事。它返回列表的下一个元素，在这里我们将其打印出来。它还通过一个项目来推进迭代器。通过这种方式，迭代器将只检查每个项目一次。(或许你还不理解这段文字的意义，这在后面的例子中会有解释，而且实际上迭代器在多种编程语言中均有设计，<code>python</code>中的迭代器解释你可以参见：cs61a的教科书)</p>
+<h2 id="Implementing-Iterators"><a href="#Implementing-Iterators" class="headerlink" title="Implementing Iterators"></a>Implementing Iterators</h2><p>在这一节中，我们将讨论如何构建一个支持迭代的类。</p>
+<p>让我们先思考编译器需要知道哪些信息才能成功编译以下迭代器示例：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">List&lt;<span class="hljs-type">Integer</span>&gt; friends = <span class="hljs-built_in">new</span> ArrayList&lt;<span class="hljs-type">Integer</span>&gt;();<br>Iterator&lt;<span class="hljs-type">Integer</span>&gt; seer = friends.iterator();<br><br><span class="hljs-keyword">while</span>(seer.hasNext()) &#123;<br>    <span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(seer.next());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>我们可以查看调用相关方法的每个对象的静态类型。 </p>
+<p><code>friends</code> 是一个 List， <code>iterator()</code> 被调用在这个 List 上，因此我们必须问：</p>
+<ul>
+<li>List 接口有 iterator()方法吗？</li>
+</ul>
+<p><code>seer</code> 是一个迭代器， <code>hasNext()</code> 和 <code>next()</code> 在其上被调用，因此我们必须询问：</p>
+<p>迭代器接口是否有 next&#x2F;hasNext()方法？</p>
+<p>那么我们如何实现这些要求？</p>
+<p>List 接口扩展了 Iterable 接口，继承了抽象的 iterator()方法。（实际上，List 扩展了 Collection，而 Collection 又扩展了 Iterable，但这样思考代码更容易开始。）</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">Iterable</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>    <span class="hljs-function">Iterator&lt;T&gt; <span class="hljs-title">iterator</span>()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs angelscript"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-symbol">List</span>&lt;<span class="hljs-symbol">T</span>&gt; <span class="hljs-symbol">extends</span> <span class="hljs-symbol">Iterable</span>&lt;<span class="hljs-symbol">T</span>&gt;&#123;<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>接下来，编译器检查迭代器是否具有 <code>hasNext()</code> 和 <code>next()</code> 。迭代器接口明确指定了这些抽象方法：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">Iterator</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>    <span class="hljs-function">boolean <span class="hljs-title">hasNext</span>()</span>;<br>    <span class="hljs-function">T <span class="hljs-title">next</span>()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>如果有人调用 <code>**next**</code> 而 <code>**hasNext**</code> 返回 false 会怎样？</strong></p>
+<p><em>This behavior is undefined. However, a common convention is to throw a <code>NoSuchElementException</code>. See <a target="_blank" rel="noopener" href="https://sp19.datastructur.es/materials/discussion/disc05sol.pdf">Discussion 5</a> for examples.</em></p>
+<p><strong><code>**hasNext**</code> 是否总是会在 <code>**next**</code> 之前被调用？</strong></p>
+<p><em>Not necessarily. This is sometimes the case when someone using the iterator knows exactly how many elements are in the sequence. Thus, we can’t rely on the user calling <code>hasNext</code> before <code>next</code>. However, you can always call <code>hasNext</code> from within your <code>next</code> function.</em></p>
+<p>特定的类将为其接口方法实现自己的迭代行为。让我们来看一个例子。（注意：如果你想从头开始构建这个，请跟随视频中的实时编码。）</p>
+<p>我们将通过键向我们的 <code>ArraySet</code> 类添加迭代功能。首先，我们编写一个名为 ArraySetIterator 的新类，该类嵌套在 ArraySet 内部：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">private</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySetIterator</span> <span class="hljs-title">implements</span> <span class="hljs-title">Iterator</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> wizPos;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySetIterator</span>()</span> &#123;<br>        wizPos = <span class="hljs-number">0</span>;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">hasNext</span>()</span> &#123;<br>        <span class="hljs-keyword">return</span> wizPos &lt; size;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">next</span>()</span> &#123;<br>        T returnItem = items[wizPos];<br>        wizPos += <span class="hljs-number">1</span>;<br>        <span class="hljs-keyword">return</span> returnItem;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个 ArraySetIterator 实现了 <code>Iterator&lt;T&gt;</code> ，这意味着它实现了一个 <code>hasNext()</code> 方法和一个 <code>next()</code> 方法，使用一个 <code>wizPos</code> 位置作为索引来跟踪它在数组中的位置。对于不同的数据结构，我们可能会以不同的方式实现这两个方法。</p>
+<p>思考练习：你会如何设计链表的 <code>hasNext()</code> 和 <code>next()</code> ？</p>
+<p>A:简要答案，我们之前构建的SLList还有AList都有size成员（或者size（））函数，所以<code>hasNext()</code>的实现方法相当之简单。而对于<code>next()</code>sllist的常规实现时间复杂度要比Alist大得多，你知道是为什么吗？</p>
+<p>既然我们已经有了合适的方法，我们可以使用 ArraySetIterator 来遍历一个 <code>ArraySet</code></p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">ArraySet&lt;<span class="hljs-type">Integer</span>&gt; aset = <span class="hljs-built_in">new</span> ArraySet&lt;&gt;();<br>aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">5</span>);<br>aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">23</span>);<br>aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">42</span>);<br><br>Iterator&lt;<span class="hljs-type">Integer</span>&gt; iter = aset.iterator();<br><br><span class="hljs-keyword">while</span>(iter.hasNext()) &#123;<br>    <span class="hljs-keyword">System</span>.<span class="hljs-keyword">out</span>.println(iter.next());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们仍然希望能够支持增强型 for 循环，以使我们的调用更清晰。因此，我们需要让 <code>ArraySet</code> 实现 Iterable 接口。Iterable 接口的基本方法是 <code>iterator()</code> ，它返回该类的 Iterator 对象。我们只需返回我们刚刚编写的 <code>ArraySetIterator</code> 的实例！</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-function"><span class="hljs-keyword">public</span> Iterator&lt;T&gt; <span class="hljs-title">iterator</span>()</span> &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ArraySetIterator();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>现在我们可以使用增强型 for 循环来操作 <code>ArrraySet</code> 了！</p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs ada">ArraySet&lt;Integer&gt; aset = <span class="hljs-keyword">new</span> ArraySet&lt;&gt;();<br>...<br><span class="hljs-keyword">for</span> (int i : <span class="hljs-type">aset</span>) &#123;<br>    System.<span class="hljs-keyword">out</span>.println(i);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在这里，我们看到了 <strong>Iterable</strong>，这是一个使类能够被迭代的接口，并要求实现 <code>iterator()</code> 方法，该方法返回一个 Iterator 对象。我们还看到了 Iterator，这是一个定义了实际进行迭代的方法的接口。你可以将 Iterator 视为一个机器，你将其放在可迭代对象上以促进迭代。任何可迭代对象都是迭代器执行操作的对象。</p>
+<p>有了这两个组件，你就可以为你的类创建复杂的 for 循环了！</p>
+<p><code>ArraySet</code> 支持迭代的代码如下：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><code class="hljs csharp">import java.util.Iterator;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySet</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-title">implements</span> <span class="hljs-title">Iterable</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>    <span class="hljs-keyword">private</span> T[] items;<br>    <span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> size; <span class="hljs-comment">// the next item to be added will be at position size</span><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySet</span>()</span> &#123;<br>        items = (T[]) <span class="hljs-keyword">new</span> Object[<span class="hljs-number">100</span>];<br>        size = <span class="hljs-number">0</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Returns true if this map contains a mapping for the specified key.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">contains</span>(<span class="hljs-params">T x</span>)</span> &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; size; i += <span class="hljs-number">1</span>) &#123;<br>            <span class="hljs-keyword">if</span> (items[i].<span class="hljs-keyword">equals</span>(x)) &#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Associates the specified value with the specified key in this map.</span><br><span class="hljs-comment">       Throws an IllegalArgumentException if the key is null. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">add</span>(<span class="hljs-params">T x</span>)</span> &#123;<br>        <span class="hljs-keyword">if</span> (x == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;can&#x27;t add null&quot;</span>);<br>        &#125;<br>        <span class="hljs-keyword">if</span> (contains(x)) &#123;<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        items[size] = x;<br>        size += <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Returns the number of key-value mappings in this map. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">size</span>()</span> &#123;<br>        <span class="hljs-keyword">return</span> size;<br>    &#125;<br><br>    <span class="hljs-comment">/** returns an iterator (a.k.a. seer) into ME */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Iterator&lt;T&gt; <span class="hljs-title">iterator</span>()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ArraySetIterator();<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySetIterator</span> <span class="hljs-title">implements</span> <span class="hljs-title">Iterator</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>        <span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> wizPos;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySetIterator</span>()</span> &#123;<br>            wizPos = <span class="hljs-number">0</span>;<br>        &#125;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">hasNext</span>()</span> &#123;<br>            <span class="hljs-keyword">return</span> wizPos &lt; size;<br>        &#125;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">next</span>()</span> &#123;<br>            T returnItem = items[wizPos];<br>            wizPos += <span class="hljs-number">1</span>;<br>            <span class="hljs-keyword">return</span> returnItem;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span>(<span class="hljs-params">String[] <span class="hljs-keyword">args</span></span>)</span> &#123;<br>        ArraySet&lt;Integer&gt; aset = <span class="hljs-keyword">new</span> ArraySet&lt;&gt;();<br>        aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">5</span>);<br>        aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">23</span>);<br>        aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">42</span>);<br><br>        <span class="hljs-comment">//iteration</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i : aset) &#123;<br>            System.<span class="hljs-keyword">out</span>.println(i);<br>        &#125;<br>    &#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="Object-Methods"><a href="#Object-Methods" class="headerlink" title="Object Methods"></a>Object Methods</h1><p>所有类都继承自 overarching Object 类。继承的方法如下：</p>
+<ul>
+<li><p><code>String toString()</code></p>
+</li>
+<li><p><code>boolean equals(Object obj)</code></p>
+</li>
+<li><p><code>Class &lt;?&gt; getClass()</code></p>
+</li>
+<li><p><code>int hashCode()</code></p>
+</li>
+<li><p><code>protected Objectclone()</code></p>
+</li>
+<li><p><code>protected void finalize()</code></p>
+</li>
+<li><p><code>void notify()</code></p>
+</li>
+<li><p><code>void notifyAll()</code></p>
+</li>
+<li><p><code>void wait()</code></p>
+</li>
+<li><p><code>void wait(long timeout)</code></p>
+</li>
+<li><p><code>void wait(long timeout, int nanos)</code></p>
+</li>
+</ul>
+<p>本章我们将重点关注前两种。我们将利用继承来覆盖这两个方法，使它们按照我们期望的方式运行。</p>
+<h2 id="toString-NaN"><a href="#toString-NaN" class="headerlink" title="toString()"></a>toString()</h2><p><code>toString()</code> 方法提供了一个对象的字符串表示。 <code>System.out.println()</code> 函数会隐式调用这个方法，对传入的对象并打印返回的字符串。当你运行 <code>System.out.println(dog)</code> 时，实际上是在做这个：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">String s = dog<span class="hljs-selector-class">.toString</span>()<br>System<span class="hljs-selector-class">.out</span><span class="hljs-selector-class">.println</span>(s)<br></code></pre></td></tr></table></figure>
+
+<p>默认的 <code>Object</code> 类的 <code>toString()</code> 方法会打印对象在内存中的位置。这是一个十六进制字符串。像 Arraylist 和 java 数组这样的类有自己的 <code>toString()</code> 方法的重写版本。这就是为什么，当你使用 Arraylist 并为其编写测试时，如果发生错误错误，反馈信息总是以这种很好的格式（1, 2, 3, 4）返回列表，而不是返回内存位置。</p>
+<p>对于我们自己编写的类，比如 <code>ArrayDeque</code> 、 <code>LinkedListDeque</code> 等，如果我们想要以可读的格式看到对象被打印出来，就需要提供自己的 <code>toString()</code> 方法。</p>
+<p>让我们尝试为 <code>ArraySet</code> 类编写这个方法。阅读下面的 <code>ArraySet</code> 类并确保你理解各种方法的作用。可以自由地将代码放入 java visualizer 中以获得更好的理解！</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><code class="hljs csharp">import java.util.Iterator;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySet</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-title">implements</span> <span class="hljs-title">Iterable</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>    <span class="hljs-keyword">private</span> T[] items;<br>    <span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> size; <span class="hljs-comment">// the next item to be added will be at position size</span><br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySet</span>()</span> &#123;<br>        items = (T[]) <span class="hljs-keyword">new</span> Object[<span class="hljs-number">100</span>];<br>        size = <span class="hljs-number">0</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Returns true if this map contains a mapping for the specified key.</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">contains</span>(<span class="hljs-params">T x</span>)</span> &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; size; i += <span class="hljs-number">1</span>) &#123;<br>            <span class="hljs-keyword">if</span> (items[i].<span class="hljs-keyword">equals</span>(x)) &#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Associates the specified value with the specified key in this map.</span><br><span class="hljs-comment">       Throws an IllegalArgumentException if the key is null. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">add</span>(<span class="hljs-params">T x</span>)</span> &#123;<br>        <span class="hljs-keyword">if</span> (x == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">&quot;can&#x27;t add null&quot;</span>);<br>        &#125;<br>        <span class="hljs-keyword">if</span> (contains(x)) &#123;<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        items[size] = x;<br>        size += <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Returns the number of key-value mappings in this map. */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">size</span>()</span> &#123;<br>        <span class="hljs-keyword">return</span> size;<br>    &#125;<br><br>    <span class="hljs-comment">/** returns an iterator (a.k.a. seer) into ME */</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> Iterator&lt;T&gt; <span class="hljs-title">iterator</span>()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ArraySetIterator();<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySetIterator</span> <span class="hljs-title">implements</span> <span class="hljs-title">Iterator</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>        <span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> wizPos;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySetIterator</span>()</span> &#123;<br>            wizPos = <span class="hljs-number">0</span>;<br>        &#125;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">hasNext</span>()</span> &#123;<br>            <span class="hljs-keyword">return</span> wizPos &lt; size;<br>        &#125;<br><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">next</span>()</span> &#123;<br>            T returnItem = items[wizPos];<br>            wizPos += <span class="hljs-number">1</span>;<br>            <span class="hljs-keyword">return</span> returnItem;<br>        &#125;<br>    &#125;<br><br>    @Override<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">toString</span>()</span> &#123;<br>        <span class="hljs-comment">/* hmmm */</span><br>    &#125;<br><br><br>    @Override<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">equals</span>(<span class="hljs-params">Object other</span>)</span> &#123;<br>        <span class="hljs-comment">/* hmmm */</span><br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">main</span>(<span class="hljs-params">String[] <span class="hljs-keyword">args</span></span>)</span> &#123;<br>        ArraySet&lt;Integer&gt; aset = <span class="hljs-keyword">new</span> ArraySet&lt;&gt;();<br>        aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">5</span>);<br>        aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">23</span>);<br>        aset.<span class="hljs-keyword">add</span>(<span class="hljs-number">42</span>);<br><br>        <span class="hljs-comment">//iteration</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i : aset) &#123;<br>            System.<span class="hljs-keyword">out</span>.println(i);<br>        &#125;<br><br>        <span class="hljs-comment">//toString</span><br>        System.<span class="hljs-keyword">out</span>.println(aset);<br><br>        <span class="hljs-comment">//equals</span><br>        ArraySet&lt;Integer&gt; aset2 = <span class="hljs-keyword">new</span> ArraySet&lt;&gt;();<br>        aset2.<span class="hljs-keyword">add</span>(<span class="hljs-number">5</span>);<br>        aset2.<span class="hljs-keyword">add</span>(<span class="hljs-number">23</span>);<br>        aset2.<span class="hljs-keyword">add</span>(<span class="hljs-number">42</span>);<br><br>        System.<span class="hljs-keyword">out</span>.println(aset.<span class="hljs-keyword">equals</span>(aset2));<br>        System.<span class="hljs-keyword">out</span>.println(aset.<span class="hljs-keyword">equals</span>(<span class="hljs-literal">null</span>));<br>        System.<span class="hljs-keyword">out</span>.println(aset.<span class="hljs-keyword">equals</span>(<span class="hljs-string">&quot;fish&quot;</span>));<br>        System.<span class="hljs-keyword">out</span>.println(aset.<span class="hljs-keyword">equals</span>(aset));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>练习 6.4.1：编写 toString() 方法，以便当我们打印一个 ArraySet 时，它会在花括号内以逗号分隔地打印元素。例如 {1, 2, 3, 4}。记住，toString() 方法应该返回一个字符串。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">public</span> String toString() &#123;<br>    <span class="hljs-attribute">String</span> returnString = <span class="hljs-string">&quot;&#123;&quot;</span>;<br>    <span class="hljs-attribute">for</span> (int i = <span class="hljs-number">0</span>; <span class="hljs-attribute">i</span> &lt; size; <span class="hljs-attribute">i</span> += <span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-attribute">returnString</span> += keys[i];<br>        <span class="hljs-attribute">returnString</span> += <span class="hljs-string">&quot;, &quot;</span>;<br>    &#125;<br>    <span class="hljs-attribute">returnString</span> += <span class="hljs-string">&quot;&#125;&quot;</span>;<br>    <span class="hljs-attribute">return</span> returnString;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个解决方案虽然看似简单优雅，但实际上不够效率(原文这里用的是naive,翻译为天真总觉得有讽喻之意）。这是因为当你在 Java 中使用字符串连接操作时，例如： <code>returnString += keys[i];</code> ，你实际上并不是仅仅在 <code>returnString</code> 后面追加内容，而是在创建一个全新的字符串。这是非常低效的，因为创建一个新的字符串对象也需要时间！具体来说，创建新字符串的时间与字符串的长度呈线性关系（我们将在后面的章节中讨论为什么会这样！）。</p>
+<p>加分题：假设将一个字符连接到字符串需要 1 秒钟。如果我们有一个大小为 5 的 ArraySet： <code>&#123;1, 2, 3, 4, 5&#125;</code> ，运行 <code>toString()</code> 方法需要多长时间？</p>
+<p>答案：我们将 <code>returnString</code> 设置为左括号，这需要 1 秒钟，因为这涉及到将 <code>&#123;</code> 添加到空字符串 <code>&quot;&quot;</code> 中。添加第一个元素将涉及创建一个全新的字符串，添加}和 1，这将花费 2 秒钟。添加第二个元素需要 3 秒钟，因为我们需要添加 <code>&#123;</code> 、 <code>1</code> 、 <code>2</code> 。这个过程会持续进行，因此对于整个数组集，总时间是 <code>1 + 2 + 3 + 4 + 5 + 6 + 7.</code></p>
+<p>为了解决这个问题，Java 有一个特殊的类叫做 <code>StringBuilder</code> 。它创建一个可变的字符串对象，所以你可以继续向同一个字符串对象追加，而不是每次都创建一个新的对象。</p>
+<p>练习 6.4.2：使用 StringBuilder 重写 toString() 方法。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">public</span> String toString() &#123;<br>        StringBuilder returnSB = <span class="hljs-keyword">new</span> StringBuilder(<span class="hljs-string">&quot;&#123;&quot;</span>);<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-keyword">size</span> - <span class="hljs-number">1</span>; i += <span class="hljs-number">1</span>) &#123;<br>            returnSB.<span class="hljs-keyword">append</span>(items[i].toString());<br>            returnSB.<span class="hljs-keyword">append</span>(<span class="hljs-string">&quot;, &quot;</span>);<br>        &#125;<br>        returnSB.<span class="hljs-keyword">append</span>(items[<span class="hljs-keyword">size</span> - <span class="hljs-number">1</span>]);<br>        returnSB.<span class="hljs-keyword">append</span>(<span class="hljs-string">&quot;&#125;&quot;</span>);<br>        <span class="hljs-keyword">return</span> returnSB.toString();<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="equals"><a href="#equals" class="headerlink" title="equals()"></a>equals()</h1><p><code>equals()</code> 和 <code>==</code> 在 Java 中的行为不同。 <code>==</code> 检查两个对象是否是内存中实际相同的对象。记住，传值！ <code>==</code> 检查两个盒子是否包含相同的东西。对于基本类型，这意味着检查值是否相等。对于对象，这意味着检查地址&#x2F;指针是否相等。</p>
+<p>实际上，<code>java</code>的默认<code>.equals()</code>方法是：<br><img src="/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104225515.png" srcset="/img/loading.gif" lazyload><br>哈哈，只检查了是否相等<br>为了避免你对此了解的不够，有以下解释：</p>
+<p>假设我们有这个 <code>Doge</code> 类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Doge</span> &#123;<br><br>   <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> age;<br>   <span class="hljs-keyword">public</span> String name;<br><br>   <span class="hljs-keyword">public</span> <span class="hljs-title function_">Doge</span><span class="hljs-params">(<span class="hljs-type">int</span> age, String name)</span>&#123;<br>      <span class="hljs-built_in">this</span>.age = age;<br>      <span class="hljs-built_in">this</span>.name = name;<br>   &#125;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br>      <span class="hljs-type">int</span> <span class="hljs-variable">x</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>;<br>      <span class="hljs-type">int</span> <span class="hljs-variable">y</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>;<br>      <span class="hljs-type">int</span> <span class="hljs-variable">z</span> <span class="hljs-operator">=</span> <span class="hljs-number">6</span>;<br><br>      <span class="hljs-type">Doge</span> <span class="hljs-variable">fido</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Doge</span>(<span class="hljs-number">5</span>, <span class="hljs-string">&quot;Fido&quot;</span>);<br>      <span class="hljs-type">Doge</span> <span class="hljs-variable">doggo</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Doge</span>(<span class="hljs-number">6</span>, <span class="hljs-string">&quot;Doggo&quot;</span>);<br>      <span class="hljs-type">Doge</span> <span class="hljs-variable">fidoTwin</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Doge</span>(<span class="hljs-number">5</span>, <span class="hljs-string">&quot;Fido&quot;</span>);<br>      <span class="hljs-type">Doge</span> <span class="hljs-variable">fidoRealTwin</span> <span class="hljs-operator">=</span> fido;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果我们把这个代码输入到 Java 可视化器中，我们会看到指针图中显示的框。</p>
+<p><img src="/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104175517.png" srcset="/img/loading.gif" lazyload></p>
+<p>练习 6.4.3：如果我们运行以下代码，Java 会返回什么？</p>
+<ul>
+<li><p><code>x == y</code></p>
+</li>
+<li><p><code>x == z</code></p>
+</li>
+<li><p><code>fido == doggo</code></p>
+</li>
+<li><p><code>fido == fidoTwin</code></p>
+</li>
+<li><p><code>fido == fidoRealTwin</code></p>
+</li>
+</ul>
+<p><strong>Answers  答案</strong></p>
+<ul>
+<li><p><code>True</code></p>
+</li>
+<li><p><code>False</code></p>
+</li>
+<li><p><code>False</code></p>
+</li>
+<li><p><code>False</code></p>
+</li>
+<li><p><code>True</code></p>
+</li>
+</ul>
+<p><code>fido</code> 和 <code>fidoTwin</code> 不被视为 <code>==</code> ，因为它们指向不同的对象。然而，这非常愚蠢，因为它们的所有属性都相同。你可以看到 <code>==</code> 如何在 Java 测试中引起一些问题。当我们为我们的 ArrayList 编写测试，并希望检查期望值是否与函数返回值相同，我们会将 expected 作为一个新的 ArrayList 创建。如果我们使用 <code>==</code> 进行测试，它将始终返回 false。这就是 <code>equals(Object o)</code> 的作用。</p>
+<p><code>equals(Object o)</code> 是 Object 类中的一个方法，默认情况下它表现得像 &#x3D;&#x3D;，即检查 this 的内存地址是否与 o 相同。然而，我们可以重写它来定义我们想要的任何相等性！例如，对于两个 Arraylists 被认为相等，它们只需要包含相同顺序的相同元素。</p>
+<p>练习 6.4.4：让我们为 ArraySet 类编写一个 equals 方法。记住，集合是无序的唯一元素集合。因此，要使两个集合被认为是相等的，你只需要检查它们是否包含相同的元素。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-keyword">public</span> boolean equals(Object other) &#123;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> == other) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (other == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (other.getClass() != <span class="hljs-keyword">this</span>.getClass()) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>        &#125;<br>        ArraySet&lt;T&gt; o = (ArraySet&lt;T&gt;) other;<br>        <span class="hljs-keyword">if</span> (o.size() != <span class="hljs-keyword">this</span>.size()) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>        &#125;<br>        <span class="hljs-keyword">for</span> (T item : <span class="hljs-keyword">this</span>) &#123;<br>            <span class="hljs-keyword">if</span> (!o.contains(item)) &#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们在方法的开头添加了一些检查，以确保我们的 <code>.equals()</code> 能够处理 null 值和不同类的对象。我们还通过在方法返回 true 时立即返回 true 来优化了函数。这样，我们避免了遍历集合的额外工作。</p>
+<p>译者按：在<code>2021</code>年Java增加了新的方法<code>instanceof</code>。<br><img src="/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260105123317.png" srcset="/img/loading.gif" lazyload><br>这个方法能很好的检查对象 o 是否为 <code>Dog</code>类的对象，如果是，还能命名为 <code>uddaDog</code><br><img src="/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260105123718.png" srcset="/img/loading.gif" lazyload><br>同时以上方法也有效，你知道是为什么吗？<br>Java 中 equals 方法的规则：重写 <code>.equals()</code> 方法有时可能比看起来更棘手。在实现你的 <code>.equals()</code> 方法时，应遵循以下规则：</p>
+<ul>
+<li><code>equals</code> 必须是等价关系</li>
+<li>自反性： <code>x.equals(x)</code> 为真</li>
+<li>对称性： <code>x.equals(y)</code> 当且仅当 <code>y.equals(x)</code></li>
+<li>传递性： <code>x.equals(y)</code> 和 <code>y.equals(z)</code> 蕴含 <code>x.equals(z)</code></li>
+<li>它必须接受一个 Object 类型的参数，以便覆盖原始的 <code>.equals()</code> 方法</li>
+<li>它必须保持一致性，如果 <code>x.equals(y)</code> ，只要 <code>x</code> 和 <code>y</code> 不变： <code>x</code> 必须继续等于 <code>y</code></li>
+<li>对于 null 永远不为真， <code>x.equals(null)</code> 必须是 false</li>
+</ul>
+<h2 id="一个小提醒"><a href="#一个小提醒" class="headerlink" title="一个小提醒"></a>一个小提醒</h2><p><img src="/images/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/Pasted%20image%2020260104225258.png" srcset="/img/loading.gif" lazyload><br>我们都知道Java是面向对象的语言，其中<code>this</code>相当于<code>python</code>中的<code>self</code>但是请注意，如果你的函数的参数和局部变量名称具有相同的命名，请注意使用<code>this</code>（因为<code>this</code>不强制）</p>
+<h1 id="一些练习"><a href="#一些练习" class="headerlink" title="一些练习"></a>一些练习</h1><p>如果你想对本章节和上章节（ch10）的内容做一些巩固，我非常推荐做：<a target="_blank" rel="noopener" href="https://cs61b-2.gitbook.io/cs61b-textbook-2025/12.-inheritance-iv-iterators-object-methods/12.6-exercises">https://cs61b-2.gitbook.io/cs61b-textbook-2025/12.-inheritance-iv-iterators-object-methods/12.6-exercises</a><br>里的练习。<br>但其中我认为Metacognitive部分的问题的答案不够严谨，以下为问题和我的答案：</p>
+<p>在讲座中，你构建了 <code>ArraySetIterator</code> 类。修改讲座类，使其构造函数接收一个 <code>Comparator&lt;T&gt;</code> 和一个泛型类型的 <code>T</code> 项目，称为 <code>ref</code> 。这个新的迭代器应该只返回大于 <code>T</code> 的项目。作为参考， <code>ArraySetIterator</code> 的代码如下所示。</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">private</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySetIterator</span> <span class="hljs-title">implements</span> <span class="hljs-title">Iterator</span>&lt;<span class="hljs-title">T</span>&gt; &#123;<br>	<span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> pos;<br>	<br>	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySetIterator</span>()</span> &#123; <br>		pos = <span class="hljs-number">0</span>; <br>	&#125;<br>	<br>	<span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">hasNext</span>()</span> &#123; <br>		<span class="hljs-keyword">return</span> pos &lt; size; <br>	&#125;<br>	<br>	<span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">next</span>()</span> &#123;<br>	 	T returnItem = items[pos];<br>	 	pos += <span class="hljs-number">1</span>;<br>	 	<span class="hljs-keyword">return</span> returnItem;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">private</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ArraySetIterators</span> <span class="hljs-title">implements</span> <span class="hljs-title">Iterator</span>&lt;<span class="hljs-title">T</span>&gt; &#123;  <br>    <span class="hljs-keyword">private</span> <span class="hljs-built_in">int</span> wizPos;  <br>    <span class="hljs-keyword">private</span> Comparator&lt;T&gt; c;<br>    <span class="hljs-keyword">private</span> T <span class="hljs-built_in">object</span>;  <br>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ArraySetIterators</span>(<span class="hljs-params">Comparator&lt;T&gt; com, T <span class="hljs-keyword">ref</span></span>)</span> &#123;  <br>        <span class="hljs-keyword">this</span>.wizPos = <span class="hljs-number">0</span>;  <br>        <span class="hljs-keyword">this</span>.c = com;  <br>        <span class="hljs-keyword">this</span>.<span class="hljs-built_in">object</span> = <span class="hljs-keyword">ref</span>;  <br>    &#125;  <br>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> boolean <span class="hljs-title">hasNext</span>()</span> &#123;  <br>        <span class="hljs-keyword">return</span> wizPos &lt; size;  <br>    &#125;  <br>  <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">next</span>()</span> &#123;  <br>        T returnItem = items[wizPos];  <br>        <span class="hljs-keyword">while</span>(hasNext() &amp;&amp; c.compare(returnItem, <span class="hljs-built_in">object</span>) &lt;= <span class="hljs-number">0</span>) &#123;  <br>            wizPos++;  <br>            returnItem = items[wizPos];  <br>        &#125;  <br>        wizPos++;  <br>        <span class="hljs-keyword">return</span> returnItem;  <br>    &#125;  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Lists and Sets in Java</div>
+      <div>https://augusteing.github.io/2026/05/14/CS61B-ch12-note-：迭代器/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年5月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/05/19/CS61B-ch20-note%EF%BC%9A%E5%93%88%E5%B8%8C%E7%A0%81/" title="hashcode">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hashcode</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/04/22/CS61B-ch19-note-%E5%93%88%E5%B8%8C%E8%A1%A8/" title="Introduction to Hashing: Data Indexed Arrays">
+                        <span class="hidden-mobile">Introduction to Hashing: Data Indexed Arrays</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,872 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="Java 内部使用两种排序算法：  基础类型：QuickSort 其余类型：MergeSort  这样使用算法的原因是：QuickSort 在霍尔分区下速度很快，在三分区下速度很慢，三分区下虽然具有稳定性。 归并排序具有稳定性，这样就使得不同类的排序不会破坏自身的结构（毕竟有的狗终究和其他的狗不一样） 计数排序想象一下，如果我们不再驾驶缓慢的本田思域，而是开始驾驶一辆快速的法拉利。不幸的是，我们">
+<meta property="og:type" content="article">
+<meta property="og:title" content="稳定性">
+<meta property="og:url" content="https://augusteing.github.io/2026/10/08/CS61B-ch36-%EF%BC%9Aradix-sort/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="Java 内部使用两种排序算法：  基础类型：QuickSort 其余类型：MergeSort  这样使用算法的原因是：QuickSort 在霍尔分区下速度很快，在三分区下速度很慢，三分区下虽然具有稳定性。 归并排序具有稳定性，这样就使得不同类的排序不会破坏自身的结构（毕竟有的狗终究和其他的狗不一样） 计数排序想象一下，如果我们不再驾驶缓慢的本田思域，而是开始驾驶一辆快速的法拉利。不幸的是，我们">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008000050.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007145710.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008002210.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008002521.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007233323.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007233336.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007233922.png">
+<meta property="article:published_time" content="2026-10-07T16:40:53.000Z">
+<meta property="article:modified_time" content="2026-11-22T12:55:27.808Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008000050.png">
+  
+  
+  
+  <title>稳定性 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="稳定性"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-10-08 00:40" pubdate>
+          2026年10月8日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          26 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">稳定性</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008000050.png" srcset="/img/loading.gif" lazyload></p>
+<p>Java 内部使用两种排序算法：</p>
+<ul>
+<li>基础类型：QuickSort</li>
+<li>其余类型：MergeSort</li>
+</ul>
+<p>这样使用算法的原因是：QuickSort 在霍尔分区下速度很快，在三分区下速度很慢，三分区下虽然具有稳定性。</p>
+<p>归并排序具有稳定性，这样就使得不同类的排序不会破坏自身的结构（毕竟有的狗终究和其他的狗不一样）</p>
+<h1 id="计数排序"><a href="#计数排序" class="headerlink" title="计数排序"></a>计数排序</h1><p>想象一下，如果我们不再驾驶缓慢的本田思域，而是开始驾驶一辆快速的法拉利。不幸的是，我们今天实际上不会去开法拉利，但我们将见证一个同样极其迅速、被称为基数排序（Radix Sorts）的算法。</p>
+<p>当对一个数组进行排序时，在最坏的情况下（数组按降序排列），排序需要 $\Omega(N \log N)$ 次比较操作。因此，最终的基于比较的排序算法具有 $\Theta(N \log N)$ 的最坏情况运行时间。</p>
+<p>从渐近的角度来看，这意味着无论我们多么聪明，我们永远无法打破归并排序（Merge Sort） $\Theta(N \log N)$ 的最坏情况运行时间。但是，如果我们根本不进行比较呢？</p>
+<p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007145710.png" srcset="/img/loading.gif" lazyload></p>
+<p> 左侧是原始状态，右侧是排序后的输出。</p>
+<p>本质上，刚刚发生的事情是，我们首先创建了一个相同大小的新数组，然后只是将所有的 # 索引复制到了正确的位置。因此，我们首先看 <code>5 Sandra Vanilla Grimes</code>，然后将其复制到我们新数组的第5个索引位置。</p>
+<p>这确实保证了 $\Theta(N)$ 的最坏情况时间。然而，如果我们正在处理以下情况该怎么办：</p>
+<ul>
+<li><p>非唯一的键（Non-unique keys）。</p>
+</li>
+<li><p>不连续的键（Non-consecutive keys）。</p>
+</li>
+<li><p>非数字的键（Non-numerical keys）。</p>
+</li>
+</ul>
+<p>所有这些情况都是复杂的案例，处理起来并不那么简单。本质上我们能做的是创建一个更简单的方法，那就是：</p>
+<ul>
+<li><p>计算每个项目出现的次数。</p>
+</li>
+<li><p>遍历列表，使用计数数组（count array）来决定将所有内容放在哪里。</p>
+</li>
+</ul>
+<p>结论是，我们可以使用计数排序在 $\Theta(N)$ 时间内对 $N$ 个对象进行排序。</p>
+<h2 id="非数值的键情况"><a href="#非数值的键情况" class="headerlink" title="非数值的键情况"></a>非数值的键情况</h2><p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008002210.png" srcset="/img/loading.gif" lazyload></p>
+<p>非连续数值的键情况我们需要弄清楚哪一个键应该从哪里开始，比如图中的红桃，我们需要知道，有三个梅花和两个♠排在前面。</p>
+<p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261008002521.png" srcset="/img/loading.gif" lazyload></p>
+<p>继而，我们得到每一种元素的起始位置，随着遍历整个列表，更新每种元素的下一个要放置的位置，从而遍历完成整个列表。</p>
+<p>注意，这里我们使用了一个桶来计算不同元素的起始位置。</p>
+<p>为了解决其他的具体问题，比如遇到非连续的数值我们该如何处理呢？这就引出了我们的下文</p>
+<p><em>这是我之后加入的内容，我对于 QuickSort 和 计数排序有一些思考，什么时候该使用计数排序，什么时候使用 QuickSort，也许我们需要使得 N &gt; R</em></p>
+<h1 id="最低位优先基数排序-LSD-Radix-Sort"><a href="#最低位优先基数排序-LSD-Radix-Sort" class="headerlink" title="最低位优先基数排序 (LSD Radix Sort)"></a><strong>最低位优先基数排序 (LSD Radix Sort)</strong></h1><p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007233323.png" srcset="/img/loading.gif" lazyload></p>
+<p><em>(图片底部文字)</em> 最低有效位基数排序 —— 使用计数排序</p>
+<p>请注意，在上面的图片中，我们输入了完全随机的数字，例如 22、34、41 等。然后在第二个框中，我们按照最右侧的数字进行了排序，因此 41、41、31 会排在最前面，因为 1 是最小的最右侧数字。接下来出现的是 32、22、12，因为 2 是第二小的最右侧数字。请注意，我们仍然需要处理 32、22 和 12 之间的排序问题，这就是为什么在我们的最后一个框中（此时所有内容已排序完毕），我们转向了倒数第二位（右侧第二个）数字进行排序。<br>以上这个过程我们称之为位数排序</p>
+<p>**我希望你注意到：这个排序算法是稳定的，没有破坏按个位排序的相对顺序。</p>
+<p>这也是为什么这个算法有效的原因，比如 11 就会排在 12 前。<br>因为在排序的过程中，我们使用了**计数排序</p>
+<p>为了得到一个按照第一位数字排序的列表，我们使用计数排序， R &#x3D; 10，因为第一位数字只可能有 10 种情况，进而我们进行计数排序。<br>LSD排序的运行时间是多少？</p>
+<ul>
+<li><p>$\Theta(WN + WR)$</p>
+</li>
+<li><p>$N$：项目数量，$R$：字母表大小，$W$：每个项目的宽度（以数字位数计）</p>
+</li>
+</ul>
+<p>当键的长度不同时，可以将空格视为小于所有其他字符。</p>
+<p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007233336.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Theta-WN-WR-运行时解释"><a href="#Theta-WN-WR-运行时解释" class="headerlink" title="$\Theta(WN + WR)$ 运行时解释"></a>$\Theta(WN + WR)$ 运行时解释</h2><p>在最低位优先基数排序 (LSD Radix Sort) 中，其最坏情况时间复杂度为 $\Theta(WN + WR)$。要深刻理解这个公式，我们需要将其拆解为<strong>外层循环</strong>与<strong>单次排序开销</strong>两个部分。</p>
+<p><strong>1. 变量定义</strong></p>
+<ul>
+<li><p>**$N$**：待排序的元素总数量（Number of items）。</p>
+</li>
+<li><p>**$W$**：元素的最大位数或宽度（Width of each item）。例如，如果数组中最大的数字是 <code>999</code>，那么 $W&#x3D;3$。</p>
+</li>
+<li><p>**$R$**：字母表大小或桶的数量（Size of alphabet&#x2F;Radix）。它代表当前位上所有可能出现的值的种类数。例如，十进制数字 $R&#x3D;10$（0-9），英文字母 $R&#x3D;26$，ASCII 字符 $R&#x3D;256$。</p>
+</li>
+</ul>
+<p><strong>2. 核心逻辑拆解</strong></p>
+<p>LSD 基数排序的本质是：**从最低有效位到最高有效位，严格执行 $W$ 轮完整的计数排序 (Counting Sort)**。</p>
+<ul>
+<li><p>**单轮计数排序的开销 $\Theta(N + R)$**：</p>
+<p>  由于现实数据存在重复值，我们不能简单粗暴地将数据直接强塞进新数组。为了保证排序的稳定性并解决位置冲突，单次计数排序必须包含以下两个维度的操作：</p>
+<ul>
+<li><p>**处理数据的开销 $\Theta(N)$**：我们需要遍历所有的 $N$ 个元素去统计每种数字出现的频次，并在最后一步根据算好的相对位置，将这 $N$ 个元素反向填入新数组。</p>
+</li>
+<li><p><strong>处理字母表&#x2F;桶的开销 $\Theta(R)$<strong>：我们需要额外维护一个长度为 $R$ 的辅助计数数组。</strong>初始化这个数组（全量清零</strong>以及<strong>遍历它计算前缀和（以此推导出每种字符在最终数组里的绝对起始位置）</strong>，都必须完整遍历这 $R$ 个位置。这部分时间开销独立于数据量 $N$，仅由字母表大小决定。</p>
+</li>
+</ul>
+<p>  因此，单轮计数排序的严格时间是 $\Theta(N + R)$。
+  </p>
+</li>
+<li><p>**总执行轮数 $W$**：</p>
+<p>  因为元素最大有 $W$ 位，算法需要逐位向左推进，上述的计数排序会被调用 $W$ 次。</p>
+</li>
+</ul>
+<p><strong>3. 最终推导</strong></p>
+<p>将总轮数乘以单轮的时间复杂度即可得到总体运行时间：</p>
+<p>$$\text{Total Time} &#x3D; W \times \Theta(N + R) &#x3D; \Theta(WN + WR)$$</p>
+<h1 id="MSD-基数排序-MSD-Radix-Sort"><a href="#MSD-基数排序-MSD-Radix-Sort" class="headerlink" title="MSD 基数排序 (MSD Radix Sort)"></a><strong>MSD 基数排序 (MSD Radix Sort)</strong></h1><p>基本思想：就像 LSD 一样，但是从最左边（最高位）的数字开始向右排序。</p>
+<blockquote>
+<p>假设我们按最高位数字、然后中间位数字、最后最右位数字进行排序。我们会得到正确的结果吗？</p>
+</blockquote>
+<p>关键思想：单独对每个子问题进行排序。 <em>(图中展示了字符串数组根据最高位字母被递归地划分为更小的块（子组），并在子组内部继续按下一位字母排序的过程。)</em></p>
+<p><img src="/images/CS61B-ch36-%EF%BC%9Aradix-sort/Pasted%20image%2020261007233922.png" srcset="/img/loading.gif" lazyload></p>
+<p>注意，我们首先按最左位数字（或字母）排序。然后我们按最左位数字将数据分组，因此一个组会以 ‘a’ 开头，下一组会以 ‘b’ 开头，依此类推。接着，我们在各个子组内按中间位数字排序，并创建新的子组。最后，我们会继续将其拆分为更多子组，直到得到所有单独的子问题。最终结果将是有序的。</p>
+<h2 id="运行时间-Runtimes"><a href="#运行时间-Runtimes" class="headerlink" title="运行时间 (Runtimes)"></a><strong>运行时间 (Runtimes)</strong></h2><p>最好情况 (Best Case)：</p>
+<ul>
+<li>我们只需进行一次计数排序，仅查看最高位数字：$\Theta(N + R)$</li>
+</ul>
+<p>最坏情况 (Worst Case)</p>
+<ul>
+<li>我们必须查看每个字符，退化为 LSD 排序：$\Theta(WN + WR)$</li>
+</ul>
+<p><strong>运行时间总结 (Summary of Runtimes)</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>算法</strong></th>
+<th><strong>内存 (Memory)</strong></th>
+<th><strong>运行时间(最坏) (Runtime worst)</strong></th>
+<th><strong>备注 (Notes)</strong></th>
+<th><strong>稳定? (Stable?)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>堆排序 (Heapsort)</strong></td>
+<td>$\Theta(1)$</td>
+<td>$\Theta(N \log N)^*$</td>
+<td>缓存命中率低 (61C)</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>插入排序 (Insertion)</strong></td>
+<td>$\Theta(1)$</td>
+<td>$\Theta(N^2)^*$</td>
+<td>对小规模 $N$ 或几乎有序的数据最快</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>归并排序 (Mergesort)</strong></td>
+<td>$\Theta(N)$</td>
+<td>$\Theta(N \log N)^*$</td>
+<td>最快的稳定排序</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>随机快速排序 (Random Quicksort)</strong></td>
+<td>$\Theta(\log N)$</td>
+<td>期望 $\Theta(N \log N)^*$</td>
+<td>最快的比较排序</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>计数排序 (Counting Sort)</strong></td>
+<td>$\Theta(N+R)$</td>
+<td>$\Theta(N+R)$</td>
+<td>仅限字母表键</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>LSD 排序 (LSD Sort)</strong></td>
+<td>$\Theta(N+R)$</td>
+<td>$\Theta(WN+WR)$</td>
+<td>仅限字母表键组成的字符串</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>MSD 排序 (MSD Sort)</strong></td>
+<td>$\Theta(N+WR)$</td>
+<td>最好 $\Theta(N+R)$<br><br>  <br>  <br><br>最坏 $\Theta(WN+WR)$</td>
+<td>缓存命中率低 (61C)</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<h2 id="MSD-基数排序原理解析"><a href="#MSD-基数排序原理解析" class="headerlink" title="MSD 基数排序原理解析"></a>MSD 基数排序原理解析</h2><p>如果说上一节的 LSD（最低位优先）是一种“自下而上、全局推进”的迭代算法，那么本节的 MSD（最高位优先）本质上是一种“自上而下、分而治之 (Divide and Conquer)”的递归算法。</p>
+<h3 id="1-为什么不能像-LSD-那样直接全局扫描？"><a href="#1-为什么不能像-LSD-那样直接全局扫描？" class="headerlink" title="1. 为什么不能像 LSD 那样直接全局扫描？"></a>1. 为什么不能像 LSD 那样直接全局扫描？</h3><p>在 LSD 中，由于我们是从个位（最右侧）开始，后面对高位（左侧）的排序会自动覆盖前面对低位的排序权重，因此我们可以每次都对<strong>整个完整的数组</strong>进行计数排序。</p>
+<p>但在 MSD 中，如果你先排了百位，再对整个数组排十位，那么十位的排序结果就会彻底打乱之前百位建立好的宏观顺序。因此，教科书提出了“单独对每个子问题进行排序”<strong>的核心破局点： 在完成最高位排序后，必须将数据</strong>物理或逻辑上切分成独立的“桶（子组）”（比如所有以 ‘a’ 开头的单词为一组）。在排下一位时，排序操作严格限制在每个子组内部，子组与子组之间互不干扰。这在数学和工程上等价于对一棵前缀树（Trie）进行深度优先遍历（DFS）。</p>
+<h3 id="2-运行时间的两极分化"><a href="#2-运行时间的两极分化" class="headerlink" title="2. 运行时间的两极分化"></a>2. 运行时间的两极分化</h3><ul>
+<li><p><strong>最好情况 $\Theta(N + R)$ 的推导</strong>：MSD 具备 LSD 所没有的“短路（Short-circuit）”能力。假设你要排序的字符串在第一个字符上就各不相同（例如 <code>apple</code>, <code>banana</code>, <code>cat</code>），那么在经过第一轮计数排序（耗时 $\Theta(N+R)$）后，所有的子组大小都变成了 1。由于单个元素天然有序，递归直接触底反弹，算法提前终止。</p>
+</li>
+<li><p><strong>最坏情况 $\Theta(WN + WR)$ 的推导</strong>：如果所有数据的前缀极其相似，直到最后一位才分出胜负（例如 <code>AAAAA</code>, <code>AAAAB</code>, <code>AAAAC</code>），MSD 就无法短路，必须老老实实向下递归 $W$ 层，每一层都要处理 $N$ 个元素和 $R$ 个桶，此时时间复杂度完全退化为和 LSD 一样。</p>
+</li>
+</ul>
+<h3 id="3-内存与底层工程的隐蔽代价（深入剖析表格）"><a href="#3-内存与底层工程的隐蔽代价（深入剖析表格）" class="headerlink" title="3. 内存与底层工程的隐蔽代价（深入剖析表格）"></a>3. 内存与底层工程的隐蔽代价（深入剖析表格）</h3><p>表格中揭示了 MSD 的两个工程缺陷，这也是在实际系统底层实现时需要权衡的关键点：</p>
+<ul>
+<li><p>**空间复杂度突增至 $\Theta(N + WR)$**：LSD 只需要在全局维护一个大小为 $R$ 的计数数组，空间是 $\Theta(N+R)$。但 MSD 是递归算法，在最坏情况下递归深度达到 $W$。每一层递归调用在栈帧中都可能需要独立分配和维护大小为 $R$ 的辅助计数数组，这就导致了额外的 $W \times R$ 空间开销。</p>
+</li>
+<li><p>**极其糟糕的缓存局部性 (Bad caching)**：表格备注中特别提到了 <code>Bad caching (61C)</code>，这是为后续计算机体系结构课程埋下的伏笔。LSD 每次都线性地遍历整个连续的大数组，这对 CPU 预取（Prefetching）和各级 Cache 非常友好。而 MSD 随着递归加深，原本连续的大数组被切碎成了无数个微小的、在内存中分散的子数组。频繁地在这些微小的不连续内存块之间跳跃，会引发严重的 Cache Miss（缓存未命中），导致常数时间的急剧恶化。</p>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>稳定性</div>
+      <div>https://augusteing.github.io/2026/10/08/CS61B-ch36-：radix-sort/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年10月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/10/09/CS61B%EF%BC%9A%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" title="问题：归并排序、LSD 处理字符串">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">问题：归并排序、LSD 处理字符串</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/10/08/CS61B-ch34%EF%BC%9A%E6%8E%92%E5%BA%8F%E4%B8%8A%E9%99%90%E6%8E%A8%E5%AF%BC/" title="排序的上限">
+                        <span class="hidden-mobile">排序的上限</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
