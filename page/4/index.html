@@ -230,15 +230,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/17/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/" target="_self">
-          An Introduction to Asymptotic Analysis
+        <a href="/2026/07/03/CS61B-ch23-note%EF%BC%9A%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86/" target="_self">
+          BFS 和 DFS
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/17/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/03/CS61B-ch23-note%EF%BC%9A%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86/" target="_self">
         <div>
-          之前，我们一直关注如何节省编写程序的时间。现在，我们将学习如何最有效地利用计算机的时间和内存。 我们可以从两个不同的角度来考虑编写高效程序的过程： 1.编程成本（截至当前日期的课程内容）  你的程序开发需要多长时间？  你的代码容易阅读或修改吗  你的代码可维护性如何？（非常重要——大部分成本来自维护和可扩展性，而非开发！）2.执行成本（从本课程这一点开始的所有内容）  时间复杂度：你的程序执行需
+          在第 22.4 节中，我们介绍了图的深度优先搜索遍历。在深度优先搜索中，我们会沿着第一个子节点的整个谱系向下访问，然后才开始查看第二个子节点——我们确实是在优先搜索深度。 这里，我们将讨论广度优先搜索（也称为层序遍历）。在广度优先搜索中，我们会先访问所有直接子节点，然后再继续访问任何孙节点。换句话说，我们先访问距离源点 1 条边的所有节点，然后是距离源点 2 条边的所有节点，以此类推。 BFS 的
         </div>
       </a>
 
@@ -246,8 +246,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-01-17 16:34" pubdate>
-              2026-01-17
+            <time datetime="2026-07-03 16:35" pubdate>
+              2026-07-03
             </time>
           </div>
         
@@ -284,15 +284,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/01/01/CS61B-ch-11-note/" target="_self">
-          There is no chapter 11 ,therefore ch11 note disppears
+        <a href="/2026/07/03/CS61B-ch22-note%EF%BC%9A%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86%E5%92%8C%E5%9B%BE/" target="_self">
+          22.1 Tree Recap
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/01/01/CS61B-ch-11-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/03/CS61B-ch22-note%EF%BC%9A%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86%E5%92%8C%E5%9B%BE/" target="_self">
         <div>
-          
+          Trees and Traversals 什么是树呢？回想一下，树由以下部分组成：  一组相连的节点（或顶点）。这两个术语可以互换使用。   一组连接这些节点的边。边不能形成环路。 Constraint: 任意两个节点之间有且仅有一条路径。    图 #1 是一棵树。它有一个节点，没有边。这没问题！  第二个和第三个结构是树。注意，第三个是链表。链表仍然是一棵树，因为它是一个连通的无环图。 第四个
         </div>
       </a>
 
@@ -300,8 +300,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-01-01 23:46" pubdate>
-              2026-01-01
+            <time datetime="2026-07-03 12:16" pubdate>
+              2026-07-03
             </time>
           </div>
         
@@ -338,15 +338,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/28/CS61B-ch9-note/" target="_self">
-          The Problem of Generality
+        <a href="/2026/06/23/CS61B-disccusion-07/" target="_self">
+          CS 61B 2025年春季
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/28/CS61B-ch9-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/06/23/CS61B-disccusion-07/" target="_self">
         <div>
-          回忆一下我们上周创建的两个列表类：SLList 和 AList。如果你查看它们的文档，你会发现它们非常相似。事实上，它们所有的支持方法都是一样的！ 假设我们想编写一个类 WordUtils ，它包含可以对单词列表运行的函数，包括一个计算 SLList 中最长字符串的方法。 Exercise 4.1.1. Try writing this method by yourself. The method
+          B树, LLRB (左倾红黑树), 哈希 (Hashing)讨论课 07: 2025年3月10日 1. 2-3 树与左倾红黑树 (2-3 Trees and LLRBs) (a) 画出在插入 18, 38, 12, 13 和 20 之后，以下 2-3 树会变成什么样子。 (注：原 PDF 包含一张树的图片，根节点为 8，左子节点为 [4 | 6]，右子节点为 14) (b) 现在，将上面生成的 2
         </div>
       </a>
 
@@ -354,8 +354,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-28 23:04" pubdate>
-              2025-12-28
+            <time datetime="2026-06-23 10:19" pubdate>
+              2026-06-23
             </time>
           </div>
         
@@ -392,15 +392,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/27/CS61B-ch8-note/" target="_self">
-          ArrayList
+        <a href="/2026/06/20/CS61B-ch18-note-%E7%BA%A2%E9%BB%91%E6%A0%91/" target="_self">
+          Rotating Trees
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/27/CS61B-ch8-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/06/20/CS61B-ch18-note-%E7%BA%A2%E9%BB%91%E6%A0%91/" target="_self">
         <div>
-          在本节中，我们将构建一个名为 AList 的新类，它可以用来存储任意长度的数据列表，类似于我们的 DLList 。与 DLList 不同， AList 将使用数组来存储数据，而不是链表。 Linked List Performance Puzzle假设我们想要为 DLList 编写一个名为 int get(int i) 的新方法。为什么 get 对于长列表来说比 getLast 慢？在什么输入下它
+          Time for some colors. **This chapter will continue our discussion on self-balancing trees through a more colorful lens. just like ferris Wheels 虽然 B 树非常平衡，但实现起来真的很难。我们需要跟踪不同的节点，并且分裂过程相当复杂。作为欣赏干净代码和喜欢挑
         </div>
       </a>
 
@@ -408,8 +408,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-27 18:23" pubdate>
-              2025-12-27
+            <time datetime="2026-06-20 21:33" pubdate>
+              2026-06-20
             </time>
           </div>
         
@@ -446,15 +446,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/24/CS61B-ch7-note/" target="_self">
-          Testing and Selection Sort
+        <a href="/2026/05/24/CS61B-ch17-note%EF%BC%9A2-3%E6%A0%91/" target="_self">
+          Tree Height
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/24/CS61B-ch7-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/05/24/CS61B-ch17-note%EF%BC%9A2-3%E6%A0%91/" target="_self">
         <div>
-          对于中级到高级程序员来说，最重要的技能之一就是能够判断自己的代码是否正确。在本章中，我们将讨论如何编写测试来评估代码的正确性。在这个过程中，我们还将讨论一种名为选择排序的排序算法。 A New Way当你编写程序时，它可能会有错误。在课堂环境中，你通过用户交互、代码分析和自动评分器测试的组合来获得代码正确性的信心，在许多情况下，尤其是作为你获得分数的方式，自动评分器测试最为重要。（分数万岁是吧）
+          BST（二叉搜索树）的一个不幸特征是，它们的形态介于最好的情况“茂密 (bushy)”树和最坏的情况“细长 (spindly)”树之间。 在最好的情况下，树的高度为 $\Theta(\log N)$；而在最坏的情况下，树的高度为 $\Theta(N)$，此时它基本上变成了链表。例如，在“细长”的 BST 上执行 contains 操作将花费线性时间。 下方的两棵树高度均为 $H &#x3D; 3$
         </div>
       </a>
 
@@ -462,8 +462,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-24 11:42" pubdate>
-              2025-12-24
+            <time datetime="2026-05-24 19:17" pubdate>
+              2026-05-24
             </time>
           </div>
         
@@ -500,15 +500,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/23/CS61B-ch6-note%EF%BC%9Aarrays/" target="_self">
-          Array Basics
+        <a href="/2026/05/19/CS61B-ch20-note%EF%BC%9A%E5%93%88%E5%B8%8C%E7%A0%81/" target="_self">
+          hashcode
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/23/CS61B-ch6-note%EF%BC%9Aarrays/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/05/19/CS61B-ch20-note%EF%BC%9A%E5%93%88%E5%B8%8C%E7%A0%81/" target="_self">
         <div>
-          到目前为止，我们已经看到了如何利用递归类定义来创建一个可扩展的列表类，包括 IntList 、 SLList 和 DLList 。在本书接下来的两个章节中，我们将讨论如何使用数组来构建一个列表类。 本书的这一部分假设你已经熟悉数组，并且不打算成为它们语法的全面指南。 为了最终构建一个可以存储信息的列表，我们需要某种方式来获取内存框。之前，我们看到过如何通过变量声明和类实例化来获取内存框。(第三节中
+          Java 默认的哈希码是对象的内存地址 对于int类型的对象，常见的哈希码是它的数值。 一个好的哈希函数应当尽量避免冲突而且使得相同对象的equals和hashcode保持一致  关于第三点：Java经常使用equals来要求哈希函数，比如：对于一个相同的对象，其因为equals得到的结果是true，那么他们理应有相同的哈希码。 equals 被用于检测两个对象是否是同一个东西 这样做的主要目的
         </div>
       </a>
 
@@ -516,8 +516,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-23 17:31" pubdate>
-              2025-12-23
+            <time datetime="2026-05-19 19:50" pubdate>
+              2026-05-19
             </time>
           </div>
         
@@ -554,15 +554,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/22/CS61B-ch5-note/" target="_self">
-          DLLists
+        <a href="/2026/05/14/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/" target="_self">
+          Lists and Sets in Java
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/22/CS61B-ch5-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/05/14/CS61B-ch12-note-%EF%BC%9A%E8%BF%AD%E4%BB%A3%E5%99%A8/" target="_self">
         <div>
-          在第 2.2 章中，我们构建了 SLList 类，它比我们之前使用的裸露递归 IntList 数据结构更好。在本节中，我们将结束对链表的讨论，同时开始学习我们之后需要用于基于数组的列表（我们将称之为 AList ）的基础知识。在这一过程中，我们还将揭示为什么在上一章中我们使用了那个笨拙的名称 SLList 的秘密。 addLast考虑上一章中的 addLast(int x) 方法。 1234567
+          本节中，我们将学习如何使用 Java 的内置 List 和 Set 数据结构，以及构建我们自己的 ArraySet  Lists in Real Java Code我们从头开始构建了一个列表，但 Java 提供了一个内置的 List 接口和几个实现，例如 ArrayList 。记住，由于 List 是一个接口，我们不能实例化它！我们必须实例化它的某个实现。 要访问这个，我们可以使用类&#x2F;接
         </div>
       </a>
 
@@ -570,8 +570,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-22 16:20" pubdate>
-              2025-12-22
+            <time datetime="2026-05-14 19:34" pubdate>
+              2026-05-14
             </time>
           </div>
         
@@ -608,15 +608,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/20/CS61B-ch4-note/" target="_self">
-          SLLists
+        <a href="/2026/04/22/CS61B-ch19-note-%E5%93%88%E5%B8%8C%E8%A1%A8/" target="_self">
+          Introduction to Hashing: Data Indexed Arrays
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/20/CS61B-ch4-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/04/22/CS61B-ch19-note-%E5%93%88%E5%B8%8C%E8%A1%A8/" target="_self">
         <div>
-          在第三章中，我们构建了 IntList 类，这是一种理论上可以完成列表所有功能的列表数据结构。然而，实际上， IntList 类存在使用起来较为笨拙的问题，导致代码难以阅读和维护。 如果你自己写代码你就会明白了，很丑陋的数据结构 根本问题在于 IntList 类是一种我称之为“裸递归”数据结构。为了正确使用 IntList 类，程序员必须理解并运用递归，即使是在处理简单的列表相关任务时也是如此。这
+          #cs61b  到目前为止，我们在课程中已经看到了许多将事物存储在数据结构中的方法，但它们在运行时效率并不总是最高。现在，让我们来介绍一种令人难以置信的数据结构，它可以在其中提供插入、删除和包含检查，无论其内部有多少元素（即使有数百万个项目）——在最佳情况下，所有操作都在 O(1)运行时间内完成！听起来太好了，以至于不真实？ 在本章中，我们将探索哈希的魔力，看看这是如何实现的。 快速回顾我们已研究
         </div>
       </a>
 
@@ -624,8 +624,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-20 15:42" pubdate>
-              2025-12-20
+            <time datetime="2026-04-22 18:20" pubdate>
+              2026-04-22
             </time>
           </div>
         
@@ -662,15 +662,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/10/CS61B-ch3-note/" target="_self">
-          list
+        <a href="/2026/04/14/softmax-%E6%A2%AF%E5%BA%A6%E8%AE%A1%E7%AE%97/" target="_self">
+          softmax 梯度计算
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/10/CS61B-ch3-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/04/14/softmax-%E6%A2%AF%E5%BA%A6%E8%AE%A1%E7%AE%97/" target="_self">
         <div>
-          如果你有python的使用经验，那么对这个数据结构不会陌生 12L = [1, 2, 3]print(L)  虽然 Java 有内置的 List 类型，但我们现在暂时不使用它。在本章中，我们将从头开始构建自己的列表，同时学习一些 Java 的关键特性 The Mystery of the Walrus开始我们的旅程，我们将首先思考海象的深奥之谜。（原文用了profound这个词汇，实在是有点美式幽
+          线性层反向传播推导：为什么 dW &#x3D; X.T @ dscores？tags: #DeepLearning #Math #Calculus #MatrixAlgebra #CS231n 1. 问题定义 (Problem Setup)在一个全连接层（Linear Layer）或 Softmax 分类器的第一步中，前向传播公式为： $$S &#x3D; XW$$ 其中变量定义如下：  **$X
         </div>
       </a>
 
@@ -678,8 +678,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-10 13:13" pubdate>
-              2025-12-10
+            <time datetime="2026-04-14 18:08" pubdate>
+              2026-04-14
             </time>
           </div>
         
@@ -694,8 +694,15 @@
     
       <span class="category-chain">
         
-  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
   
 
       </span>
@@ -716,15 +723,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/12/09/CS61B-ch2-note/" target="_self">
-          Static vs. Non-Static Methods
+        <a href="/2026/04/12/CS231N-assignment2%EF%BC%9Adropout/" target="_self">
+          CS231N assignment2：dropout
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/12/09/CS61B-ch2-note/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/04/12/CS231N-assignment2%EF%BC%9Adropout/" target="_self">
         <div>
-          Static method我们在ch1的note中提到过：Java的所有代码都必须归属于一个类，大多数代码则是在函数（或者叫方法中）。我们可以先看一个例子： 12345public class Dog &#123;    public static void makeNoise() &#123;        System.out.println(&quot;Bark!&quot;);    &#
+          dropoutDropout [1] 是一种通过在前向传播过程中随机将某些输出激活设为零来正则化神经网络的技巧。在这个练习中，你将实现一个 dropout 层，并修改你的全连接网络以选择性地使用 dropout。
         </div>
       </a>
 
@@ -732,8 +739,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-12-09 14:22" pubdate>
-              2025-12-09
+            <time datetime="2026-04-12 20:27" pubdate>
+              2026-04-12
             </time>
           </div>
         
@@ -748,8 +755,15 @@
     
       <span class="category-chain">
         
-  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Assignment/" class="category-chain-item">Assignment</a>
+  
+  
+
   
 
       </span>
@@ -768,7 +782,7 @@
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <a class="extend prev" rel="prev" href="/page/3/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/#board">5</a><a class="extend next" rel="next" href="/page/5/#board"><i class="iconfont icon-arrowright"></i></a>
+      <a class="extend prev" rel="prev" href="/page/3/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/#board">5</a><a class="page-number" href="/page/6/#board">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/#board">8</a><a class="extend next" rel="next" href="/page/5/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 

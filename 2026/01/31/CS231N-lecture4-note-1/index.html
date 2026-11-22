@@ -1,0 +1,782 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="Introduction  引言在本节中，我们将建立对 反向传播 (Backpropagation) 的直观理解并掌握相关专业技能。反向传播是一种通过递归应用 链式法则 (Chain Rule) 来计算表达式梯度的方法。理解这一过程及其细节对于理解、有效开发、设计和调试 神经网络 至关重要。 我们研究的核心问题如下：给定一个函数 $f(x)$，其中 $x$ 是输入向量，我们需要计算 $f$ 在 $">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture4 note 1">
+<meta property="og:url" content="https://augusteing.github.io/2026/01/31/CS231N-lecture4-note-1/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="Introduction  引言在本节中，我们将建立对 反向传播 (Backpropagation) 的直观理解并掌握相关专业技能。反向传播是一种通过递归应用 链式法则 (Chain Rule) 来计算表达式梯度的方法。理解这一过程及其细节对于理解、有效开发、设计和调试 神经网络 至关重要。 我们研究的核心问题如下：给定一个函数 $f(x)$，其中 $x$ 是输入向量，我们需要计算 $f$ 在 $">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture4-note-1/Pasted%20image%2020260131125910.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture4-note-1/Pasted%20image%2020260131133704.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture4-note-1/Pasted%20image%2020260131171646.png">
+<meta property="article:published_time" content="2026-01-31T12:07:51.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.708Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture4-note-1/Pasted%20image%2020260131125910.png">
+  
+  
+  
+  <title>CS231N lecture4 note 1 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture4 note 1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-31 20:07" pubdate>
+          2026年1月31日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          52 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture4 note 1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Introduction-引言"><a href="#Introduction-引言" class="headerlink" title="Introduction  引言"></a>Introduction  引言</h1><p>在本节中，我们将建立对 <strong>反向传播 (Backpropagation)</strong> 的直观理解并掌握相关专业技能。反向传播是一种通过递归应用 <strong>链式法则 (Chain Rule)</strong> 来计算表达式梯度的方法。理解这一过程及其细节对于理解、有效开发、设计和调试 <strong>神经网络</strong> 至关重要。</p>
+<p>我们研究的核心问题如下：给定一个函数 $f(x)$，其中 $x$ 是输入向量，我们需要计算 $f$ 在 $x$ 处的梯度（即 $\nabla f(x)$）。</p>
+<p>我们关注这个问题的主要原因在于，在神经网络的具体案例中，$f$ 对应于 **损失函数 ($L$)**，而输入 $x$ 由训练数据和神经网络权重组成。例如，损失函数可以是 SVM 损失函数，输入包括训练数据 $(x_i, y_i), i&#x3D;1\dots N$ 以及权重和偏置 $W, b$。</p>
+<p>注意（这是机器学习中常见的情况），我们通常认为训练数据是给定且固定的，而权重是我们可控的变量。因此，尽管我们可以通过反向传播轻易计算输入样本 $x_i$ 的梯度，但在实践中，我们通常只计算参数（如 $W, b$）的梯度，以便用于 <strong>参数更新</strong>。不过，正如课程稍后将涉及的，计算 $x_i$ 的梯度有时仍有帮助，例如用于可视化和解释神经网络的行为。</p>
+<p>如果你在加入本课程时已能熟练运用链式法则推导梯度，我们仍鼓励你浏览本节内容。因为它提供了一种鲜少涉及的视角——将反向传播视为 <strong>实值电路 (Real-valued Circuits)</strong> 中的 **反向流动 (Backward Flow)**。你从中获得的见解将对整个课程的学习大有裨益。</p>
+<h1 id="Simple-expressions-and-interpretation-of-the-gradient"><a href="#Simple-expressions-and-interpretation-of-the-gradient" class="headerlink" title="Simple expressions and interpretation of the gradient"></a>Simple expressions and interpretation of the gradient</h1><p>让我们从简单的开始，以便为更复杂的表达式建立符号和约定。考虑两个数字的简单乘法函数 $f(x, y) &#x3D; xy$。推导任一输入的偏导数只需简单的微积分知识：</p>
+<p>$$f(x, y) &#x3D; xy \quad \rightarrow \quad \frac{\partial f}{\partial x} &#x3D; y \quad \frac{\partial f}{\partial y} &#x3D; x$$<br>让我们从简单的开始，以便为更复杂的表达式建立符号和约定。考虑两个数字的简单乘法函数 $f(x, y) &#x3D; xy$。推导任一输入的偏导数只需简单的微积分知识：</p>
+<p>$$f(x, y) &#x3D; xy \quad \rightarrow \quad \frac{\partial f}{\partial x} &#x3D; y \quad \frac{\partial f}{\partial y} &#x3D; x$$</p>
+<p><strong>解释</strong>。请记住导数告诉了你什么：它们表示函数在某一点附近无限小区域内相对于该变量的变化率：</p>
+<p>$$\frac{df(x)}{dx} &#x3D; \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$$</p>
+<p>关于技术细节的注意事项是，左侧的除号与右侧的除号不同，它不代表除法。相反，该符号表示算子 $\frac{d}{dx}$ 被应用于函数 $f$，并返回一个不同的函数（导数）。理解上述表达式的一个好方法是，当 $h$ 非常小时，函数可以被直线很好地近似，而导数就是它的斜率。换句话说，每个变量上的导数告诉你整个表达式对其值的<strong>敏感度</strong>。例如，如果 $x&#x3D;4, y&#x3D;-3$，则 $f(x,y) &#x3D; -12$，且 $x$ 上的导数 $\frac{\partial f}{\partial x} &#x3D; -3$。这告诉我们，如果我们把这个变量的值增加一点点，对整个表达式的影响将是使其减小（由于负号），且变化量是该增加量的三倍。这可以通过重新排列上述方程看出（$f(x+h) &#x3D; f(x) + h \frac{df(x)}{dx}$）。类似地，因为 $\frac{\partial f}{\partial y} &#x3D; 4$，我们预期将 $y$ 的值增加非常小的量 $h$ 也会增加函数的输出（由于正号），且增加量为 $4h$。</p>
+<blockquote>
+<p>每个变量上的导数告诉你整个表达式对其值的敏感度。</p>
+</blockquote>
+<p>如前所述，梯度 $\nabla f$ 是偏导数的向量，因此我们有 $\nabla f &#x3D; [\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}] &#x3D; [y, x]$。尽管梯度在技术上是一个向量，为了简单起见，我们经常使用诸如“$x$ 上的梯度”之类的术语，而不是技术上正确的短语“$x$ 上的偏导数”。</p>
+<p>我们也可以推导加法运算的导数：</p>
+<p>$$f(x, y) &#x3D; x + y \quad \rightarrow \quad \frac{\partial f}{\partial x} &#x3D; 1 \quad \frac{\partial f}{\partial y} &#x3D; 1$$</p>
+<p>也就是说，无论 $x, y$ 的值是多少，$x, y$ 上的导数都是 1。这也是合理的，因为增加 $x$ 或 $y$ 中的任何一个都会增加 $f$ 的输出，并且这种增加的比率独立于 $x, y$ 的实际值（不像上面的乘法情况）。我们在课程中会经常使用的最后一个函数是 $max$ 运算：</p>
+<p>$$f(x, y) &#x3D; \max(x, y) \quad \rightarrow \quad \frac{\partial f}{\partial x} &#x3D; 1(x &gt;&#x3D; y) \quad \frac{\partial f}{\partial y} &#x3D; 1(y &gt;&#x3D; x)$$</p>
+<p>也就是说，较大输入上的（次）梯度是 1，而另一个输入上的梯度是 0。直观地说，如果输入是 $x&#x3D;4, y&#x3D;2$，那么 max 是 4，且函数对 $y$ 的设置不敏感。也就是说，如果我们将它增加一个微小的量 $h$，函数将保持输出 4，因此梯度为零：没有影响。当然，如果我们把 $y$ 改变一个很大的量（例如大于 2），那么 $f$ 的值就会改变，但导数并没有告诉我们关于输入发生这种巨大变化后的影响；正如定义中的 $\lim_{h \to 0}$ 所表明的那样，它们仅对输入的微小、无限小的变化提供信息。</p>
+<h1 id="使用链式法则的复合表达式"><a href="#使用链式法则的复合表达式" class="headerlink" title="使用链式法则的复合表达式"></a>使用链式法则的复合表达式</h1><p>现在让我们开始考虑涉及多个复合函数的更复杂表达式，例如 $f(x, y, z) &#x3D; (x + y)z$。这个表达式仍然简单到可以直接微分，但我们将采用一种特定的方法来处理它，这将有助于理解反向传播背后的直觉。具体来说，请注意这个表达式可以分解为两个表达式：$q &#x3D; x + y$ 和 $f &#x3D; qz$。此外，正如上一节所见，我们知道如何分别计算这两个表达式的导数。$f$ 只是 $q$ 和 $z$ 的乘法，所以 $\frac{\partial f}{\partial q} &#x3D; z, \frac{\partial f}{\partial z} &#x3D; q$，而 $q$ 是 $x$ 和 $y$ 的加法，所以 $\frac{\partial q}{\partial x} &#x3D; 1, \frac{\partial q}{\partial y} &#x3D; 1$。然而，我们不一定关心中间值 $q$ 上的梯度——$\frac{\partial f}{\partial q}$ 的值并不是很有用。相反，我们最终感兴趣的是 $f$ 相对于其输入 $x, y, z$ 的梯度。<strong>链式法则</strong>告诉我们，将这些梯度表达式“链接”在一起的正确方法是相乘。例如，$\frac{\partial f}{\partial x} &#x3D; \frac{\partial f}{\partial q} \frac{\partial q}{\partial x}$。在实践中，这只是两个保存了梯度的数值的乘法。</p>
+<p>译者按：这里实际上为 $x$ 对 $f$ 的影响，$x$ 通过作用于 $q$ 影响函数值<br>让我们通过一个例子来看看：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># 设置输入值</span><br><span class="hljs-attr">x</span> = -<span class="hljs-number">2</span><span class="hljs-comment">; y = 5; z = -4</span><br><br><span class="hljs-comment"># 执行前向传播</span><br><span class="hljs-attr">q</span> = x + y <span class="hljs-comment"># q 变为 3</span><br><span class="hljs-attr">f</span> = q * z <span class="hljs-comment"># f 变为 -12</span><br><br><span class="hljs-comment"># 执行后向传播（反向传播），顺序相反：</span><br><span class="hljs-comment"># 首先通过 f = q * z 反向传播</span><br><span class="hljs-attr">dfdz</span> = q <span class="hljs-comment"># df/dz = q，所以 z 上的梯度变为 3</span><br><span class="hljs-attr">dfdq</span> = z <span class="hljs-comment"># df/dq = z，所以 q 上的梯度变为 -4</span><br><br><span class="hljs-comment"># 接着通过 q = x + y 反向传播</span><br><span class="hljs-attr">dqdx</span> = <span class="hljs-number">1.0</span><br><span class="hljs-attr">dqdy</span> = <span class="hljs-number">1.0</span><br><span class="hljs-attr">dfdx</span> = dfdq * dqdx <span class="hljs-comment"># 这里的乘法即体现了链式法则！</span><br><span class="hljs-attr">dfdy</span> = dfdq * dqdy<br></code></pre></td></tr></table></figure>
+
+<p>最后我们得到了变量的梯度 <code>[dfdx, dfdy, dfdz]</code>，它们告诉我们变量 <code>x, y, z</code> 对 <code>f</code> 的影响程度！这是反向传播最简单的例子。在接下来的内容中，我们将使用一种更简洁的符号，省略 <code>df</code> 前缀。例如，我们将简单地写 <code>dq</code> 来代替 <code>dfdq</code>，并默认梯度总是相对于最终输出计算的。</p>
+<p><img src="/images/CS231N-lecture4-note-1/Pasted%20image%2020260131125910.png" srcset="/img/loading.gif" lazyload></p>
+<p>这种计算也可以通过电路图直观地展示出来。左侧的实值“电路”展示了计算过程的视觉表示。<strong>前向传播 (Forward pass)</strong> 计算从输入到输出的数值（图中以绿色显示）。随后，<strong>反向传播 (Backward pass)</strong> 从末端开始，递归地应用链式法则来计算梯度（图中以红色显示），一直回传至电路的输入端。我们可以将梯度想象为在电路中<strong>反向流动</strong>。</p>
+<p>请注意，反向传播是一个美妙的<strong>局部过程</strong>。电路图中的每个门单元接收一些输入，并能立即计算两件事：1. 它的输出值；2. 其输出相对于输入的<strong>局部</strong>梯度。请注意，门单元可以完全独立地完成这项工作，而无需知道它所嵌入的整个电路的任何细节。然而，一旦前向传播结束，在反向传播期间，门单元最终将获得其输出值相对于整个电路最终输出的梯度。链式法则指出，门单元应该获取该梯度，并将其乘以它为所有输入计算的每一个梯度。</p>
+<blockquote>
+<p>由于链式法则而产生的这种额外的乘法（针对每个输入），可以将一个孤立且相对无用的门单元转变为复杂电路（如整个神经网络）中的一个齿轮。</p>
+</blockquote>
+<p>让我们再次参考该示例，以直观地理解其工作原理。加法门接收输入 $[-2, 5]$ 并计算输出 $3$。由于该门计算的是加法运算，其两个输入的局部梯度均为 $+1$。电路的其余部分计算出的最终值为 $-12$。在反向传播过程中（链式法则在电路中递归地向后应用），加法门（作为乘法门的输入）得知其输出的梯度为 $-4$。如果我们把电路<strong>拟人化</strong>，认为它想要输出更高的值（这有助于直观理解），那么我们可以认为电路“想要”加法门的输出变得更低（由于负号），且“力度”为 $4$。为了继续递归并链接梯度，加法门获取该梯度并将其乘以其输入的所有局部梯度（使得 $x$ 和 $y$ 上的梯度均为 $1 * -4 &#x3D; -4$）。请注意，这产生了预期的效果：如果 $x, y$ 减小（响应它们的负梯度），那么加法门的输出就会减小，这反过来又会使乘法门的输出增加。</p>
+<p>因此，反向传播可以被认为是门单元之间（通过梯度信号）相互通信，以此表达它们希望其输出增加还是减少（以及这种意愿有多强烈），从而使最终的输出值更高。</p>
+<h1 id="模块化：Sigmoid-示例"><a href="#模块化：Sigmoid-示例" class="headerlink" title="模块化：Sigmoid 示例"></a><strong>模块化：Sigmoid 示例</strong></h1><p>我们上面介绍的门单元相对来说是任意的。任何类型的可微函数都可以充当门单元，并且只要方便，我们可以将多个门组合成一个门，或者将一个函数分解为多个门。让我们看另一个说明这一点的表达式：</p>
+<p>$$f(w,x) &#x3D; \frac{1}{1+e^{-(w_0x_0 + w_1x_1 + w_2)}}$$</p>
+<p>正如我们在课程后面将看到的，该表达式描述了一个使用 <strong>Sigmoid 激活 (sigmoid activation)</strong> 函数的二维神经元（输入为 $x$，权重为 $w$）。但现在，让我们非常简单地将其视为一个从输入 $w,x$ 到单个数字的函数。该函数由多个门组成。除了上面已经描述的那些（加法、乘法、最大值）之外，还有四个：</p>
+<p>$$f(x) &#x3D; \frac{1}{x} \rightarrow \frac{df}{dx} &#x3D; -1&#x2F;x^2$$</p>
+<p>$$f_c(x) &#x3D; c + x \rightarrow \frac{df}{dx} &#x3D; 1$$</p>
+<p>$$f(x) &#x3D; e^x \rightarrow \frac{df}{dx} &#x3D; e^x$$</p>
+<p>$$f_a(x) &#x3D; ax \rightarrow \frac{df}{dx} &#x3D; a$$</p>
+<p>其中函数 $f_c, f_a$ 分别将输入平移常数 $c$ 和缩放常数 $a$。这在技术上是加法和乘法的特例，但我们将它们作为（新的）一元门引入这里，因为我们不需要常数 $c, a$ 的梯度。整个电路如下图所示：</p>
+<p><img src="/images/CS231N-lecture4-note-1/Pasted%20image%2020260131133704.png" srcset="/img/loading.gif" lazyload></p>
+<p>这是一个具有 Sigmoid 激活函数的二维神经元的示例电路。输入是 $[x_0, x_1]$，神经元的（可学习）权重是 $[w_0, w_1, w_2]$。正如我们在后面将看到的，神经元计算其输入与权重的点积，然后其激活值被 sigmoid 函数柔和地“挤压”到 0 到 1 的范围内。</p>
+<p>在上面的例子中，我们看到了一长串的函数应用，它们对 $w,x$ 之间的点积结果进行操作。这些操作实现的函数称为 **Sigmoid 函数 $\sigma(x)$**。事实证明，sigmoid 函数相对于其输入的导数在经过推导后（利用在分子中加 1 减 1 这一有趣的技巧）会简化得非常漂亮：</p>
+<p>$$\sigma(x) &#x3D; \frac{1}{1+e^{-x}} $$</p>
+<p>$$\rightarrow \quad \frac{d\sigma(x)}{dx} &#x3D; \frac{e^{-x}}{(1+e^{-x})^2} &#x3D; \left( \frac{1+e^{-x}-1}{1+e^{-x}} \right) \left( \frac{1}{1+e^{-x}} \right) &#x3D; (1-\sigma(x))\sigma(x)$$</p>
+<p>如我们所见，梯度简化后变得非常简单。例如，sigmoid 表达式在前向传播过程中接收输入 1.0 并计算输出 0.73。上面的推导表明，<strong>局部</strong>梯度将简单地是 $(1 - 0.73) \times 0.73 \approx 0.2$，正如电路之前计算的那样（见上图），只是这种方式将通过单个、简单且高效的表达式完成（并且数值问题更少）。因此，在任何实际应用中，将这些操作分组到单个门中是非常有用的。让我们看看这个神经元的反向传播代码：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">w</span> = [<span class="hljs-number">2</span>, -<span class="hljs-number">3</span>, -<span class="hljs-number">3</span>] <span class="hljs-comment"># 假设一些随机权重和数据</span><br><span class="hljs-attr">x</span> = [-<span class="hljs-number">1</span>, -<span class="hljs-number">2</span>]<br><br><span class="hljs-comment"># 前向传播</span><br><span class="hljs-attr">dot</span> = w[<span class="hljs-number">0</span>]*x[<span class="hljs-number">0</span>] + w[<span class="hljs-number">1</span>]*x[<span class="hljs-number">1</span>] + w[<span class="hljs-number">2</span>]<br><span class="hljs-attr">f</span> = <span class="hljs-number">1.0</span> / (<span class="hljs-number">1</span> + math.exp(-dot)) <span class="hljs-comment"># sigmoid 函数</span><br><br><span class="hljs-comment"># 神经元的反向传播</span><br><span class="hljs-attr">ddot</span> = (<span class="hljs-number">1</span> - f) * f <span class="hljs-comment"># dot 变量上的梯度，使用 sigmoid 梯度推导公式</span><br><span class="hljs-attr">dx</span> = [w[<span class="hljs-number">0</span>] * ddot, w[<span class="hljs-number">1</span>] * ddot] <span class="hljs-comment"># 反向传播回 x</span><br><span class="hljs-attr">dw</span> = [x[<span class="hljs-number">0</span>] * ddot, x[<span class="hljs-number">1</span>] * ddot, <span class="hljs-number">1.0</span> * ddot] <span class="hljs-comment"># 反向传播回 w</span><br><span class="hljs-comment"># 完成！我们要到了电路输入的梯度</span><br></code></pre></td></tr></table></figure>
+
+<p>**实现技巧：分段反向传播 (Staged Backpropagation)**。如上面的代码所示，在实践中，将前向传播分解为易于进行反向传播的阶段总是有帮助的。例如，在这里我们创建了一个中间变量 <code>dot</code>，它保存了 <code>w</code> 和 <code>x</code> 之间点积的输出。然后在反向传播过程中，我们依次（以相反的顺序）计算相应的变量（例如 <code>ddot</code>，最终是 <code>dw, dx</code>），这些变量保存了对应变量的梯度。</p>
+<p>本节的重点在于，反向传播的具体执行细节，以及我们将前向函数的哪些部分视为门单元，实际上是为了方便起见。了解表达式的哪些部分具有简单的局部梯度非常有帮助，这样就可以用最少的代码和精力将它们链接在一起。</p>
+<h1 id="分阶段计算"><a href="#分阶段计算" class="headerlink" title="分阶段计算"></a>分阶段计算</h1><p>让我们看另一个例子。假设我们有一个如下形式的函数：</p>
+<p>$$f(x, y) &#x3D; \frac{x + \sigma(y)}{\sigma(x) + (x + y)^2}$$</p>
+<p>需要说明的是，这个函数完全没用，而且如果不考虑它是反向传播的一个好例子，你甚至不知道为什么要计算它的梯度。非常重要的一点是，如果你直接对 $x$ 或 $y$ 进行微分，你会得到非常庞大且复杂的表达式。然而，事实证明这样做完全没有必要，因为我们不需要写出一个显式的函数来评估梯度。我们只需要知道如何计算它。下面是我们如何构建该表达式的前向传播：</p>
+<figure class="highlight leaf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs leaf">x = 3 <span class="hljs-punctuation">#</span> 示例值<br>y = -4<br><br><span class="hljs-punctuation">#</span> 前向传播<br>sigy = 1.0 / (1 + math.exp(-y)) <span class="hljs-punctuation">#</span> 分子中的 sigmoid   <span class="hljs-punctuation">#</span><span class="hljs-params">(1)</span><br>num = x + sigy <span class="hljs-punctuation">#</span> 分子                               <span class="hljs-punctuation">#</span><span class="hljs-params">(2)</span><br>sigx = 1.0 / (1 + math.exp(-x)) <span class="hljs-punctuation">#</span> 分母中的 sigmoid   <span class="hljs-punctuation">#</span><span class="hljs-params">(3)</span><br>xpy = x + y                                          <span class="hljs-punctuation">#</span><span class="hljs-params">(4)</span><br>xpysqr = xpy**2                                      <span class="hljs-punctuation">#</span><span class="hljs-params">(5)</span><br>den = sigx + xpysqr <span class="hljs-punctuation">#</span> 分母                           <span class="hljs-punctuation">#</span><span class="hljs-params">(6)</span><br>invden = 1.0 / den                                   <span class="hljs-punctuation">#</span><span class="hljs-params">(7)</span><br>f = num * invden <span class="hljs-punctuation">#</span> 完成！                            <span class="hljs-punctuation">#</span><span class="hljs-params">(8)</span><br></code></pre></td></tr></table></figure>
+
+<p>呼，在表达式结束时，我们已经计算了前向传播。请注意，我们构建代码的方式包含多个中间变量，每个变量都只是简单的表达式，我们已经知道它们的局部梯度。因此，计算反向传播非常容易：我们将倒序进行，对于前向传播过程中的每个变量（<code>sigy, num, sigx, xpy, xpysqr, den, invden</code>），我们都会有一个对应的变量（以 <code>d</code> 开头），它保存了电路输出相对于该变量的梯度。此外，请注意，反向传播中的每一部分都涉及计算该表达式的局部梯度，并通过乘法将其与该表达式上的梯度进行链接:</p>
+<figure class="highlight leaf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs leaf"><span class="hljs-punctuation">#</span> 反向传播 f = num * invden<br>dnum = invden <span class="hljs-punctuation">#</span> 分子上的梯度                                         <span class="hljs-punctuation">#</span><span class="hljs-params">(8)</span><br>dinvden = num                                                     <span class="hljs-punctuation">#</span><span class="hljs-params">(8)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 invden = 1.0 / den <br>dden = (-1.0 / (den**2)) * dinvden                                <span class="hljs-punctuation">#</span><span class="hljs-params">(7)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 den = sigx + xpysqr<br>dsigx = (1) * dden                                                <span class="hljs-punctuation">#</span><span class="hljs-params">(6)</span><br>dxpysqr = (1) * dden                                              <span class="hljs-punctuation">#</span><span class="hljs-params">(6)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 xpysqr = xpy**2<br>dxpy = (2 * xpy) * dxpysqr                                        <span class="hljs-punctuation">#</span><span class="hljs-params">(5)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 xpy = x + y<br>dx = (1) * dxpy                                                   <span class="hljs-punctuation">#</span><span class="hljs-params">(4)</span><br>dy = (1) * dxpy                                                   <span class="hljs-punctuation">#</span><span class="hljs-params">(4)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 sigx = 1.0 / (1 + math.exp(-x))<br>dx += ((1 - sigx) * sigx) * dsigx <span class="hljs-punctuation">#</span> 注意 += !! 见下方注释            <span class="hljs-punctuation">#</span><span class="hljs-params">(3)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 num = x + sigy<br>dx += (1) * dnum                                                  <span class="hljs-punctuation">#</span><span class="hljs-params">(2)</span><br>dsigy = (1) * dnum                                                <span class="hljs-punctuation">#</span><span class="hljs-params">(2)</span><br><br><span class="hljs-punctuation">#</span> 反向传播 sigy = 1.0 / (1 + math.exp(-y))<br>dy += ((1 - sigy) * sigy) * dsigy                                 <span class="hljs-punctuation">#</span><span class="hljs-params">(1)</span><br><br><span class="hljs-punctuation">#</span> 完成！<br></code></pre></td></tr></table></figure>
+
+
+<p>注意几件事：</p>
+<p><strong>缓存前向传播变量</strong>。为了计算反向传播，保存（缓存）一些在前向传播中使用的变量是非常有帮助的。在实践中，你需要构建你的代码，以便缓存这些变量，使它们在反向传播期间可用。如果这太困难，重新计算它们也是可能的（但很浪费）。</p>
+<p><strong>梯度在分支处相加</strong>。前向表达式多次涉及变量 $x, y$，因此当我们执行反向传播时，必须小心使用 <code>+=</code> 而不是 <code>=</code> 来累积这些变量上的梯度（否则我们会覆盖它）。这遵循微积分中的 **多元链式法则 (multivariable chain rule)**，该法则指出，如果一个变量分支到电路的不同部分，那么回流到它的梯度将会相加。</p>
+<h1 id="反向流动的模式"><a href="#反向流动的模式" class="headerlink" title="反向流动的模式"></a><strong>反向流动的模式</strong></h1><p>有趣的是，在许多情况下，反向流动的梯度可以在直观层面上进行解释。例如，神经网络中最常用的三个门（$add, mul, max$），在反向传播过程中的行为都有非常简单的解释。考虑这个示例电路：</p>
+<p><img src="/images/CS231N-lecture4-note-1/Pasted%20image%2020260131171646.png" srcset="/img/loading.gif" lazyload></p>
+<p>这是一个展示反向传播直觉的示例电路，它演示了反向传播期间执行的操作，以便计算输入的梯度。求和操作将梯度均等地分配给所有输入。最大值操作将梯度路由给值较高的输入。乘法门获取输入激活值，交换它们并乘以其梯度。</p>
+<p>以包含图表的示例来看，我们可以看到：</p>
+<p><strong>加法门 (add gate)</strong> 总是接收其输出位置的梯度，并将其均等地分发给它的所有输入，无论前向传播时的输入值是多少。这源于加法运算的局部梯度简单地为 $+1.0$，因此所有输入上的梯度将精确等于输出上的梯度，因为它们乘以了 $1.0$（即保持不变）。在上面的示例电路中，请注意加法门将 $2.00$ 的梯度路由到了它的两个输入端，均等且未改变。</p>
+<p><strong>最大值门 (max gate)</strong> 对梯度进行路由。与加法门将梯度原样分发给所有输入不同，最大值门将梯度（原样）分配给它的<strong>恰好一个</strong>输入（即在前向传播期间具有最高值的那个输入）。这是因为最大值门的局部梯度对于最大值是 $1.0$，而对于所有其他值是 $0.0$。在上面的示例电路中，最大值运算将 $2.00$ 的梯度路由到了 $z$ 变量，因为它的值比 $w$ 高，而 $w$ 上的梯度保持为零。</p>
+<p><strong>乘法门 (multiply gate)</strong> 稍微没那么容易解释。它的局部梯度是输入值（只不过是交换过的），并且这会在链式法则过程中乘以其输出上的梯度。在上面的例子中，$x$ 上的梯度是 $-8.00$，即 $-4.00 \times 2.00$。</p>
+<p><strong>非直观的影响及其后果</strong>。注意，如果乘法门的一个输入非常小而另一个非常大，那么乘法门会做一些略微反直觉的事情：它会将一个相对巨大的梯度分配给小的输入，而将一个微小的梯度分配给大的输入。注意，在线性分类器中，权重与输入进行点积 $w^T x_i$（相乘），这意味着数据的尺度对权重的梯度幅度有影响。例如，如果你在预处理期间将所有输入数据样本 $x_i$ 乘以 $1000$，那么权重上的梯度将变大 $1000$ 倍，你就必须通过降低同样倍率的学习率来补偿。这就是为什么预处理非常重要，有时这种重要性体现在微妙的地方！对梯度如何流动有直观的理解可以帮助你调试其中一些情况。</p>
+<p>（说实话我认为这是很自然的）</p>
+<h1 id="向量化操作的梯度"><a href="#向量化操作的梯度" class="headerlink" title="向量化操作的梯度"></a>向量化操作的梯度</h1><p>上述部分主要关注单个变量，但所有概念都可以直接推广到矩阵和向量运算。然而，我们需要更加注意<strong>维度 (dimensions)</strong> 和<strong>转置 (transpose)</strong> 操作。</p>
+<p><strong>矩阵-矩阵乘法梯度</strong>。矩阵-矩阵乘法可能是最棘手的操作（它推广了所有矩阵-向量和向量-向量的乘法运算）：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># 前向传播</span><br><span class="hljs-attr">W</span> = np.random.randn(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>)<br><span class="hljs-attr">X</span> = np.random.randn(<span class="hljs-number">10</span>, <span class="hljs-number">3</span>)<br><span class="hljs-attr">D</span> = W.dot(X)<br><br><span class="hljs-comment"># 假设我们已经有了从电路更深处传回来的 D 的梯度 dD</span><br><span class="hljs-attr">dD</span> = np.random.randn(*D.shape) <span class="hljs-comment"># 形状与 D 相同</span><br><span class="hljs-attr">dW</span> = dD.dot(X.T) <span class="hljs-comment"># .T 表示矩阵转置</span><br><span class="hljs-attr">dX</span> = W.T.dot(dD)<br></code></pre></td></tr></table></figure>
+
+<p><strong>提示：使用维度分析！</strong> 请注意，你不需要死记硬背 <code>dW</code> 和 <code>dX</code> 的表达式，因为根据维度很容易重新推导它们。例如，我们知道计算出的权重梯度 <code>dW</code> 的尺寸必须与 <code>W</code> 相同，并且它必须依赖于 <code>X</code> 和 <code>dD</code> 的矩阵乘法（就像 <code>X, W</code> 都是单个数字而非矩阵时那样）。通常只有一种方式可以实现这一点并使维度匹配。例如，<code>X</code> 的尺寸为 $[10 \times 3]$，<code>dD</code> 的尺寸为 $[5 \times 3]$，如果我们想要 <code>dW</code> 且 <code>W</code> 的形状为 $[5 \times 10]$，那么实现这一点的唯一方法就是 <code>dD.dot(X.T)</code>，如上所示。</p>
+<p>**从简单的具体例子入手 (Work with small, explicit examples)**。有些人可能觉得很难一开始就推导出某些向量化表达式的梯度更新。我们的建议是显式地写出一个最小化的向量化示例，在纸上推导梯度，然后将模式推广到其高效的向量化形式。</p>
+<p>(Erik Learned-Miller 也写了一篇相关的长文档，关于矩阵&#x2F;向量求导，你可能会觉得很有帮助。)</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h1><p>我们已经建立了关于梯度的直观理解：它们意味着什么，它们如何在电路中向后流动，以及它们如何“沟通”电路的哪一部分应该增加或减少，以及以多大的力度来使最终输出更高。</p>
+<p>我们讨论了<strong>分阶段计算 (staged computation)</strong> 对于反向传播实际实现的重要性。你总是希望将函数分解为可以轻松推导局部梯度的模块，然后使用链式法则将它们链接起来。至关重要的是，你几乎不需要在纸上写出这些完整的表达式并对其进行符号微分，因为你永远不需要输入变量梯度的显式数学方程。因此，将表达式分解为多个阶段，以便你可以独立地对每个阶段进行微分（这些阶段可以是矩阵向量乘法、最大值操作或求和操作等），然后一步一步地通过变量进行反向传播。</p>
+<p>在下一节中，我们将开始定义神经网络，反向传播将允许我们有效地计算损失函数相对于其参数的梯度。换句话说，我们现在已经准备好训练神经网络了，本课程概念上最困难的部分已经过去了！卷积神经网络 (ConvNets) 将指日可待。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture4 note 1</div>
+      <div>https://augusteing.github.io/2026/01/31/CS231N-lecture4-note-1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月31日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/01/CS231N-lecture4-note3/" title="CS231N lecture4 note3">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N lecture4 note3</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/25/CS61B-%E8%A1%A5%E5%85%85%E7%AC%94%E8%AE%B0-1-extend/" title="CS61B 补充笔记 1 extend">
+                        <span class="hidden-mobile">CS61B 补充笔记 1 extend</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

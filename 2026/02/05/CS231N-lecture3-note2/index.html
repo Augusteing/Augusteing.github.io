@@ -1,0 +1,872 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="正则化f1 完美拟合了几乎所有数据点，但是我们通常会使用 f2 f1 通常被称为过拟合 Among multiple competing hypotheses，the simplest is best  BY William of Ockham 我们会有两种正则化的方式 L1、L2 其中 L1 更偏好于稀疏的向量，因为我们总是喜欢较小的值L2 更偏好于较小的值，因为 0.001 的平方总归会更小">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture3 note2">
+<meta property="og:url" content="https://augusteing.github.io/2026/02/05/CS231N-lecture3-note2/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="正则化f1 完美拟合了几乎所有数据点，但是我们通常会使用 f2 f1 通常被称为过拟合 Among multiple competing hypotheses，the simplest is best  BY William of Ockham 我们会有两种正则化的方式 L1、L2 其中 L1 更偏好于稀疏的向量，因为我们总是喜欢较小的值L2 更偏好于较小的值，因为 0.001 的平方总归会更小">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124223859.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124224409.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124224900.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124232409.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124232536.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124233713.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125113525.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125114839.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125130254.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125132200.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125132408.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125132801.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125132859.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125132935.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260125133017.png">
+<meta property="article:published_time" content="2026-02-05T02:53:47.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.698Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture3-note2/Pasted%20image%2020260124223859.png">
+  
+  
+  
+  <title>CS231N lecture3 note2 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture3 note2"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-05 10:53" pubdate>
+          2026年2月5日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture3 note2</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260124223859.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="正则化"><a href="#正则化" class="headerlink" title="正则化"></a>正则化</h1><p>f1 完美拟合了几乎所有数据点，但是我们通常会使用 f2</p>
+<p>f1 通常被称为过拟合</p>
+<p><em>Among multiple competing hypotheses，the simplest is best  BY William of Ockham</em></p>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260124224409.png" srcset="/img/loading.gif" lazyload><br>我们会有两种正则化的方式 L1、L2</p>
+<p>其中 L1 更偏好于稀疏的向量，因为我们总是喜欢较小的值<br>L2 更偏好于较小的值，因为 0.001 的平方总归会更小（但是很遗憾非0）</p>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260124224900.png" srcset="/img/loading.gif" lazyload><br>这是一个证明上述观点的简单例子，我们很明显的看到 L2 偏好于 w2这种表现形式，即使w1和w2和x相乘得到的分数一致。</p>
+<p>采用正则化的原因：</p>
+<ul>
+<li>能使模型更加简单，防止过拟合</li>
+<li>能使得计算简单</li>
+<li>表达我们对权重（这里指的是W）的某种偏好</li>
+</ul>
+<h1 id="softmax"><a href="#softmax" class="headerlink" title="softmax"></a>softmax</h1><p>这是个性能良好的函数</p>
+<h1 id="SGD"><a href="#SGD" class="headerlink" title="SGD"></a>SGD</h1><p>和我们在note1中看到的一样，我们随机采样256个样本进行梯度的计算。当我们遍历完所有的样本后，继续迭代称为一个周期</p>
+<h2 id="局部极小值问题"><a href="#局部极小值问题" class="headerlink" title="局部极小值问题"></a>局部极小值问题</h2><p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260124232409.png" srcset="/img/loading.gif" lazyload><br>如果你遇到梯度消失或者局部极小值问题，很明显你不知道怎么继续走了</p>
+<h2 id="鞍点问题"><a href="#鞍点问题" class="headerlink" title="鞍点问题"></a>鞍点问题</h2><p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260124232536.png" srcset="/img/loading.gif" lazyload></p>
+<p>中间的这个偏导数都为0的点称之为鞍点，实际上这种点更加常见</p>
+<h2 id="SGD本身问题"><a href="#SGD本身问题" class="headerlink" title="SGD本身问题"></a>SGD本身问题</h2><p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260124233713.png" srcset="/img/loading.gif" lazyload><br>因为我们取得不是整个训练集中的数据点，所以我们的梯度方向不能代表整个训练集，所以看起来会有些弯弯扭扭</p>
+<p>所有这里我们会通过一种“添加动量”的方式来做这件事，可以“冲过局部极小值”还有平滑点</p>
+<p>当然动量 SGD有时候会存在“冲过头”的现象出现</p>
+<ul>
+<li>它不仅仅看当前的梯度 ($dx$)，还会累加之前的梯度。</li>
+</ul>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125113525.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="RMSProp"><a href="#RMSProp" class="headerlink" title="RMSProp"></a>RMSProp</h1><p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125114839.png" srcset="/img/loading.gif" lazyload></p>
+<p>这是由 Geoffrey Hinton 提出的一种更聪明的优化器。以下为核心操作：</p>
+<p>$$grad_squared &#x3D; decay_rate \times grad_squared + (1 - decay_rate) \times dx^2$$<br>简单来说，<code>grad_squared</code> 得到的是<strong>该维度梯度近期震荡剧烈程度的一个“平均分”</strong>。</p>
+<ul>
+<li><strong>$dx^2$ 的意义</strong>：平稳的梯度（比如 0.1）平方后很小（0.01）；而剧烈震动的梯度（比如 10 或 -10）平方后会变大（100）。<strong>平方去掉了正负号，只保留了“强度”信息。</strong></li>
+<li><strong>$decay_rate$ 的意义</strong>：它决定了你的“记忆力”。如果你设为 0.9，意味着当前的“平均分”里，90% 来源于过去的经验，10% 来源于当下的表现。</li>
+</ul>
+<p>grad的平方会从过去的梯度平方中学习，这就是decay_rate的作用。</p>
+<h2 id="为什么要使用这种方法？"><a href="#为什么要使用这种方法？" class="headerlink" title="为什么要使用这种方法？"></a>为什么要使用这种方法？</h2><p>我们可以把这个过程看作是给每一条参数轴安装了一个<strong>自适应减震器</strong>：</p>
+<table>
+<thead>
+<tr>
+<th><strong>梯度表现</strong></th>
+<th><strong>grad_squared 的值</strong></th>
+<th><strong>效果 (除以 grad_squared​)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>经常大幅度跳动</strong> (不稳定)</td>
+<td>会变得非常<strong>大</strong></td>
+<td>学习率被除以一个大数，<strong>步子变小</strong>，防止飞出轨道。</td>
+</tr>
+<tr>
+<td><strong>一直非常微弱</strong> (收敛慢)</td>
+<td>会变得非常<strong>小</strong></td>
+<td>学习率被除以一个小数，<strong>步子放大</strong>，加快训练速度。</td>
+</tr>
+</tbody></table>
+<p><strong>RMSProp</strong> 则是<strong>“平抑震荡，加速平缓”</strong>。它会自动给那些疯狂震荡的方向“踩刹车”，给那些进展缓慢的方向“加油门”。</p>
+<p>总结来说：它会帮助我们在平缓的时候扩大步长，在剧烈时减小步长</p>
+<h1 id="深度学习优化器：Adam-Adaptive-Moment-Estimation"><a href="#深度学习优化器：Adam-Adaptive-Moment-Estimation" class="headerlink" title="深度学习优化器：Adam (Adaptive Moment Estimation)"></a>深度学习优化器：Adam (Adaptive Moment Estimation)</h1><p><strong>标签</strong>: #DeepLearning #CS231n #Optimization #Adam</p>
+<hr>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125130254.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-核心概念"><a href="#1-核心概念" class="headerlink" title="1. 核心概念"></a>1. 核心概念</h2><p>Adam 可以被理解为 <strong>Momentum + RMSProp</strong> 的结合体。它既利用了动量来加速收敛（像重球滚下山坡），又利用了自适应学习率来处理不同方向的梯度差异（像自动调节步伐）。</p>
+<ul>
+<li><strong>Momentum (动量)<strong>：关注梯度的</strong>方向</strong>，平滑梯度，积累速度。</li>
+<li><strong>RMSProp (自适应)<strong>：关注梯度的</strong>大小（震荡程度）</strong>，给震荡大的方向减速，给平缓的方向加速。</li>
+</ul>
+<hr>
+<h2 id="2-算法实现-伪代码解析"><a href="#2-算法实现-伪代码解析" class="headerlink" title="2. 算法实现 (伪代码解析)"></a>2. 算法实现 (伪代码解析)</h2><p>从 CS231n 的幻灯片中，我们可以看到 Adam 的更新步骤分为两部分：</p>
+<h3 id="A-计算一阶矩-First-Moment-类似-Momentum"><a href="#A-计算一阶矩-First-Moment-类似-Momentum" class="headerlink" title="A. 计算一阶矩 (First Moment) -&gt; 类似 Momentum"></a>A. 计算一阶矩 (First Moment) -&gt; 类似 Momentum</h3><p>$$m_t &#x3D; \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot dx$$</p>
+<ul>
+<li><strong>含义</strong>：这是梯度的加权移动平均（Mean）。</li>
+<li><strong>作用</strong>：$m_t$ 充当了“速度”的角色，带有惯性，能平滑梯度的随机噪音。</li>
+<li><strong>参数</strong>：$\beta_1$ 通常设为 <code>0.9</code>。</li>
+</ul>
+<h3 id="B-计算二阶矩-Second-Moment-类似-RMSProp"><a href="#B-计算二阶矩-Second-Moment-类似-RMSProp" class="headerlink" title="B. 计算二阶矩 (Second Moment) -&gt; 类似 RMSProp"></a>B. 计算二阶矩 (Second Moment) -&gt; 类似 RMSProp</h3><p>$$v_t &#x3D; \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot dx^2$$</p>
+<ul>
+<li><strong>含义</strong>：这是梯度平方的加权移动平均（Uncentered Variance）。</li>
+<li><strong>作用</strong>：$v_t$ 衡量了梯度在最近一段时间内的震荡强烈程度。</li>
+<li><strong>参数</strong>：$\beta_2$ 通常设为 <code>0.999</code>。</li>
+</ul>
+<h3 id="C-参数更新-Update-Rule"><a href="#C-参数更新-Update-Rule" class="headerlink" title="C. 参数更新 (Update Rule)"></a>C. 参数更新 (Update Rule)</h3><p>$$x \leftarrow x - \text{learning_rate} \cdot \frac{m_t}{\sqrt{v_t} + \epsilon}$$</p>
+<ul>
+<li>**分子 ($m_t$)**：利用动量方向前进。</li>
+<li>**分母 ($\sqrt{v_t}$)**：根据震荡程度进行归一化（自适应步长）。</li>
+</ul>
+<hr>
+<h2 id="3-直观理解"><a href="#3-直观理解" class="headerlink" title="3. 直观理解"></a>3. 直观理解</h2><p>Adam 就像一个经验丰富的探险家：</p>
+<ol>
+<li>他看着脚下的路（当前梯度 $dx$），但也记得刚才跑起来的惯性（$m_t$, Momentum）。</li>
+<li>他同时评估地面的崎岖程度（$v_t$, RMSProp）：<ul>
+<li>如果地面很平（$v_t$ 小），他就大步流星地利用惯性冲刺。</li>
+<li>如果地面坑洼不平（$v_t$ 大），他就小心翼翼，减小步幅，以免摔倒。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="4-注意事项-Bias-Correction"><a href="#4-注意事项-Bias-Correction" class="headerlink" title="4. 注意事项 (Bias Correction)"></a>4. 注意事项 (Bias Correction)</h2><p><em>注意：幻灯片展示的是简化版 Adam。</em><br>在实际完整的 Adam 算法中，因为 $m$ 和 $v$ 初始化为 0，在训练初期它们会向 0 偏置（Bias）。因此，标准算法包含一个<strong>偏差修正 (Bias Correction)</strong> 步骤：</p>
+<p>$$\hat{m}_t &#x3D; \frac{m_t}{1 - \beta_1^t}$$<br>$$\hat{v}_t &#x3D; \frac{v_t}{1 - \beta_2^t}$$</p>
+<p>更新时使用的是修正后的 $\hat{m}_t$ 和 $\hat{v}_t$。</p>
+<h1 id="深度学习优化器：Adam-完整版"><a href="#深度学习优化器：Adam-完整版" class="headerlink" title="深度学习优化器：Adam (完整版)"></a>深度学习优化器：Adam (完整版)</h1><p><strong>标签</strong>: #DeepLearning #CS231n #Optimization #Adam #BiasCorrection</p>
+<hr>
+<pre><code class="hljs">笔者按：2025年的ICLR将 Time Award 奖授予了提出Adam的论文 
+</code></pre>
+<h2 id="1-核心概述"><a href="#1-核心概述" class="headerlink" title="1. 核心概述"></a>1. 核心概述</h2><p><strong>Adam (Adaptive Moment Estimation)</strong> 是目前深度学习最常用的默认优化器。它结合了 <strong>Momentum</strong>（一阶动量）和 <strong>RMSProp</strong>（二阶动量）的优势，并引入了 <strong>偏差修正 (Bias Correction)</strong> 机制来解决冷启动问题。</p>
+<blockquote>
+<p><strong>一句话总结</strong>：Adam &#x3D; Momentum + RMSProp + Bias Correction</p>
+</blockquote>
+<hr>
+<h2 id="2-为什么需要偏差修正-Bias-Correction"><a href="#2-为什么需要偏差修正-Bias-Correction" class="headerlink" title="2. 为什么需要偏差修正 (Bias Correction)?"></a>2. 为什么需要偏差修正 (Bias Correction)?</h2><p>这是完整版 Adam 与简化版的关键区别。</p>
+<ul>
+<li><p><strong>问题 (Cold Start Problem)</strong>:<br>  算法初始化时，<code>first_moment</code> ($m$) 和 <code>second_moment</code> ($v$) 都被设为 <strong>0</strong>。<br>  由于衰减率 $\beta$ 通常很高 (0.9 或 0.999)，在训练初期，这些变量的更新值会非常小，严重偏向于 0。这导致模型在开始训练时“迈不开步子”。</p>
+</li>
+<li><p><strong>解决方案</strong>:<br>  通过除以 $(1 - \beta^t)$ 进行缩放。</p>
+<ul>
+<li>在初期 ($t$ 很小)，分母很小，相当于<strong>放大</strong>了估计值，抵消了初始化的偏差。</li>
+<li>在后期 ($t$ 很大)，$\beta^t \approx 0$，分母 $\approx 1$，修正不再起作用，算法回归稳态。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="3-算法详解-代码对照"><a href="#3-算法详解-代码对照" class="headerlink" title="3. 算法详解 (代码对照)"></a>3. 算法详解 (代码对照)</h2><h3 id="A-初始化"><a href="#A-初始化" class="headerlink" title="A. 初始化"></a>A. 初始化</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">first_moment = <span class="hljs-number">0</span>   <span class="hljs-comment"># 动量 (m)</span><br>second_moment = <span class="hljs-number">0</span>  <span class="hljs-comment"># 震荡幅度 (v)</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="B-核心循环-for-t-in-range-1-num-iterations"><a href="#B-核心循环-for-t-in-range-1-num-iterations" class="headerlink" title="B. 核心循环 for t in range(1, num_iterations):"></a>B. 核心循环 <code>for t in range(1, num_iterations):</code></h3><h4 id="Step-1-动量累积-Momentum"><a href="#Step-1-动量累积-Momentum" class="headerlink" title="Step 1: 动量累积 (Momentum)"></a>Step 1: 动量累积 (Momentum)</h4><p>$$m_t &#x3D; \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot dx$$</p>
+<ul>
+<li><p><code>first_moment</code>：估计梯度的均值。</p>
+</li>
+<li><p>**$\beta_1$ (Beta1)**：推荐值 <strong>0.9</strong>。</p>
+</li>
+</ul>
+<h4 id="Step-2-震荡监测-RMSProp"><a href="#Step-2-震荡监测-RMSProp" class="headerlink" title="Step 2: 震荡监测 (RMSProp)"></a>Step 2: 震荡监测 (RMSProp)</h4><p>$$v_t &#x3D; \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot dx^2$$</p>
+<ul>
+<li><p><code>second_moment</code>：估计梯度的未中心化方差。</p>
+</li>
+<li><p>**$\beta_2$ (Beta2)**：推荐值 <strong>0.999</strong>。</p>
+</li>
+</ul>
+<h4 id="Step-3-偏差修正-Bias-Correction-关键步骤"><a href="#Step-3-偏差修正-Bias-Correction-关键步骤" class="headerlink" title="Step 3: 偏差修正 (Bias Correction) - 关键步骤"></a>Step 3: 偏差修正 (Bias Correction) - <strong>关键步骤</strong></h4><p>$$\hat{m}_t &#x3D; \frac{m_t}{1 - \beta_1^t}$$</p>
+<p>$$\hat{v}_t &#x3D; \frac{v_t}{1 - \beta_2^t}$$</p>
+<ul>
+<li>注意：这里是用 $t$ 次方。当 $t&#x3D;1$ 时，修正力度最大。</li>
+</ul>
+<h4 id="Step-4-参数更新"><a href="#Step-4-参数更新" class="headerlink" title="Step 4: 参数更新"></a>Step 4: 参数更新</h4><p>$$x_{t+1} &#x3D; x_t - \eta \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$</p>
+<ul>
+<li><p>**$\eta$ (Learning Rate)**：推荐起手值为 <strong>1e-3</strong> 或 <strong>5e-4</strong>。</p>
+</li>
+<li><p>**$\epsilon$ (Epsilon)**：防止分母为0，通常设为 1e-7 或 1e-8。</p>
+</li>
+</ul>
+<h2 id="4-经验法则-Practical-Tips"><a href="#4-经验法则-Practical-Tips" class="headerlink" title="4. 经验法则 (Practical Tips)"></a>4. 经验法则 (Practical Tips)</h2><ol>
+<li><p><strong>默认首选</strong>：在大多数非计算机视觉（甚至包括CV）任务中，Adam 是最好的默认选择。</p>
+</li>
+<li><p><strong>鲁棒性</strong>：它对超参数（Hyperparameters）不那么敏感，通常默认参数就能跑出不错的结果。</p>
+</li>
+<li><p><strong>对比 SGD</strong>：SGD + Momentum 可能在调参极其精细的情况下能达到略好的极值，但 Adam 收敛速度通常更快，且更容易训练。</p>
+</li>
+</ol>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125132200.png" srcset="/img/loading.gif" lazyload><br>给出了推荐的值</p>
+<p>注明：</p>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125132408.png" srcset="/img/loading.gif" lazyload><br>AdamW 不在梯度计算中加入正则。</p>
+<h1 id="学习率的确定"><a href="#学习率的确定" class="headerlink" title="学习率的确定"></a>学习率的确定</h1><p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125132801.png" srcset="/img/loading.gif" lazyload></p>
+<p>经验的做法是</p>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125132859.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125132935.png" srcset="/img/loading.gif" lazyload><br><img src="/images/CS231N-lecture3-note2/Pasted%20image%2020260125133017.png" srcset="/img/loading.gif" lazyload><br>这是经验之谈</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture3 note2</div>
+      <div>https://augusteing.github.io/2026/02/05/CS231N-lecture3-note2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/06/CS231N-lecture5-note1/" title="CS231N lecture5 note1">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N lecture5 note1</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/02/01/CS231N-lecture4-note3/" title="CS231N lecture4 note3">
+                        <span class="hidden-mobile">CS231N lecture4 note3</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

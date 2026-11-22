@@ -1,0 +1,871 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="Vision Transformers 该种 Transformer 将用于自然语言处理的 Transformer 进行改造。 into patches首先，ViT 将图片分成 $s * s$ 的小块，在这个例子中是三乘三。之后这些小块经过线性映射之后称为一个D维的长向量。这一步完美地模仿了 NLP 中的“词嵌入”（Word Embedding），也就是把一个个图像块变成了 Transformer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture9 note1">
+<meta property="og:url" content="https://augusteing.github.io/2026/09/19/CS231N-lecture9-note1/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="Vision Transformers 该种 Transformer 将用于自然语言处理的 Transformer 进行改造。 into patches首先，ViT 将图片分成 $s * s$ 的小块，在这个例子中是三乘三。之后这些小块经过线性映射之后称为一个D维的长向量。这一步完美地模仿了 NLP 中的“词嵌入”（Word Embedding），也就是把一个个图像块变成了 Transformer">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260325145210.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260915190224.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260915190459.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260915190635.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260915191002.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260915191810.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916121737.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916124324.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916124903.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916125728.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916125901.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916130001.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916130112.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916132353.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916132344.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916132738.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260916132859.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919150927.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919151609.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919161219.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919162146.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919162839.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919163123.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260919163834.png">
+<meta property="article:published_time" content="2026-09-19T08:39:34.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:37.094Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture9-note1/Pasted%20image%2020260325145210.png">
+  
+  
+  
+  <title>CS231N lecture9 note1 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture9 note1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-09-19 16:39" pubdate>
+          2026年9月19日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          33 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture9 note1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Vision-Transformers"><a href="#Vision-Transformers" class="headerlink" title="Vision Transformers"></a>Vision Transformers</h1><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260325145210.png" srcset="/img/loading.gif" lazyload></p>
+<p>该种 Transformer 将用于自然语言处理的 Transformer 进行改造。</p>
+<h2 id="into-patches"><a href="#into-patches" class="headerlink" title="into patches"></a>into patches</h2><p>首先，ViT 将图片分成 $s * s$ 的小块，在这个例子中是三乘三。之后这些小块经过线性映射之后称为一个D维的长向量。这一步完美地模仿了 NLP 中的“词嵌入”（Word Embedding），也就是把一个个图像块变成了 Transformer 可以理解的“单词”。</p>
+<h2 id="positional-embedding"><a href="#positional-embedding" class="headerlink" title="positional embedding"></a>positional embedding</h2><p>与 NLP 中的 Transformer 一样，ViT 本身是<strong>置换不变</strong>（Permutation Invariant）的——也就是说，如果不加位置信息，模型把 patches 打乱后看到的内容和原来一样，这显然不合理。因此，ViT 需要为每个 patch 添加位置信息。</p>
+<p>做法是：为每个 patch 的 D 维向量<strong>加上</strong>一个可学习的 D 维位置向量（Positional Embedding）。这些位置嵌入是训练出来的，而不是像原始 Transformer 那样用固定的正弦&#x2F;余弦函数生成。</p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260915190224.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们不对图片做掩码，没有必要，我们给予的就是整体的图片。</p>
+<h1 id="改进措施"><a href="#改进措施" class="headerlink" title="改进措施"></a>改进措施</h1><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260915190459.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>residual：主要是为了让模型训练的更加稳定</li>
+<li>RMSNorm：</li>
+</ul>
+<p>都是为了让训练更加的稳定</p>
+<h3 id="SwiGLU-MLP"><a href="#SwiGLU-MLP" class="headerlink" title="SwiGLU MLP"></a>SwiGLU MLP</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260915190635.png" srcset="/img/loading.gif" lazyload></p>
+<p>在基础的 MLP 中使用变种的 MLP，SwiGLu MLP 添加了第三个投影矩阵 W3 作为门控机制，调整两个矩阵 W1和2的输出。虽然这么做有一部分提升参数量的原因，但即使参数量没变，这也是更好的做法。</p>
+<h3 id="专家模式"><a href="#专家模式" class="headerlink" title="专家模式"></a>专家模式</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260915191002.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>MoE Transformer</strong>：模型在这一层实例化了 $E$ 个独立的 MLP。在底层内存中，这不再是两个二维矩阵，而是被扩展成了两个<strong>三阶张量（Tensor）</strong>：$W_1 \in \mathbb{R}^{E \times D \times 4D}$ 和 $W_2 \in \mathbb{R}^{E \times 4D \times D}$。</p>
+<p>虽然内存里躺着 $E$ 个专家，但为了节省算力，并不是每个 Token 都要经过所有的 MLP。这就是图里左侧提到的 “Each token gets routed to $A &lt; E$ of the experts”。</p>
+<p>从数学上讲，在进入 MLP 之前，这里隐藏了一个<strong>路由函数（Router&#x2F;Gating Network）</strong>，它通常是一个极其简单的线性变换加上 Softmax：</p>
+<p>$$\text{Gate}(x) &#x3D; \text{Softmax}(x \cdot W_{route})$$</p>
+<p>其中 $W_{route} \in \mathbb{R}^{D \times E}$。</p>
+<p>对于输入序列中的某一个特定 Token $x_i$，这个算子会输出一个长度为 $E$ 的概率分布向量。模型会动态选出概率最大的 $A$ 个（在目前主流的开源大模型如 Mixtral 中，通常 $E&#x3D;8, A&#x3D;2$，即 Top-2 路由），将这个 Token <strong>仅仅</strong>派发给这 $A$ 个特定的矩阵进行计算。</p>
+<p>专家的数量是超参数。</p>
+<p>当这 $A$ 个被选中的专家独立完成了各自内部复杂的 MLP 计算，吐出结果后，系统会<strong>直接利用刚才算出的路由概率作为权重，对结果进行线性组合</strong>。</p>
+<p>设第 $i$ 个专家的网络算子为 $E_i(x)$，则最终重新汇入主干（残差连接）的输出 $y$ 为：</p>
+<p>$$y &#x3D; \sum_{i&#x3D;1}^{E} p_i(x) \cdot E_i(x)$$</p>
+<h1 id="边缘识别"><a href="#边缘识别" class="headerlink" title="边缘识别"></a>边缘识别</h1><p>边缘识别任务即为对于每一个像素都分配一个 label。如果我们单看某一个像素则完全没有意义，需要该像素周边的图像。</p>
+<h2 id="困难"><a href="#困难" class="headerlink" title="困难"></a>困难</h2><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260915191810.png" srcset="/img/loading.gif" lazyload></p>
+<p>如果我们对每一个像素和它的周边的图像都过一遍类似于 CNN VIT 等模型，则需要的计算量是天文数字，所以我们需要找到算法来做出图像的边缘图。</p>
+<h2 id="全连接网络"><a href="#全连接网络" class="headerlink" title="全连接网络"></a>全连接网络</h2><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916121737.png" srcset="/img/loading.gif" lazyload></p>
+<p>全卷积网络如图所示，我们使用这种尾部有膨胀的卷积层来处理图像。</p>
+<p>受限于算力的影响，这种网络会有很多的参数，所以我们考虑一种改进的方法。</p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916124324.png" srcset="/img/loading.gif" lazyload></p>
+<p>通常使用下采样的方法来减少参数，下采样的方法有：池化，跨步数的卷积。如图所示，我们的确减少了参数的数量。</p>
+<p>但这引出了另外一个问题：我们该如何做这种采样的逆操作，上采样？</p>
+<h2 id="训练方式"><a href="#训练方式" class="headerlink" title="训练方式"></a>训练方式</h2><p>我们该如何定义损失函数呢？</p>
+<p>既然要对每一个像素进行分类，那我们可以对于每一个像素上加一个 $softmax$ 之后做一个加权平均，这样就定义好了损失函数。这类算法是全连接的，现在有了工具不用这么做了。</p>
+<h2 id="上采样"><a href="#上采样" class="headerlink" title="上采样"></a>上采样</h2><h3 id="池化上采样"><a href="#池化上采样" class="headerlink" title="池化上采样"></a>池化上采样</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916124903.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916125728.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="卷积上采样"><a href="#卷积上采样" class="headerlink" title="卷积上采样"></a>卷积上采样</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916125901.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916130001.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="U-Net"><a href="#U-Net" class="headerlink" title="U-Net"></a>U-Net</h2><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916130112.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="目标检测"><a href="#目标检测" class="headerlink" title="目标检测"></a>目标检测</h1><p>目标检测任务区别于边缘识别的点在于：如果图像中存在多个目标物体，我们需要划出不同目标物体所在的区域</p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916132353.png" srcset="/img/loading.gif" lazyload></p>
+<p>对于单一物体的识别，很简单，输入一张图片，我们输出</p>
+<ul>
+<li>目标物体的概率分布 和之前的图片分类类似，我们可以使用 $softmax$ 损失来做</li>
+<li>我们还需要圈出目标物体的范围，这也就需要我们规定一个 $L2$ 损失。</li>
+</ul>
+<p>这也是一种全监督的分类任务（标注实在很贵）</p>
+<h2 id="多物体检测"><a href="#多物体检测" class="headerlink" title="多物体检测"></a>多物体检测</h2><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916132344.png" srcset="/img/loading.gif" lazyload></p>
+<p>如果按照之前的思路来做多目标的检测，会导致一些问题</p>
+<ul>
+<li>算法扩展性太差，我们无法预知到底有多少个物体</li>
+<li>输出头的输出太多，模型不好训练</li>
+</ul>
+<h3 id="navie"><a href="#navie" class="headerlink" title="navie"></a>navie</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916132738.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>穷举搜索机制</strong>：如左侧图像中密集的蓝色矩形框所示，该方法在整张输入图像上遍历所有可能的位置、尺度（scales）和长宽比（aspect ratios），截取出无数个子图像区域（crops）。</p>
+<p><strong>独立分类判别</strong>：每一个截取出的局部区域都被当作一张独立的图片，送入中间的卷积神经网络（CNN）进行前向传播，最终由分类器输出该区域的类别（例如图中的逻辑判断：是狗吗？不是；是猫吗？是；是背景吗？不是）</p>
+<p>这会导致很大程度的计算浪费！</p>
+<h3 id="改进措施-1"><a href="#改进措施-1" class="headerlink" title="改进措施"></a>改进措施</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260916132859.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>原始 R-CNN 的计算管线</strong>：算法首先利用某种候选区域生成方法，在输入图像上提取出约 2000 个感兴趣区域（RoI）。为了满足全连接层的维度要求，这些大小不一的区域会被强制形变（Warped）成统一分辨率（如 224x224 像素），随后<strong>每一个</strong>区域都要独立地送入卷积神经网络（ConvNet）进行前向传播。最后，网络输出特征用于两步操作：通过 SVM 进行类别分类，以及通过边界框回归器（Bbox reg）预测 4 个位置修正参数 $(dx, dy, dw, dh)$。</p>
+<p>但是这没有实际上的进步，所以我们考虑：</p>
+<p>在裁剪之前先让整张图像通过卷积网络改为裁剪卷积特征！</p>
+<h3 id="Fast-CNN"><a href="#Fast-CNN" class="headerlink" title="Fast-CNN"></a>Fast-CNN</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919150927.png" srcset="/img/loading.gif" lazyload></p>
+<p>fast CNN 做的改进是在切分可能区域之前，先做一次卷积来提取特征，之后再对特征图进行切分，随后接一个 CNN 输出目标类别和区域。</p>
+<h3 id="区域提议网络"><a href="#区域提议网络" class="headerlink" title="区域提议网络"></a>区域提议网络</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919151609.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li><p><strong>特征降维与空间映射</strong>：原始输入图像（尺寸如 $3 \times 640 \times 480$）首先穿过基础的 CNN 骨干网络，映射为一个低分辨率、高维度的特征张量（例如 $512 \times 20 \times 15$）。在拓扑学意义上，这个 $20 \times 15$ 空间网格中的每一个点，都对应着原图上的一个特定感受野。</p>
+</li>
+<li><p><strong>锚框 (Anchor Boxes) 先验</strong>：为了约束搜索空间，RPN 在特征图的每一个空间位置上，都隐式地设定了 $K$ 个具有不同尺度（scale）和长宽比（aspect ratio）的参考锚框。图中中心点向外辐射的蓝色多层矩形，正是这 $K$ 个预设锚框在原图上的感受野投影。</p>
+</li>
+<li><p><strong>平行的双头卷积预测</strong>：网络直接在提取出的特征图上应用小卷积核进行滑动计算，并分化出两个并行的预测分支：</p>
+<ul>
+<li><p>**前景&#x2F;背景分类 (Objectness)**：输出一个维度为 $K \times 20 \times 15$ 的张量，利用交叉熵损失，判断每个锚框内究竟是目标物体还是纯背景（Anchor is an object?）。</p>
+</li>
+<li><p>**边界框回归 (Box Transforms)**：输出一个维度为 $4K \times 20 \times 15$ 的张量。这 4 个参数代表了几何上的仿射变换，用于预测如何将预设的先验锚框平移和缩放，从而精确贴合真实的物体边界。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>排序与截断</strong>：最终，算法会根据分类分支计算出的“物体概率分数”（objectness score）对总计 $K \times 20 \times 15$ 个生成的边界框进行排序，并仅截取排名前 300 左右的高质量框作为最终的提议区域（Proposals）</p>
+</li>
+</ul>
+<h2 id="F-CNN-的改进"><a href="#F-CNN-的改进" class="headerlink" title="F-CNN 的改进"></a>F-CNN 的改进</h2><h3 id="yolo"><a href="#yolo" class="headerlink" title="yolo"></a>yolo</h3><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919161219.png" srcset="/img/loading.gif" lazyload></p>
+<p>摒弃了复杂的区域提议（Proposal）和后续的特征裁剪。算法直接将输入图像（尺寸为 $3 \times H \times W$）强行划分为粗粒度的网格。这个网格体系构成了目标检测的空间基底。</p>
+<p><strong>统一的张量输出（Unified Output Tensor）</strong>：对于 $7 \times 7$ 网格中的每一个单元格（Grid Cell），网络会基于 $B$ 个先验基础框（Base boxes，此处 $B&#x3D;3$）进行密集预测。最终直接输出一个维度为 $7 \times 7 \times (5 \times B + C)$ 的三维特征张量。</p>
+<h2 id="DETR"><a href="#DETR" class="headerlink" title="DETR"></a>DETR</h2><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919162146.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li><p><strong>CNN 基底 (Backbone) + 位置编码 (Positional Encoding)</strong></p>
+<ul>
+<li><p>首先，依然用传统的 CNN 扫一遍原图，把图像压缩成高维特征图（set of image features）。</p>
+</li>
+<li><p><strong>关键点</strong>：因为 Transformer 本身不具备处理空间位置的能力，必须把二维空间的位置编码（Positional encoding）加到特征图里，告诉网络“谁在谁旁边”。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>Transformer 编码器 (Encoder)</strong></p>
+<ul>
+<li>图像特征被展平后送入 Encoder。在这里，特征像素之间通过自注意力机制互相“交流”，建立对整张图片的全局上下文理解。</li>
+</ul>
+</li>
+<li><p><strong>Transformer 解码器 (Decoder) 与“目标查询” (Object Queries)</strong></p>
+<ul>
+<li><p>这是 DETR 最巧妙的设计。网络预设了固定数量（例如 100 个）的 <strong>Object Queries</strong>。</p>
+</li>
+<li><p>你可以把这些 Queries 理解为 100 个带有学习能力的“探测器”。它们进入 Decoder 后，会根据 Encoder 提供的全局图像信息，各自去“认领”图片中的物体。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>预测头 (Prediction Heads)</strong></p>
+<ul>
+<li><p>从 Decoder 出来的每一个 query，都会通过前馈神经网络（FFN）进行独立预测，直接吐出结果。</p>
+</li>
+<li><p>结果只有两种可能：要么输出物体的类别和边框参数（class, box），要么就像截图字幕里说的，“直接说这里没有目标”（输出 $\emptyset$ 符号代表背景）。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>类似于这种全监督算法，一般没有扩展的方法。</p>
+<h1 id="实例分割"><a href="#实例分割" class="headerlink" title="实例分割"></a>实例分割</h1><h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919162839.png" srcset="/img/loading.gif" lazyload></p>
+<p>对于一些通道较少的滤波器，我们可以采用可视化来展示滤波器学到的模式。</p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919163123.png" srcset="/img/loading.gif" lazyload></p>
+<p>这张幻灯片展示了如何通过反向传播（Backprop）来判断图像中“哪些像素对分类结果最重要”（Which pixels matter）。这是一种试图打开深度学习“黑盒”、探究模型到底在“看”什么的技术。</p>
+<p><strong>数学推导：基于梯度的敏感度分析</strong></p>
+<p>在前向传播（Forward pass）中，输入图像经过整个卷积神经网络（CNN），计算出各个类别的概率，最终输出例如“狗（Dog）”的分类结果。</p>
+<p>设输入图像为三维张量 $I \in \mathbb{R}^{H \times W \times 3}$，网络对于目标类别 $c$（例如“狗”）的未归一化得分（即 Softmax 之前的 logits）为标量函数 $S_c(I)$。</p>
+<p>为了衡量单个像素对最终分类得分的贡献，我们利用多变量微积分中的链式法则，直接将类别得分对输入图像的所有像素求偏导数：</p>
+<p>$$\nabla_I S_c &#x3D; \frac{\partial S_c}{\partial I}$$</p>
+<p>这个梯度张量 $\nabla_I S_c$ 的维度与输入图像完全相同，均为 $H \times W \times 3$。</p>
+<p>为了生成一张人类直观可读的二维显著性图（Saliency Map），我们需要沿颜色通道降维。幻灯片中的做法是对梯度取绝对值，并在 RGB 三个颜色通道上取最大值（take absolute value and max over RGB channels）：</p>
+<p>$$M_{i,j} &#x3D; \max_{k \in {R,G,B}} \left\vert{} \frac{\partial S_c}{\partial I_{i,j,k}} \right\vert{}$$</p>
+<p><strong>微积分直觉：一阶泰勒展开</strong></p>
+<p>利用你已掌握的多变量微积分知识，如果我们在原图像 $I$ 附近给一个微小的像素扰动 $\Delta I$，对得分函数进行一阶泰勒展开：</p>
+<p>$$S_c(I + \Delta I) \approx S_c(I) + (\nabla_I S_c)^T \Delta I$$</p>
+<p>在这个线性近似下，梯度 $\nabla_I S_c$ 实际上充当了图像像素的<strong>权重系数</strong>。</p>
+<p>某像素位置的偏导数绝对值越大，意味着对该像素进行极其微小的颜色修改，都会导致“狗”的分类得分 $S_c$ 发生剧烈的上升或下降。幻灯片右下角的黑白图像正是二维矩阵 $M$ 的可视化，其中亮白色的区域（狗的轮廓）代表了高梯度值区域。正如字幕所总结的：“把这些可视化，就说明这些像素是关键。”</p>
+<p><img src="/images/CS231N-lecture9-note1/Pasted%20image%2020260919163834.png" srcset="/img/loading.gif" lazyload></p>
+<p>为了能使用这套数学技巧，CNN 的架构必须满足一个条件：在最后一个卷积层之后，不能接常规的展平（Flatten）操作，而是必须接一个**全局平均池化层 (Global Average Pooling, GAP)**。 假设最后一个卷积层输出的特征张量为 $f \in \mathbb{R}^{H \times W \times K}$。在几何上，你可以把它想象成 $K$ 张分辨率为 $H \times W$ 的特征图。 GAP 操作直接在空间维度上求平均，将这 $K$ 张图的每一张都“压扁”成一个纯量，从而得到一个一维的列向量 $F \in \mathbb{R}^K$：</p>
+<p>$$F_k &#x3D; \frac{1}{HW} \sum_{h,w} f_{h,w,k}$$</p>
+<p><strong>数学推导：求和顺序的交换（线性算子的可交换性）</strong></p>
+<p>随后，这个一维向量 $F$ 会通过一个全连接层（其权重矩阵为 $w \in \mathbb{R}^{K \times C}$）进行简单的矩阵乘法，得出 $C$ 个类别的最终得分 $S \in \mathbb{R}^C$。 对于某一个特定的目标类别 $c$（比如“狗”），其分类得分 $S_c$ 的计算公式为：</p>
+<p>$$S_c &#x3D; \sum_k w_{k,c} F_k$$</p>
+<p>现在，我们将前面 GAP 计算 $F_k$ 的等式代入到这个得分公式中：</p>
+<p>$$S_c &#x3D; \sum_k w_{k,c} \left( \frac{1}{HW} \sum_{h,w} f_{h,w,k} \right)$$</p>
+<p>接下来的这一步是整个 CAM 算法的核心代数戏法：由于这里的乘法和求和都是<strong>线性操作</strong>，我们完全可以合法地交换求和的顺序。我们将针对空间坐标 $(h, w)$ 的求和提到最外面，把针对通道 $k$ 的求和移到最里面：</p>
+<p>$$S_c &#x3D; \frac{1}{HW} \sum_{h,w} \left( \sum_k w_{k,c} f_{h,w,k} \right)$$</p>
+<p><strong>几何直觉：空间维度的反向投影</strong></p>
+<p>请仔细观察最后这个式子括号里的部分： $\sum_k w_{k,c} f_{h,w,k}$。 它在几何上究竟代表什么？这意味着在二维平面的某一个特定坐标 $(h, w)$ 上，我们将网络提取出的 $K$ 个深层特征 $f_{h,w,k}$，利用类别 $c$ 专属的权重 $w_{k,c}$ 进行了一次<strong>加权求和（线性组合）</strong>。</p>
+<p>如果我们把括号里计算出的标量提取出来，单独记为 $M_{c}(h,w)$，那么这个 $M_c$ 就是一张大小为 $H \times W$ 的二维矩阵。这张矩阵就是 CAM 热力图！正如幻灯片底部字幕所揭示的，通过简单的代数分配律，我们绕过了“全局平均”这堵墙，一路“追溯到了特征图（All the way back to the feature maps）”。</p>
+<p>用更直白的话来说：权重 $w_{k,c}$ 衡量了“第 $k$ 个通道对判断当前类别有多重要”。我们直接用这个“重要性”去乘对应的二维特征图，然后把 $K$ 张图叠在一起相加。最终生成的这张图中，数值越高的像素，就代表它是促使神经网络做出当前分类决定的“罪魁祸首”。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture9 note1</div>
+      <div>https://augusteing.github.io/2026/09/19/CS231N-lecture9-note1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年9月19日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/09/19/CS61B-ch33%EF%BC%9AQuickSort/" title="快速排序变体：动机">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">快速排序变体：动机</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/09/15/CS231N-assignment3%EF%BC%9ASelf-Supervised-Learning/" title="CS231N assignment3：Self_Supervised_Learning">
+                        <span class="hidden-mobile">CS231N assignment3：Self_Supervised_Learning</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

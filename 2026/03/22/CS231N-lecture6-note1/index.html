@@ -1,0 +1,930 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="本笔记将从cnn的架构和如何训练cnn展开。 CNN 的架构本部分不会介绍卷积层、池化层和全连接层的内容，如果需要的话请参见讲座笔记5 归一化层核心机制：归一化与重缩放 归一化层在神经网络中的设计初衷非常直观，其高层思想（High-level Idea）是通过学习特定的参数来对输入数据进行缩放（scale）和平移（shift）。这个过程并非一步完成，而是分为两个关键步骤：首先是对输入数据进行标准化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture6 note1">
+<meta property="og:url" content="https://augusteing.github.io/2026/03/22/CS231N-lecture6-note1/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="本笔记将从cnn的架构和如何训练cnn展开。 CNN 的架构本部分不会介绍卷积层、池化层和全连接层的内容，如果需要的话请参见讲座笔记5 归一化层核心机制：归一化与重缩放 归一化层在神经网络中的设计初衷非常直观，其高层思想（High-level Idea）是通过学习特定的参数来对输入数据进行缩放（scale）和平移（shift）。这个过程并非一步完成，而是分为两个关键步骤：首先是对输入数据进行标准化">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207162218.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207162413.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207170240.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207190645.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207202042.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207203429.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209230620.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209231218.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209232351.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209232415.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209234015.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209233239.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209233322.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260209233932.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210154111.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210164243.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210164219.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210164636.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210165100.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210165945.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210170254.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210170544.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260210183900.png">
+<meta property="article:published_time" content="2026-03-22T07:21:30.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.885Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="cnn">
+<meta property="article:tag" content="cs231n">
+<meta property="article:tag" content="cnn_train">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture6-note1/Pasted%20image%2020260207162218.png">
+  
+  
+  
+  <title>CS231N lecture6 note1 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture6 note1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-03-22 15:21" pubdate>
+          2026年3月22日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          60 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture6 note1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>本笔记将从cnn的架构和如何训练cnn展开。</p>
+<h1 id="CNN-的架构"><a href="#CNN-的架构" class="headerlink" title="CNN 的架构"></a>CNN 的架构</h1><p>本部分不会介绍卷积层、池化层和全连接层的内容，如果需要的话请参见讲座笔记5</p>
+<h2 id="归一化层"><a href="#归一化层" class="headerlink" title="归一化层"></a>归一化层</h2><h3 id="核心机制：归一化与重缩放"><a href="#核心机制：归一化与重缩放" class="headerlink" title="核心机制：归一化与重缩放"></a>核心机制：归一化与重缩放</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260207162218.png" srcset="/img/loading.gif" lazyload></p>
+<p>归一化层在神经网络中的设计初衷非常直观，其高层思想（High-level Idea）是通过学习特定的参数来对输入数据进行<strong>缩放（scale）和平移（shift）</strong>。这个过程并非一步完成，而是分为两个关键步骤：首先是对输入数据进行标准化处理，使其分布更加规范；其次是利用学习到的参数对数据进行恢复或调整。具体来说，给定一个维度为 $N \times D$ 的输入数据 $\mathbf{x}$（其中 $N$ 代表样本数量，即 Batch Size， $D$ 代表特征维度），网络首先会计算数据的统计量（均值 $\mu$ 和标准差 $\sigma$）来执行归一化，即让数据变成均值为 0、方差为 1 的分布。但这可能会限制网络的表达能力，因此紧接着会应用一组可学习的参数 $\gamma$（缩放因子）和 $\beta$（平移因子）来对数据进行变换。最终的输出公式为 $\mathbf{y} &#x3D; \gamma(\mathbf{x}-\mu) &#x2F; \sigma + \beta$。这一机制允许网络在稳定分布的同时，保留恢复原始特征分布的能力。</p>
+<h3 id="深入解析：Layer-Normalization（层归一化）"><a href="#深入解析：Layer-Normalization（层归一化）" class="headerlink" title="深入解析：Layer Normalization（层归一化）"></a>深入解析：Layer Normalization（层归一化）</h3><p>幻灯片以 <strong>Layer Normalization (LayerNorm)</strong> 为例详细展示了具体的计算维度。在 LayerNorm 中，统计量的计算是<strong>独立于 Batch 中的其他样本</strong>的。观察维度变化可以发现，对于形状为 $N \times D$ 的输入 $\mathbf{x}$，我们计算得到的均值 $\mu$ 和标准差 $\sigma$ 的维度是 $N \times 1$。这意味着，对于 Batch 中的每一个样本（即每一行），我们都在其自身的 $D$ 个特征维度上计算均值和标准差。换句话说，每个样本都有自己独特的统计量，互不干扰。在归一化之后，网络使用学习到的参数 $\gamma$ 和 $\beta$ 进行仿射变换，这两个参数的维度是 $1 \times D$，意味着对于同一个特征维度，所有样本共享同一套缩放和平移参数。这种针对“每个样本”内部所有特征进行归一化的方式，使得 LayerNorm 非常适合 Batch Size 较小或者序列长度不定的场景（如 RNN）。</p>
+<h3 id="宏观视角：四种归一化方式的几何对比"><a href="#宏观视角：四种归一化方式的几何对比" class="headerlink" title="宏观视角：四种归一化方式的几何对比"></a>宏观视角：四种归一化方式的几何对比</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260207162413.png" srcset="/img/loading.gif" lazyload></p>
+<p>为了更全面地理解不同的归一化层，我们可以将数据看作一个形状为 $(N, C, H, W)$ 的 4D 张量（分别代表 Batch Size、通道数、高度、宽度），并通过<strong>计算统计量的范围</strong>（即幻灯片中蓝色像素块覆盖的区域）来区分它们。</p>
+<p><strong>Batch Norm (BN)</strong> 的计算范围是沿着 Batch 维度（$N$）以及空间维度（$H, W$）进行的，它对于每个通道（$C$）计算一组统计量。你可以将其想象为切下所有样本的“同一层切片”来求平均，因此它的统计特性高度依赖于 Batch 中的样本分布。</p>
+<p><strong>Layer Norm (LN)</strong> 则完全不同，它的计算范围是一个样本（$N$ 中的一个）内的所有通道（$C$）和空间位置（$H, W$）。这相当于对“单个样本这个立方体”求平均，不依赖于其他样本，这与前文提到的 $N \times D$ 矩阵计算逻辑是一致的。</p>
+<p><strong>Instance Norm (IN)</strong> 的粒度更细，它只在一个样本的一个通道内（即仅在 $H, W$ 空间维度上）计算统计量。这通常用于风格迁移等任务，因为它剔除了特定图片的对比度信息。</p>
+<p>最后是 **Group Norm (GN)**，它是一种折衷方案。它将通道分成若干个“组”（Group），并在一个样本的每个“组”内计算统计量。从几何上看，它介于 Layer Norm（所有通道为一组）和 Instance Norm（每个通道为一组）之间，在 Batch Size 较小时通常能提供比 Batch Norm 更稳定的表现。</p>
+<h2 id="Dropout"><a href="#Dropout" class="headerlink" title="Dropout"></a>Dropout</h2><p>对于此层，我们会在训练时随机抛弃一些激活值（神经元），但是在测试时候我们不会如此</p>
+<p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260207170240.png" srcset="/img/loading.gif" lazyload></p>
+<p>这实际上是为了防止过拟合而做的操作，我们会减少部分特征的输入。</p>
+<h4 id="1-核心直觉：为什么要“弄坏”网络？"><a href="#1-核心直觉：为什么要“弄坏”网络？" class="headerlink" title="1. 核心直觉：为什么要“弄坏”网络？"></a><strong>1. 核心直觉：为什么要“弄坏”网络？</strong></h4><p>Dropout 是一种非常强大且反直觉的正则化技术。它的核心思想是在训练过程中，随机地“关掉”神经网络中的一部分神经元。这听起来像是在故意破坏网络，但正如第一张 PPT 中的“猫分类器”示例所示，这种做法实际上强迫网络变得更加强壮。</p>
+<p>想象一个神经网络正在学习识别猫。如果没有 Dropout，网络可能会偷懒，过度依赖某一个强特征，比如“有耳朵”。如果网络发现只要看到耳朵就是猫，它可能就会忽略尾巴、毛发等其他特征。这就导致了<strong>特征的共适应（Co-adaptation）</strong>，即神经元之间形成了复杂的依赖关系，一旦缺少了某个特定神经元（比如图片里的耳朵被遮住了），整个网络就会瘫痪。</p>
+<p>Dropout 通过在每次训练迭代中随机删除神经元，切断了这种依赖。网络被迫意识到：“我不能只指望‘耳朵’神经元，因为它随时可能消失。”因此，网络必须分散风险，学习利用“尾巴”、“爪子”、“毛发”等多种冗余特征来做出判断。这迫使网络学习到<strong>冗余的表示（Redundant Representation）</strong>，从而大大提高了模型的鲁棒性和泛化能力。</p>
+<h4 id="2-工作机制：训练与测试的差异"><a href="#2-工作机制：训练与测试的差异" class="headerlink" title="2. 工作机制：训练与测试的差异"></a><strong>2. 工作机制：训练与测试的差异</strong></h4><p>Dropout 的实施在训练阶段和测试阶段是完全不同的，理解这一点至关重要。</p>
+<ul>
+<li><p><strong>训练阶段（Training Time）：</strong></p>
+<p>  在每一次前向传播中，每一个神经元都有一个概率 $p$ 被保留（或者说有 $1-p$ 的概率被丢弃）。被丢弃的神经元其输出被强制设为 0，既不参与前向传播计算，也不参与反向传播的梯度更新。这意味着对于每一个 Batch 的数据，我们实际上都是在一个“残缺”的、结构随机的子网络上进行训练。（通常 $p$ &#x3D; $0.5$)</p>
+</li>
+<li><p><strong>测试阶段（Test Time）：</strong></p>
+<p>  当我们使用训练好的模型去预测新数据时，我们<strong>不希望</strong>结果是随机的。因此，在测试时，我们会激活<strong>所有</strong>的神经元。</p>
+<p>  但是这里有个数学问题：在训练时，网络只有 $p$ 比例的神经元在工作，输出的数值总和是比较小的。到了测试时，所有神经元一起工作，输出数值会突然变大（大约是训练时的 $1&#x2F;p$ 倍）。为了平衡这种差异，保持输出期望值一致，我们需要在测试时对神经元的输出进行<strong>缩放（Scale）</strong>，通常是乘以概率 $p$。</p>
+</li>
+</ul>
+<h4 id="3-代码详细解析-Vanilla-Dropout"><a href="#3-代码详细解析-Vanilla-Dropout" class="headerlink" title="3. 代码详细解析 (Vanilla Dropout)"></a><strong>3. 代码详细解析 (Vanilla Dropout)</strong></h4><p>第二张 PPT 展示了最原始的 Dropout 实现方式（Vanilla Dropout）。虽然 PPT 备注提到这在现代不是推荐的实现方式（现代常用 Inverted Dropout），但理解这段代码对于理解 Dropout 的原理至关重要。</p>
+<p>我们设定超参数 <code>p = 0.5</code>，这意味着每个神经元有 50% 的概率被保留。</p>
+<p><strong>训练函数 <code>train_step(X)</code> 解析：</strong></p>
+<p>Python</p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs clean"># H1 是第一层经过激活函数后的输出<br>H1 = np.maximum(<span class="hljs-number">0</span>, np.dot(W1, X) + b1) <br><br># 【关键步骤 <span class="hljs-number">1</span>：生成掩码】<br># np.random.rand(*H1.shape) 生成一个和 H1 形状一样的矩阵，由于是均匀分布，<br># 里面的数值在 <span class="hljs-number">0</span> 到 <span class="hljs-number">1</span> 之间随机。<br># &lt; p 判断这些随机数是否小于 <span class="hljs-number">0.5</span>。<br># 结果 U1 是一个布尔矩阵（<span class="hljs-literal">True</span>/<span class="hljs-literal">False</span>），充当“开关”。<br>U1 = np.random.rand(*H1.shape) &lt; p <br><br># 【关键步骤 <span class="hljs-number">2</span>：应用掩码】<br># 将 H1 与 U1 相乘。在 Python 中，<span class="hljs-literal">True</span> 被视为 <span class="hljs-number">1</span>，<span class="hljs-literal">False</span> 被视为 <span class="hljs-number">0</span>。<br># 这一步直接把那些对应 <span class="hljs-literal">False</span> 的神经元输出变成了 <span class="hljs-number">0</span>（即“失活”）。<br>H1 *= U1 <br><br># 第二层同理<br>H2 = np.maximum(<span class="hljs-number">0</span>, np.dot(W2, H1) + b2)<br>U2 = np.random.rand(*H2.shape) &lt; p <br>H2 *= U2 <br><br># 输出层<br>out = np.dot(W3, H2) + b3<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>总结</strong>：在训练时，代码通过生成随机掩码 <code>U1</code> 和 <code>U2</code>，强行将部分神经元的激活值抹零。</li>
+</ul>
+<p><strong>预测函数 <code>predict(X)</code> 解析：</strong></p>
+<p>Python</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># 【关键步骤 3：测试时缩放】</span><br><span class="hljs-comment"># 注意这里多了 &quot;* p&quot;</span><br><span class="hljs-attr">H1</span> = np.maximum(<span class="hljs-number">0</span>, np.dot(W1, X) + b1) * p <br><span class="hljs-attr">H2</span> = np.maximum(<span class="hljs-number">0</span>, np.dot(W2, H1) + b2) * p <br><span class="hljs-attr">out</span> = np.dot(W3, H2) + b3<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>为什么要乘以 $p$？</strong></p>
+<p>  假设训练时 $p&#x3D;0.5$，也就是说只有一半的神经元是“活着”的。假设每个神经元原本输出 1，那么训练时这一层的总输出期望是 $0.5 \times Total$。</p>
+<p>  到了测试时，如果不做处理，所有神经元都输出 1，总输出就是 $1.0 \times Total$。</p>
+<p>  这会导致测试时的信号强度比训练时大一倍，导致网络预测紊乱。</p>
+<p>  因此，必须在测试时乘以 $p$（比如 0.5），把信号强度“压”下去，使其与训练时的期望值保持一致。</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>补充说明（关于 PPT 中的 “Not recommended”）</strong>：</p>
+<p>现代深度学习框架（如 PyTorch, TensorFlow）通常使用 <strong>Inverted Dropout（反向 Dropout）</strong>。</p>
+<ul>
+<li><p><strong>Vanilla Dropout（本代码）</strong>：训练时不缩放，测试时乘 $p$。缺点是测试阶段需要改变计算逻辑，且调整 $p$ 时会影响测试代码。</p>
+</li>
+<li><p><strong>Inverted Dropout（推荐）</strong>：训练时在应用掩码后直接 <strong>除以 $p$<strong>（放大信号），测试时则</strong>什么都不做</strong>。这样模型在训练时就适应了全量的信号强度，测试代码更加简洁。</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="激活函数"><a href="#激活函数" class="headerlink" title="激活函数"></a>激活函数</h2><h3 id="sigmoid"><a href="#sigmoid" class="headerlink" title="sigmoid"></a>sigmoid</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260207190645.png" srcset="/img/loading.gif" lazyload><br><code>sigmoid</code> 函数在很长一段时间内作为传统的激活函数，但是它有一个缺陷。就是在<code>x</code>很大或者很小的时候梯度会几乎为0，使得在反向传播的时候很难计算梯度。</p>
+<h3 id="Relu"><a href="#Relu" class="headerlink" title="Relu"></a>Relu</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260207202042.png" srcset="/img/loading.gif" lazyload></p>
+<p>$max$ 函数在非正部分的梯度为0，但是在非负处的梯度归为1，这比大部分区域都几乎为0，但这比sigmoid函数的表现要好得多，所以成为了几乎最流行的激活函数。</p>
+<h3 id="Gelu"><a href="#Gelu" class="headerlink" title="Gelu"></a>Gelu</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260207203429.png" srcset="/img/loading.gif" lazyload></p>
+<p>此激活函数是 $Transfomrer$ 使用的激活函数，我们这里不展开具体的数学表达式。当 $x -&gt; ∞$<br>时，其近似于 $max$ 函数，但是相较max函数其在实数域上处处可微，具有更好的性能。</p>
+<h1 id="CNN网络示例"><a href="#CNN网络示例" class="headerlink" title="CNN网络示例"></a>CNN网络示例</h1><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209230620.png" srcset="/img/loading.gif" lazyload></p>
+<p>在开始之前我们还需要看看 <code>cnn</code> 取得的历史成就，自从 <code>AlexNet</code> 成功之后，随着网络层数的扩大还有<code>gpu</code>资源的丰富，深度学习得到了巨大的进展。</p>
+<h2 id="VGGnet"><a href="#VGGnet" class="headerlink" title="VGGnet"></a>VGGnet</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209231218.png" srcset="/img/loading.gif" lazyload></p>
+<p>VGGnet 是在 Alexnet 之后被提出的网络，明显的一点它几乎是一个扩大和优化版本的 ALEXNET。</p>
+<hr>
+<p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209232351.png" srcset="/img/loading.gif" lazyload></p>
+<hr>
+<p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209232415.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="1-核心问题：有效感受野的计算"><a href="#1-核心问题：有效感受野的计算" class="headerlink" title="1. 核心问题：有效感受野的计算"></a><strong>1. 核心问题：有效感受野的计算</strong></h4><p>PPT 左侧的示意图非常直观地回答了这个问题。当我们把多个卷积层堆叠在一起时，高层的神经元虽然只看前一层的 $3 \times 3$ 区域，但由于前一层的像素本身也包含了更早一层的 $3 \times 3$ 信息，所以高层神经元实际上能“看到”原始图像上更大的区域。</p>
+<ul>
+<li><p>**第一层 (Conv1)**：一个神经元看原始图像的 **$3 \times 3$**。</p>
+</li>
+<li><p>**第二层 (Conv2)**：它的一个神经元看 Conv1 的 $3 \times 3$。但因为 Conv1 的每个点都代表了原图的 $3 \times 3$（有重叠），叠加之后，Conv2 的一个神经元实际上覆盖了原始图像的 **$5 \times 5$**。</p>
+</li>
+<li><p>**第三层 (Conv3)**：同理，它看 Conv2 的 $3 \times 3$，这进一步扩大了视野。最终，Conv3 的一个神经元有效地覆盖了原始图像的 <strong>$7 \times 7$</strong> 区域。</p>
+</li>
+</ul>
+<p><strong>结论</strong>：<strong>堆叠 3 个 $3 \times 3$ 的卷积层，其感受野等效于 1 个 $7 \times 7$ 的卷积层。</strong></p>
+<h4 id="2-设计哲学：为什么要用-3-个小核代替-1-个大核？"><a href="#2-设计哲学：为什么要用-3-个小核代替-1-个大核？" class="headerlink" title="2. 设计哲学：为什么要用 3 个小核代替 1 个大核？"></a><strong>2. 设计哲学：为什么要用 3 个小核代替 1 个大核？</strong></h4><p>既然效果都是看 $7 \times 7$ 的区域，为什么 VGGNet 不直接用一个 $7 \times 7$ 的卷积核，非要麻烦地堆三个 $3 \times 3$ 呢？这是面试和理解 VGG 的重中之重，主要有两个原因：</p>
+<ul>
+<li><p><strong>原因一：参数量大幅减少（更省参数）</strong></p>
+<p>  让我们算一笔账（假设输入输出通道数都是 $C$）：</p>
+<ul>
+<li><p><strong>方案 A（大核）</strong>：使用 1 个 $7 \times 7$ 卷积核。</p>
+<p>  参数量 &#x3D; $7 \times 7 \times C^2 &#x3D; 49C^2$。</p>
+</li>
+<li><p><strong>方案 B（堆叠小核）</strong>：使用 3 个 $3 \times 3$ 卷积核。</p>
+<p>  参数量 &#x3D; $3 \times (3 \times 3 \times C^2) &#x3D; 27C^2$。</p>
+</li>
+<li><p><strong>结果</strong>：$27C^2$ 远小于 $49C^2$。通过堆叠小核，我们在保持“视力范围”（感受野）不变的情况下，把参数量减少了近一半（45%）！这让网络可以做得更深而不会导致模型过于臃肿。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>原因二：非线性变换更多（更聪明）</strong></p>
+<p>  每一个卷积层后面都会跟一个 <strong>ReLU</strong> 激活函数。</p>
+<ul>
+<li><p>使用 1 个 $7 \times 7$ 层，你只能经过 <strong>1 次</strong> 非线性变换（ReLU）。</p>
+</li>
+<li><p>使用 3 个 $3 \times 3$ 层，特征提取过程中经过了 <strong>3 次</strong> 非线性变换（ReLU -&gt; ReLU -&gt; ReLU）。</p>
+</li>
+<li><p>更多的非线性变换意味着网络能学习到更复杂、更抽象的特征，这使得模型的判别能力更强。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-VGGNet-的架构特点（右图解析）"><a href="#3-VGGNet-的架构特点（右图解析）" class="headerlink" title="3. VGGNet 的架构特点（右图解析）"></a><strong>3. VGGNet 的架构特点（右图解析）</strong></h4><p>PPT 右侧展示了 <strong>VGG16</strong> 和 <strong>VGG19</strong> 的具体结构（数字代表层数）。你可以看到它极其<strong>规整</strong>：</p>
+<ul>
+<li><p><strong>统一的卷积</strong>：全网从头到尾只用 $3 \times 3$ 卷积，步长为 1，填充（Padding）为 1。这意味着卷积层<strong>不改变</strong>特征图的长宽尺寸。</p>
+</li>
+<li><p><strong>统一的池化</strong>：所有的尺寸缩小（下采样）工作全部交给 $2 \times 2$ 的最大池化层（Max Pooling）来完成。</p>
+</li>
+<li><p><strong>深度的力量</strong>：VGG 证明了，仅仅通过把网络加深（从 AlexNet 的 8 层增加到 16&#x2F;19 层），并使用小卷积核，就能显著提高图像识别的准确率。</p>
+</li>
+</ul>
+<h2 id="Resnet"><a href="#Resnet" class="headerlink" title="Resnet"></a>Resnet</h2><p><em>不要轻视简单，简单意味着坚固</em> ——刘慈欣</p>
+<p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209234015.png" srcset="/img/loading.gif" lazyload></p>
+<p>请关注这张幻灯片，通常我们认为复杂模型相较于简单模型反而性能不佳的原因是：复杂模型过拟合了，但是通过实际实验的观察，我们发现：并不是因为过拟合（这一点通过观察训练损失看出来，因为其损失更高）。</p>
+<p><em>实际上是因为复杂模型陷入了局部最小值困境</em></p>
+<h3 id="resnet的过拟合之谜"><a href="#resnet的过拟合之谜" class="headerlink" title="resnet的过拟合之谜"></a>resnet的过拟合之谜</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209233239.png" srcset="/img/loading.gif" lazyload></p>
+<p>理论上，复杂模型应当具有更加丰富的刻画能力，其分类能力应当更强，但是事实证明并非如此，但又不是因为过拟合，于是科学家十分的不理解。</p>
+<p>于是我们发明了这种残差网络。</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209233322.png" srcset="/img/loading.gif" lazyload><br>我们为了解决复杂模型反而不如简单模型的问题，我们发明了残差网络，上图中右侧就是具体的结构。我们可以看到当 $F(x) &#x3D; 0$ 时，右侧可以忽略中间的两层卷积层。</p>
+<p>这种做法能有效抑制模型训练十分困难的问题，但更多是出于经验性上的。没有理论支撑</p>
+<hr>
+<p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260209233932.png" srcset="/img/loading.gif" lazyload></p>
+<p>或许你认为延长训练时间就能够解决这些问题，你这么做的理由出于<em>复杂模型训练只需要长时间就能取得很好的效果</em>，实际上并不是如此，这已经被大量实验验证，这就是为什么我们需要残差网络结构的原因</p>
+<h3 id="网络规模"><a href="#网络规模" class="headerlink" title="网络规模"></a>网络规模</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210154111.png" srcset="/img/loading.gif" lazyload></p>
+<p>随着网络规模的提升，模型的性能也呈现良好的提升，但是这种提升归于平缓，也受到 GPU和 CPU的限制，最终不会无限增长。</p>
+<p>实际上我认为这从哲学角度考虑是一个很好的问题：如果有一天我们真的拥有了无限计算资源的计算机（灵感来源刘慈欣《镜子》），我们真的能够模拟整个人类的大脑，那么是否可以真正的做到一模一样呢？</p>
+<p>你或许注意到网络一开始使用了 $7 \times7$ 的卷积层，这是出于经验上的发现。</p>
+<h1 id="权重选择"><a href="#权重选择" class="headerlink" title="权重选择"></a>权重选择</h1><p>在训练深度神经网络时，我们不能随意地将权重初始化为任意的随机数。权重的大小决定了信号在网络中传播时的“生存状态”。这两张 PPT 生动地演示了如果标准差（Standard Deviation）选得不合适，信号要么会“饿死”（消失），要么会“撑死”（爆炸）。</p>
+<h2 id="权重过小"><a href="#权重过小" class="headerlink" title="权重过小"></a>权重过小</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210164243.png" srcset="/img/loading.gif" lazyload></p>
+<p>当我们把初始化的权重设定得非常小（例如代码中的 <code>W = 0.01 * np.random.randn(...)</code>）时，网络会遭遇<strong>激活值消失（Vanishing Activations）</strong>的问题。</p>
+<p>观察 PPT 下方的直方图，你会发现一个非常明显的趋势。在第一层（Layer 1），激活值的分布还算正常，呈高斯分布状。然而，随着数据向更深层传播（Layer 2 到 Layer 6），均值（mean）和标准差（std）迅速下降。到了最后几层，几乎所有的激活值都坍缩到了 <strong>0</strong> 附近。</p>
+<p>这背后的数学原理很简单：当你不断地将数据乘以一个小于 1 的微小数（例如 0.01），数值会指数级地衰减。这对于神经网络的训练是毁灭性的。因为在反向传播（Backpropagation）中，权重的梯度是与其输入的激活值成正比的（根据链式法则）。如果前向传播时激活值都变成了 0，那么反向传播时计算出的<strong>梯度也全是 0</strong>。结果就是，权重根本得不到更新，网络完全无法学习。这也就是所谓的“梯度消失”的一种表现形式。</p>
+<h2 id="权重过大"><a href="#权重过大" class="headerlink" title="权重过大"></a>权重过大</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210164219.png" srcset="/img/loading.gif" lazyload></p>
+<p>为了解决上面的问题，我们可能会想：“那把权重设大一点不就行了吗？” 这张 PPT 告诉我们，稍微大一点点也是灾难。实验中仅仅将系数从 <code>0.01</code> 提升到了 <code>0.05</code>（<code>W = 0.05 * ...</code>），就引发了<strong>激活值爆炸（Exploding Activations）</strong>。</p>
+<p>观察这里的直方图，情况与上一张截然相反。第一层的均值是 1.27，但到了第六层，均值已经飙升到了 74.50，标准差也从 1.86 暴增到 109.24。直方图的分布不再集中，而是迅速向右扩散，数值变得巨大。</p>
+<p>这是因为在矩阵乘法中，输入维度（Din）通常很大（这里是 4096）。如果权重稍微大一点，经过加权求和后的数值方差就会变得非常大。由于使用的是 <strong>ReLU</strong> 激活函数（它是无上界的，$f(x) &#x3D; \max(0, x)$），这些巨大的数值会毫无阻拦地向后传递并不断放大。最终，这些数值会导致计算机浮点数溢出（NaN），或者导致梯度过大让网络训练震荡、无法收敛。</p>
+<h2 id="何恺明方法"><a href="#何恺明方法" class="headerlink" title="何恺明方法"></a>何恺明方法</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210164636.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="1-核心公式：那个神奇的-sqrt-2"><a href="#1-核心公式：那个神奇的-sqrt-2" class="headerlink" title="1. 核心公式：那个神奇的 $\sqrt{2}$"></a><strong>1. 核心公式：那个神奇的 $\sqrt{2}$</strong></h4><p>为了让网络不论多深，每一层的信号强度（方差）都能保持稳定，何恺明推导出了一个非常简单的公式。我们在初始化权重 $W$ 时，应该让权重的方差为 $2&#x2F;n$。</p>
+<p><strong>代码实现：</strong></p>
+<p><code>W = np.random.randn(Din, Dout) * np.sqrt(2 / Din)</code></p>
+<ul>
+<li><p>**<code>np.random.randn</code>**：生成均值为 0，方差为 1 的高斯分布随机数。</p>
+</li>
+<li><p>**<code>np.sqrt(2 / Din)</code>**：这是关键的缩放因子。</p>
+<ul>
+<li><p>$D_{in}$：输入神经元的个数（Fan-in）。</p>
+</li>
+<li><p><strong>2</strong>：这是何氏初始化的灵魂所在。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-直觉：为什么要乘以-2？"><a href="#2-直觉：为什么要乘以-2？" class="headerlink" title="2. 直觉：为什么要乘以 2？"></a><strong>2. 直觉：为什么要乘以 2？</strong></h4><p>在何恺明之前，大家常用的是 Xavier Initialization（Glorot Initialization），它的系数是 $\sqrt{1&#x2F;Din}$。但是 Xavier 是假设激活函数是线性的（或者像 Tanh 那样关于原点对称）。</p>
+<p><strong>但是，我们现在用的是 ReLU！</strong></p>
+<ul>
+<li><p><strong>ReLU 的特性</strong>：$f(x) &#x3D; \max(0, x)$。它会把所有负数的输入都砍成 0。</p>
+</li>
+<li><p><strong>信号损失</strong>：假设输入数据正负各半，经过 ReLU 之后，<strong>一半的信号（能量）直接没了</strong>。</p>
+</li>
+<li><p><strong>补偿机制</strong>：既然 ReLU 每一层都“杀掉”了一半的信号，为了保持总方差不变，我们在初始化权重时，就必须把<strong>方差乘以 2</strong> 来补偿这部分损失。</p>
+</li>
+</ul>
+<p>这就是公式中 $\sqrt{2 &#x2F; D_{in}}$ 那个 <strong>2</strong> 的由来。</p>
+<h4 id="3-效果：Just-Right-刚刚好"><a href="#3-效果：Just-Right-刚刚好" class="headerlink" title="3. 效果：Just Right (刚刚好)"></a><strong>3. 效果：Just Right (刚刚好)</strong></h4><p>看 PPT 下方的直方图：</p>
+<ul>
+<li><p><strong>Layer 1 到 Layer 6</strong>：所有的直方图分布都非常健康、稳定。</p>
+</li>
+<li><p>**均值 (mean)**：稳定在 0.5 左右（因为 ReLU 后全是正数）。</p>
+</li>
+<li><p>**标准差 (std)**：稳定在 0.8 左右，没有出现前面那种衰减到 0.01 或爆炸到 100 的情况。</p>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h4><p><strong>Kaiming Initialization</strong> 告诉我们：如果你使用 <strong>ReLU</strong> (或其变体) 作为激活函数，<strong>请务必使用 $\sqrt{2&#x2F;n}$ 来初始化你的权重</strong>。这是目前训练深度卷积神经网络（CNN）的标准操作。</p>
+<h1 id="训练（真是让人激动的环节）"><a href="#训练（真是让人激动的环节）" class="headerlink" title="训练（真是让人激动的环节）"></a>训练（真是让人激动的环节）</h1><h2 id="数据预处理"><a href="#数据预处理" class="headerlink" title="数据预处理"></a>数据预处理</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210165100.png" srcset="/img/loading.gif" lazyload></p>
+<p>图像归一化的核心目的在于对输入数据进行<strong>中心化（Centering）</strong>和<strong>缩放（Scaling</strong>，这已经成为几乎所有现代深度学习模型的标准预处理步骤。其基本操作逻辑是<strong>按通道（Per-channel）</strong>进行的。具体来说，对于常见的 RGB 图像，我们需要分别统计整个训练数据集中红、绿、蓝这三个通道的像素值分布。这意味着最终我们需要计算出 <strong>3 个均值（Mean）</strong>和 <strong>3 个标准差（Std）</strong>，分别对应三个颜色通道的统计特性，而不是针对整张图混在一起计算。</p>
+<p>在实际工程实现中，这些统计量必须在训练开始前，基于你的特定数据集进行<strong>预计算（Pre-computing）</strong>。一旦获得了这组全局的均值和标准差，在预处理每一张图像时，我们就会对每一个像素点执行标准化的数学变换：即取该位置的像素值，减去其所属通道的均值，再除以该通道的标准差。用代码逻辑来表达，对于第 $c$ 个通道在 $(i, j)$ 位置的像素点，其归一化后的值等于 $(pixel[i,j,c] - \mu_c) &#x2F; \sigma_c$。通过这种方式，我们消除了不同通道间量纲或数值范围的差异，让输入数据的分布更加规范，从而帮助神经网络更快、更稳定地收敛。</p>
+<h2 id="数据增强"><a href="#数据增强" class="headerlink" title="数据增强"></a>数据增强</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210165945.png" srcset="/img/loading.gif" lazyload></p>
+<p>数据增强的核心策略是通过随机变换（如裁剪、缩放、翻转等）让模型“见多识广”，从而防止过拟合。在训练阶段，ResNet 等经典网络采用了一种动态的裁剪策略：首先，从一个指定的范围（例如 $[256, 480]$）内随机选择一个数值 $L$，将原始训练图像的短边缩放到这个长度；接着，在这个已经缩放的图像上随机裁剪出一个固定大小（例如 $224 \times 224$）的图像块（patch）作为模型的输入。这种随机性迫使模型在每一轮训练中看到的图像细节和构图都有所不同，从而学习到更加鲁棒的特征。</p>
+<p>这种增强不仅用于训练，在<strong>测试阶段（Test Time</strong>也可以通过一种称为“测试时增强（Test Time Augmentation, TTA）”的技术来提升预测的准确度。与训练时的完全随机不同，测试时通常采用更加确定性和全面的策略。例如，ResNet 会将测试图像分别缩放到 5 个不同的尺度（${224, 256, 384, 480, 640}$），然后在每个尺度的图像上裁剪出 <strong>10 个</strong>特定的图像块：这通常包括左上、右上、左下、右下这 4 个角，加上 1 个中心裁剪，以及这 5 个裁剪块对应的水平翻转版本。最后，模型会对这所有裁剪块的预测结果取平均值，作为最终的分类结果。这种做法虽然增加了推理的计算量，但能显著提升模型的稳定性和精度。</p>
+<h2 id="迁移学习"><a href="#迁移学习" class="headerlink" title="迁移学习"></a>迁移学习</h2><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210170254.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们知道训练一个大型的深度神经网络（比如在 ImageNet 上训练的）是非常耗时耗力的，需要海量的数据和强大的算力。那么，当我们手头只有一点点数据，或者不想从零开始训练时，该怎么办呢？这时候迁移学习就派上用场了！它的核心思想是：利用别人已经训练好的模型（预训练模型），把它学到的知识“迁移”到我们的新任务上。</p>
+<p>如果你的新数据集比较小（Small Dataset），千万别尝试重新训练整个网络，那样很容易过拟合（Overfitting）。明智的做法是把预训练模型前面的大部分层都<strong>“冻结”（Freeze）</strong>住，也就是不让它们的参数更新。我们只把最后那个负责分类的全连接层（FC层）给换掉，换成适合你自己任务类别数的新层，然后只训练这最后的一层。这就好比你买了一辆跑车，只是换了个新方向盘，引擎还是法拉利的引擎，照样能跑得飞快！</p>
+<p>如果你的数据集稍微大一些（Bigger Dataset），那你可以稍微大胆一点。除了初始化最后的全连接层，你还可以尝试<strong>“微调”（Finetune）</strong>更多的层，甚至整个网络。这种情况下，预训练模型的参数就像是一个非常优秀的初始化起点，比随机初始化要好得多。这就好比你买了一套二手房，虽然房子结构没动，但你把墙纸、地板、家具都重新装修了一遍，让它更符合你的品味。因为数据够多，所以不用太担心过拟合的问题，模型能学到更适合你新数据的特征。</p>
+<hr>
+<p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210170544.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们在上一张幻灯片讨论了如何根据数据集的大小来选择“冻结”还是“微调”。这背后的逻辑其实是基于一个假设：预训练模型（比如在 ImageNet 上训练的 AlexNet 或 VGG）已经学会了如何“看”这个世界。为了验证这一点，我们可以提取网络中倒数第二层（也就是分类器之前的那一层，通常有 4096 个神经元）的输出特征向量。当我们在这个<strong>特征空间（Feature Space）</strong>中去寻找某张测试图片的“近邻”时，神奇的事情发生了：你会发现找到的不仅仅是颜色分布相似的图片，而是<strong>语义（Semantic）</strong>高度相似的图片。</p>
+<p>看那个大象的例子简直太直观了！如果你输入一张大象向左侧站立的照片，在特征空间里找到的“邻居”全是不同背景下、但姿态神似的大象。同样的，如果你输入一张万圣节南瓜灯的照片，网络找出来的都是发光的南瓜，而不是其他橘黄色的圆形物体（比如橘子或篮球）。这说明预训练模型提取的特征（那 4096 维的向量）已经包含了极高层的语义信息——它真的“懂”什么是大象，什么是南瓜。这正是为什么我们可以放心地把这些特征迁移到新任务上使用的根本原因：因为这些特征本身就已经是非常高质量的图像描述符了。</p>
+<p>所以总结一下迁移学习的实操指南：如果是<strong>小数据集</strong>，我们就把这些高质量的特征提取器当作固定的“积木”，只重新训练最后那个负责具体分类任务的“积木头”（线性分类器），因为数据太少，动摇地基容易把模型练坏；如果是<strong>大数据集</strong>，我们就有底气把整个大厦（所有层）都重新装修一遍（Fine-tuning），利用预训练的参数作为一个绝佳的初始化起点，这通常能比从零随机初始化训练得到更好的收敛效果和最终精度。</p>
+<p>也就是说，我们可以在最后放置一个knn或者线性分类器，经过提取的语义符号具有良好的效果</p>
+<h3 id="迁移学习的局限"><a href="#迁移学习的局限" class="headerlink" title="迁移学习的局限"></a>迁移学习的局限</h3><p><img src="/images/CS231N-lecture6-note1/Pasted%20image%2020260210183900.png" srcset="/img/loading.gif" lazyload></p>
+<p>很遗憾的是，并不是所有问题都适合迁移学习</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/cnn/" class="print-no-link">#cnn</a>
+      
+        <a href="/tags/cs231n/" class="print-no-link">#cs231n</a>
+      
+        <a href="/tags/cnn-train/" class="print-no-link">#cnn_train</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture6 note1</div>
+      <div>https://augusteing.github.io/2026/03/22/CS231N-lecture6-note1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年3月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/03/22/CS231N-lecture5-note2/" title="CS231N lecture5 note2">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N lecture5 note2</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/03/22/Attention-is-all-you-need/" title="Attention is all you need">
+                        <span class="hidden-mobile">Attention is all you need</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

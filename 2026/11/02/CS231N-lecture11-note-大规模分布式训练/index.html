@@ -1,0 +1,694 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="GPUGPU 全称为 Graphic Processing Unit，本质上是处理图像计算的硬件，具有很好的并行计算的能力。Nvidia 早在 10s 就开始投入并行计算这一领域，为深度学习提供了硬件基础。 H100的机构 H100 应该是25年左右单卡性能最好的 GPU, AMD 和 谷歌也有类似的深度学习计算单元。  由 132 个流式处理器和中心的L2内存构成（实际上一个 H100 的计算核">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture11 note 大规模分布式训练">
+<meta property="og:url" content="https://augusteing.github.io/2026/11/02/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="GPUGPU 全称为 Graphic Processing Unit，本质上是处理图像计算的硬件，具有很好的并行计算的能力。Nvidia 早在 10s 就开始投入并行计算这一领域，为深度学习提供了硬件基础。 H100的机构 H100 应该是25年左右单卡性能最好的 GPU, AMD 和 谷歌也有类似的深度学习计算单元。  由 132 个流式处理器和中心的L2内存构成（实际上一个 H100 的计算核">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102163358.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102163445.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102164155.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102164618.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102164838.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102165545.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102172648.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102173030.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102171128.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102173317.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102173950.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102174107.png">
+<meta property="article:published_time" content="2026-11-02T09:44:58.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.230Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102163358.png">
+  
+  
+  
+  <title>CS231N lecture11 note 大规模分布式训练 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture11 note 大规模分布式训练"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-02 17:44" pubdate>
+          2026年11月2日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          873 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          8 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture11 note 大规模分布式训练</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="GPU"><a href="#GPU" class="headerlink" title="GPU"></a>GPU</h1><p>GPU 全称为 Graphic Processing Unit，本质上是处理图像计算的硬件，具有很好的并行计算的能力。Nvidia 早在 10s 就开始投入并行计算这一领域，为深度学习提供了硬件基础。</p>
+<h2 id="H100的机构"><a href="#H100的机构" class="headerlink" title="H100的机构"></a>H100的机构</h2><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102163358.png" srcset="/img/loading.gif" lazyload></p>
+<p>H100 应该是25年左右单卡性能最好的 GPU, AMD 和 谷歌也有类似的深度学习计算单元。</p>
+<p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102163445.png" srcset="/img/loading.gif" lazyload></p>
+<p>由 132 个流式处理器和中心的L2内存构成（实际上一个 H100 的计算核心有 144 个核心，但是 NVidia 只承诺 132 个是可用的。</p>
+<p>我猜测是工程上的原因。</p>
+<p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102164155.png" srcset="/img/loading.gif" lazyload></p>
+<p>tensor core 通常</p>
+<h1 id="显卡集群"><a href="#显卡集群" class="headerlink" title="显卡集群"></a>显卡集群</h1><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102164618.png" srcset="/img/loading.gif" lazyload></p>
+<p>llmma 3 训练集群由接近 25000 块 GPU 构成。<br>说实话按照之前 GPT 员工的说法，似乎十万+ 的集群也属于正常。</p>
+<p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102164838.png" srcset="/img/loading.gif" lazyload></p>
+<p>可以近似的将模型看作一个大电脑，在这个超级强力的电脑中就可以完成计算。</p>
+<h1 id="训练算法"><a href="#训练算法" class="headerlink" title="训练算法"></a>训练算法</h1><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102165545.png" srcset="/img/loading.gif" lazyload></p>
+<p>数据并行算法过程如上，首先每块 GPU 都有模型的全部权重和优化器（Adam），每块 GPU 处理自己的小批次数据，之后再进行前向传播，反向传播，最后平均梯度到所有的GPU，每个GPU更新自己的梯度。</p>
+<p>其中计算反向传播和更新平均梯度可以并行。</p>
+<p>这样做的一个问题就是，每个模型要存模型的全部权重，会将模型的大小限制在 1B 左右。</p>
+<h2 id="FSPD"><a href="#FSPD" class="headerlink" title="FSPD"></a>FSPD</h2><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102172648.png" srcset="/img/loading.gif" lazyload></p>
+<p>快速 DP的基本思想是：不同 GPU 各司其职，只负责某一层的向前和后向传播，在其他 GPU 需要自己的层的时候，就互相通信，之后不负责该层的 GPU 删除权重腾出内存，反向传播时同理，最后更新了权重也广播到所有的 GPU。</p>
+<h2 id="激活值检查"><a href="#激活值检查" class="headerlink" title="激活值检查"></a>激活值检查</h2><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102173030.png" srcset="/img/loading.gif" lazyload><br>反向传播的过程需要利用激活值，但是大量激活值的存储也是不可接受的，于是我们提出了重算激活值的方法，在反向传播需要时才计算该层的激活值，但是这会导致时间大大延长，所以我们设置几个点，每隔几层保存一些激活值，这些都是很朴素的思想。</p>
+<h1 id="HFU和MFU"><a href="#HFU和MFU" class="headerlink" title="HFU和MFU"></a>HFU和MFU</h1><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102171128.png" srcset="/img/loading.gif" lazyload></p>
+<p>HFU 的定义是指 GPU 在模型上花费的算力&#x2F; GPU 的理论总算力。</p>
+<p>但是 GPU 不仅仅只能做计算对吧，还有很多事情可以完成，所以：MFU 被定义了</p>
+<p>MFU 衡量的是：模型完成有效训练任务所需的 FLOPs，占硬件理论峰值 FLOPs 的比例。</p>
+<h2 id="上下文并行"><a href="#上下文并行" class="headerlink" title="上下文并行"></a>上下文并行</h2><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102173317.png" srcset="/img/loading.gif" lazyload><br>将数据沿着序列维度切分，GPU 1 和 GPU 2 负责处理同一个 token 的不同内容。</p>
+<h2 id="流水线并行"><a href="#流水线并行" class="headerlink" title="流水线并行"></a>流水线并行</h2><p><img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102173950.png" srcset="/img/loading.gif" lazyload></p>
+<p>模型不同的层由不同的 GPU 负责，但是这样做的坏处就是高度的串行了，所以我们将数据处理为多个批次，如图处理为 4 个批次。</p>
+<p>这也是很朴素的想法。</p>
+<h2 id="张量并行"><a href="#张量并行" class="headerlink" title="张量并行"></a>张量并行<img src="/images/CS231N-lecture11-note-%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%AD%E7%BB%83/Pasted%20image%2020261102174107.png" srcset="/img/loading.gif" lazyload></h2><p>某些大张量可以被切分为多个小张量，分在不同的 GPU 上进行计算。</p>
+<h1 id="summary"><a href="#summary" class="headerlink" title="summary"></a>summary</h1><ul>
+<li>GPU 确实是近 10 年以来进步最快的基础设备之一，提高了近 1000 倍的算力</li>
+<li>现在的大语言模型都在万卡甚至十万卡的设备上运行，搞ai确实费钱</li>
+<li>为了大规模的分布式运行，我们需要设计很多算法。</li>
+<li>总的来说是希望 MFU 的指标越来越好，根据 DeepSeek和llmma开源的细节，大部分的 MFU 都在 30 - 50% 的区间。</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture11 note 大规模分布式训练</div>
+      <div>https://augusteing.github.io/2026/11/02/CS231N-lecture11-note-大规模分布式训练/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年11月2日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/11/04/CS231N-lecture12-note-%E8%87%AA%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0/" title="CS231N lecture12 note 自监督学习">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N lecture12 note 自监督学习</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/10/21/CS231N-assignment2%EF%BC%9A%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" title="CS231N assignment2：卷积神经网络">
+                        <span class="hidden-mobile">CS231N assignment2：卷积神经网络</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

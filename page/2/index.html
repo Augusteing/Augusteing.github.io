@@ -230,15 +230,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/08/16/CS61B-ch31%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" target="_self">
-          git的协作
+        <a href="/2026/10/09/CS61B%EF%BC%9A%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" target="_self">
+          问题：归并排序、LSD 处理字符串
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/16/CS61B-ch31%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/10/09/CS61B%EF%BC%9A%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" target="_self">
         <div>
-          git的版本控制如上所示，我们之所以使用git，是因为在某些特殊时候，会考虑将代码回退到之前的版本。 但git是如何实现协作的呢？  假设我们是程序员 Kanav 我们在和 Stella 开发一款名为 61B belly 的软件&#x2F;程序。这款软件的主要功能是提供美食的评价功能（你可以思考思考一款美食评价的app需要哪些功能） 图中我们可以看到：S （Stella） 设计了 饭店（我是中
+          现在抛出一个问题：归并排序要处理长度为 $W$ 的字符串，问它的运行时时间分析。 我们可以写一个字符串的比较器，比较两个字符串之间的大小，在最坏情况下他会有：$O(W)$ 的运行时间。（可能我们需要比较到最后一位） 所以对于归并排序来说，总的运行时为：$O(W* NlogN)$ 。 但如果字符串的首字母都不同，也就是说比较两个字符串的时间在 $\theta(1)$ ，则仍然具有 $O(nlogN)
         </div>
       </a>
 
@@ -246,8 +246,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-08-16 17:35" pubdate>
-              2026-08-16
+            <time datetime="2026-10-09 18:13" pubdate>
+              2026-10-09
             </time>
           </div>
         
@@ -284,15 +284,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/08/13/CS61B-disc08/" target="_self">
-          CS61B disc08
+        <a href="/2026/10/08/CS61B-ch36-%EF%BC%9Aradix-sort/" target="_self">
+          稳定性
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/13/CS61B-disc08/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/10/08/CS61B-ch36-%EF%BC%9Aradix-sort/" target="_self">
         <div>
-          CS 61B 图（Graphs）、堆（Heaps）2025 年春季学期（Spring 2025）讨论课 08（Discussion 08）：2025 年 3 月 17 日 1 树、图与遍历，我的天哪！（Trees, Graphs, and Traversals, Oh My!） (a) 写出下面这棵 BST 的下列遍历。 前序（Pre-order）：中序（In-order）：后序（Post-ord
+          Java 内部使用两种排序算法：  基础类型：QuickSort 其余类型：MergeSort  这样使用算法的原因是：QuickSort 在霍尔分区下速度很快，在三分区下速度很慢，三分区下虽然具有稳定性。 归并排序具有稳定性，这样就使得不同类的排序不会破坏自身的结构（毕竟有的狗终究和其他的狗不一样） 计数排序想象一下，如果我们不再驾驶缓慢的本田思域，而是开始驾驶一辆快速的法拉利。不幸的是，我们
         </div>
       </a>
 
@@ -300,8 +300,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-08-13 12:00" pubdate>
-              2026-08-13
+            <time datetime="2026-10-08 00:40" pubdate>
+              2026-10-08
             </time>
           </div>
         
@@ -338,15 +338,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/08/13/CS61B-ch30-note%EF%BC%9AmergeSort/" target="_self">
-          归并排序复习
+        <a href="/2026/10/08/CS61B-ch34%EF%BC%9A%E6%8E%92%E5%BA%8F%E4%B8%8A%E9%99%90%E6%8E%A8%E5%AF%BC/" target="_self">
+          排序的上限
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/13/CS61B-ch30-note%EF%BC%9AmergeSort/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/10/08/CS61B-ch34%EF%BC%9A%E6%8E%92%E5%BA%8F%E4%B8%8A%E9%99%90%E6%8E%A8%E5%AF%BC/" target="_self">
         <div>
-          归并排序的算法：  将数组近似等分为两个数组 递归归并左半数组 递归归并右半数组 合并数组   插入排序原地插入排序的算法如下：  i 从 0 到 N-1 遍历： 第 i 个元素之前是已排序元素部分，之后为未排序部分 如果 i 元素 &lt; i - 1 元素，则交换，直到第 i 个元素在正确的位置上    时间复杂度为 $O(N^2)$   值得一提的是：插入排序在小数组上表现十分良好，大约 N
+          目前我们已经看到许多的算法，似乎他们的时间上线都是 $\theta(nlogn)$  最直观的用途当然是将事物按特定顺序排列。  但它也可以用来解决其他任务，有时是以非常巧妙（non-trivial）的方式：  排序将“查找重复项”问题的复杂度从朴素的 $O(N^2)$ 优化到了 $O(N \log N)$。  排序将“3SUM”问题的复杂度从朴素的 $O(N^3)$ 优化到了 $O(N^2)$。
         </div>
       </a>
 
@@ -354,8 +354,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-08-13 11:51" pubdate>
-              2026-08-13
+            <time datetime="2026-10-08 00:09" pubdate>
+              2026-10-08
             </time>
           </div>
         
@@ -392,15 +392,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/08/12/CS61B-ch29-note%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" target="_self">
-          管理复杂
+        <a href="/2026/09/20/CS61B-ch14-note%EF%BC%9Aunion/" target="_self">
+          Introduction
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/12/CS61B-ch29-note%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B-ch14-note%EF%BC%9Aunion/" target="_self">
         <div>
-          我鼓励大家多去做一些复杂的工程，Vernor Vinge在1982年的一篇杂志中指出如果之后的人们能仅使用手中的手机解决本科期间的绝大多数问题，那么我们就应该学会这种工具。  使得代码清晰明显 封装成磨模块  复杂的定义一切有关于使得软件更难阅读和修改的事都称之为复杂  理解代码如何工作 花在用于改进的时间 找到用于改进的地方 改bug而不引入另外一个  控制复杂的方法Facebook 20年前开
+          我们这样的人（比如你和我）居住在各自的国家里，并生活在这些国家中。 我们可以把每一个国家看作一个集合（set），而生活在这个国家里的所有人就是这个集合中的元素（elements）。 同一个人不可能在同一时间生活在两个不同的国家。 我们刚刚建立的这个模型，就是一个不相交集合（disjoint set）。 如果两个集合没有共同的元素，那么它们被称为不相交集合。不相交集合（或并查集）数据结构跟踪固定数量
         </div>
       </a>
 
@@ -408,8 +408,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-08-12 11:37" pubdate>
-              2026-08-12
+            <time datetime="2026-09-20 19:08" pubdate>
+              2026-09-20
             </time>
           </div>
         
@@ -446,15 +446,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/08/12/CS61B-ch28-note%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%8E%92%E5%BA%8F/" target="_self">
-          排序的定义
+        <a href="/2026/09/20/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" target="_self">
+          21.1 Priority Queues
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/12/CS61B-ch28-note%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%8E%92%E5%BA%8F/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B-ch21-note-%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" target="_self">
         <div>
-          对于一组元素，如果能够排序应该满足如下的性质：  元素可以被比较， 元素 a 和 b 共有三种关系 a &gt; b, a &#x3D; b, b &gt; a 具有传递性 a &lt; b b &lt; c -&gt; a &lt; c  我们有许多种排序的方式，不只局限于数字的大小。 比如：在对字符串进行排序的时候，我们可能会采用以下的排列方式：  字符串的长度 ASCII码的顺序 首字母的顺
+          #cs61b  二叉搜索树让我们能够高效地搜索树，时间复杂度仅为$$log(N)$$这是因为我们可以在搜索的每一步中排除树中一半的元素。但如果我们更关心快速找到最小或最大的元素，而不是快速搜索呢？ 现在我们来介绍优先队列这一抽象数据类型。为了理解这个 ADT，想象一个装有物品的袋子。你可以往这个袋子里添加物品，也可以从中移除物品，等等。但有一个限制：你只能与这个袋子中最小的物品进行交互。 1234
         </div>
       </a>
 
@@ -462,8 +462,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-08-12 11:01" pubdate>
-              2026-08-12
+            <time datetime="2026-09-20 19:06" pubdate>
+              2026-09-20
             </time>
           </div>
         
@@ -500,15 +500,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/13/CS61B-ch27-note%EF%BC%9ATRIES/" target="_self">
-          tries
+        <a href="/2026/09/20/CS61B-ch25-note%EF%BC%9A%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/" target="_self">
+          定义
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/13/CS61B-ch27-note%EF%BC%9ATRIES/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B-ch25-note%EF%BC%9A%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91/" target="_self">
         <div>
-          我们之前看到许多种实现集合和map的数据结构，今天我们要介绍新的一种，它的运行时间更短。  基本思想：  每个节点都只有一个字母 每个节点可以有很多的子节点  如果我们想表示很多单词但是不想出现无意义的单词比如 “aw”，那么一个好的解决办法是对于单词的结尾节点标记一个布尔值。 运行时分析 无论 Trie 里存了 10 个单词（$N&#x3D;10$）还是 10,000,000 个单词（$N&#x
+          最小生成树是从图中生成出的一个概念 其定义为：  链接所有的节点 不含有环 其边的权重总和最小  cut 性质 我们将一个图的节点分成两个不为空的集合，上图中我用紫色和白色区分这两个集合。 对于链接两个集合的节点的边，其中最小的边就存在于这张图的MST中。 证明我们已经得到了一个最小生成树，如上图中的加粗黑线所示。 我们使用反证法证明，假设存在一条边是最小的链接两个集合节点的边，但却不存在于MST
         </div>
       </a>
 
@@ -516,8 +516,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-13 20:21" pubdate>
-              2026-07-13
+            <time datetime="2026-09-20 18:14" pubdate>
+              2026-09-20
             </time>
           </div>
         
@@ -554,15 +554,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/09/CS61B-ch26-note%EF%BC%9A%E6%9C%89%E5%90%91%E6%97%A0%E7%8E%AF%E5%9B%BE/" target="_self">
-          拓扑排序
+        <a href="/2026/09/20/CS61B%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%9B%9B/" target="_self">
+          API
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/09/CS61B-ch26-note%EF%BC%9A%E6%9C%89%E5%90%91%E6%97%A0%E7%8E%AF%E5%9B%BE/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/20/CS61B%EF%BC%9A%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%9B%9B/" target="_self">
         <div>
-          到目前为止，我们已经学习了大量的内容。包括编程实践、使用集成开发环境（IDE）、设计数据结构、渐近分析、实现各种不同的抽象数据类型（例如，使用二叉搜索树、字典树或哈希表来实现映射，使用堆来实现优先队列），最后还有图上的算法。 你可能听人说过，CS 61B 这门课教授的内容，很多都是解决科技公司标准面试题所必需的——但为什么公司会寻找具备这些特定知识的候选人呢？ 一个主要原因是，许多现实世界的问题都
+          在理想的世界中，我们认为一个大型项目应该完全被拆分为不同的模块。 但是这很难实现，因为为了实现不同的功能，总会出现模块之间耦合的情况。  一个 Java 类的API可以分为：  形式化 API (Formal Part)：指方法签名的列表（The list of method signatures）。这包括方法名、参数类型列表和返回值类型。 非形式化 API (Informal Part)：指那些
         </div>
       </a>
 
@@ -570,8 +570,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-09 18:27" pubdate>
-              2026-07-09
+            <time datetime="2026-09-20 17:37" pubdate>
+              2026-09-20
             </time>
           </div>
         
@@ -608,15 +608,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/09/CS61B-ch24-note%EF%BC%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" target="_self">
-          前瞻
+        <a href="/2026/09/19/CS61B-ch33%EF%BC%9AQuickSort/" target="_self">
+          快速排序变体：动机
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/09/CS61B-ch24-note%EF%BC%9A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/19/CS61B-ch33%EF%BC%9AQuickSort/" target="_self">
         <div>
-          我们是否开发出了一种算法，能够找到从给定顶点到所有其他可达顶点的最短路径？嗯，算是吧。我们开发出了一种在无边权标记的图上表现良好的算法。我们做了这些：开发出了一种算法，能够找到从给定源顶点出发的最短路径（这里”最短”指的是边数最少）。 但这并不总是”最短”的正确定义。有时，图的边可能带有”权重”，如果 A-B 边的权重为 5，而 A-C 边的权重仅为 3，那么 A-B 就被认为比 A-C 更远。
+          在深入探讨如何改进快速排序算法的精彩思路之前，先回顾一下快速排序（或分区排序）的工作原理。 回想一下，我们版本的快速排序具有以下特性：  最左侧的元素始终作为基准（pivot） 我们的分区算法始终保留小于等于和大于等于元素的相对顺序。  并且请记住，即使我们有一个始终“良好”的枢轴，这会导致最佳情况运行时间为 $θ(NlogN$) ，但在实践中仍然可能发生罕见的 worst case 运行时间 $
         </div>
       </a>
 
@@ -624,8 +624,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-09 17:42" pubdate>
-              2026-07-09
+            <time datetime="2026-09-19 16:50" pubdate>
+              2026-09-19
             </time>
           </div>
         
@@ -662,15 +662,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/03/CS61B-ch23-note%EF%BC%9A%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86/" target="_self">
-          BFS 和 DFS
+        <a href="/2026/09/19/CS231N-lecture9-note1/" target="_self">
+          CS231N lecture9 note1
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/03/CS61B-ch23-note%EF%BC%9A%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/19/CS231N-lecture9-note1/" target="_self">
         <div>
-          在第 22.4 节中，我们介绍了图的深度优先搜索遍历。在深度优先搜索中，我们会沿着第一个子节点的整个谱系向下访问，然后才开始查看第二个子节点——我们确实是在优先搜索深度。 这里，我们将讨论广度优先搜索（也称为层序遍历）。在广度优先搜索中，我们会先访问所有直接子节点，然后再继续访问任何孙节点。换句话说，我们先访问距离源点 1 条边的所有节点，然后是距离源点 2 条边的所有节点，以此类推。 BFS 的
+          Vision Transformers 该种 Transformer 将用于自然语言处理的 Transformer 进行改造。 into patches首先，ViT 将图片分成 $s * s$ 的小块，在这个例子中是三乘三。之后这些小块经过线性映射之后称为一个D维的长向量。这一步完美地模仿了 NLP 中的“词嵌入”（Word Embedding），也就是把一个个图像块变成了 Transformer
         </div>
       </a>
 
@@ -678,8 +678,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-03 16:35" pubdate>
-              2026-07-03
+            <time datetime="2026-09-19 16:39" pubdate>
+              2026-09-19
             </time>
           </div>
         
@@ -694,8 +694,15 @@
     
       <span class="category-chain">
         
-  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
   
 
       </span>
@@ -716,15 +723,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/03/CS61B-ch22-note%EF%BC%9A%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86%E5%92%8C%E5%9B%BE/" target="_self">
-          22.1 Tree Recap
+        <a href="/2026/09/15/CS231N-assignment3%EF%BC%9ASelf-Supervised-Learning/" target="_self">
+          CS231N assignment3：Self_Supervised_Learning
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/03/CS61B-ch22-note%EF%BC%9A%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86%E5%92%8C%E5%9B%BE/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/09/15/CS231N-assignment3%EF%BC%9ASelf-Supervised-Learning/" target="_self">
         <div>
-          Trees and Traversals 什么是树呢？回想一下，树由以下部分组成：  一组相连的节点（或顶点）。这两个术语可以互换使用。   一组连接这些节点的边。边不能形成环路。 Constraint: 任意两个节点之间有且仅有一条路径。    图 #1 是一棵树。它有一个节点，没有边。这没问题！  第二个和第三个结构是树。注意，第三个是链表。链表仍然是一棵树，因为它是一个连通的无环图。 第四个
+          现代机器学习需要大量标注数据。但很多时候，获取大量人工标注数据既困难又&#x2F;或昂贵。有没有一种方法可以让机器自动学习一个模型，在没有标注数据集的情况下生成良好的视觉表示？有，这就是自监督学习！ 自监督学习（SSL）允许模型利用给定数据集中的数据自动学习一个“良好”的表示空间，而无需使用标签。具体来说，如果我们的数据集是一堆图像，那么自监督学习允许模型学习并生成图像的“良好”表示向量。 自监督
         </div>
       </a>
 
@@ -732,8 +739,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-03 12:16" pubdate>
-              2026-07-03
+            <time datetime="2026-09-15 18:57" pubdate>
+              2026-09-15
             </time>
           </div>
         
@@ -748,8 +755,15 @@
     
       <span class="category-chain">
         
-  <a href="/categories/CS61B/" class="category-chain-item">CS61B</a>
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Assignment/" class="category-chain-item">Assignment</a>
+  
+  
+
   
 
       </span>
@@ -768,7 +782,7 @@
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/#board">3</a><a class="page-number" href="/page/4/#board">4</a><a class="page-number" href="/page/5/#board">5</a><a class="extend next" rel="next" href="/page/3/#board"><i class="iconfont icon-arrowright"></i></a>
+      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/#board">3</a><a class="page-number" href="/page/4/#board">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/#board">8</a><a class="extend next" rel="next" href="/page/3/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 

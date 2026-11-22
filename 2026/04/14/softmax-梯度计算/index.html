@@ -1,0 +1,792 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="线性层反向传播推导：为什么 dW &#x3D; X.T @ dscores？tags: #DeepLearning #Math #Calculus #MatrixAlgebra #CS231n 1. 问题定义 (Problem Setup)在一个全连接层（Linear Layer）或 Softmax 分类器的第一步中，前向传播公式为： $$S &#x3D; XW$$ 其中变量定义如下：  **$X">
+<meta property="og:type" content="article">
+<meta property="og:title" content="softmax 梯度计算">
+<meta property="og:url" content="https://augusteing.github.io/2026/04/14/softmax-%E6%A2%AF%E5%BA%A6%E8%AE%A1%E7%AE%97/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="线性层反向传播推导：为什么 dW &#x3D; X.T @ dscores？tags: #DeepLearning #Math #Calculus #MatrixAlgebra #CS231n 1. 问题定义 (Problem Setup)在一个全连接层（Linear Layer）或 Softmax 分类器的第一步中，前向传播公式为： $$S &#x3D; XW$$ 其中变量定义如下：  **$X">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-14T10:08:32.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:37.095Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>softmax 梯度计算 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="softmax 梯度计算"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-04-14 18:08" pubdate>
+          2026年4月14日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          10 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">softmax 梯度计算</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="线性层反向传播推导：为什么-dW-X-T-dscores？"><a href="#线性层反向传播推导：为什么-dW-X-T-dscores？" class="headerlink" title="线性层反向传播推导：为什么 dW &#x3D; X.T @ dscores？"></a>线性层反向传播推导：为什么 dW &#x3D; X.T @ dscores？</h1><p>tags: #DeepLearning #Math #Calculus #MatrixAlgebra #CS231n</p>
+<h2 id="1-问题定义-Problem-Setup"><a href="#1-问题定义-Problem-Setup" class="headerlink" title="1. 问题定义 (Problem Setup)"></a>1. 问题定义 (Problem Setup)</h2><p>在一个全连接层（Linear Layer）或 Softmax 分类器的第一步中，前向传播公式为：</p>
+<p>$$S &#x3D; XW$$</p>
+<p>其中变量定义如下：</p>
+<ul>
+<li>**$X \in \mathbb{R}^{N \times D}$**：输入数据矩阵（Batch Size 为 $N$，特征维度为 $D$）。</li>
+<li>**$W \in \mathbb{R}^{D \times C}$**：权重矩阵（特征维度为 $D$，类别数为 $C$）。</li>
+<li>**$S \in \mathbb{R}^{N \times C}$**：分数矩阵（Scores），即 <code>scores</code>。</li>
+<li>**$L$**：最终的损失函数值（Scalar），是一个标量。</li>
+</ul>
+<p><strong>已知条件：</strong><br>我们已经求出了损失函数 $L$ 关于分数 $S$ 的梯度（Upstream Gradient），即代码中的 <code>dscores</code>：<br>$$\frac{\partial L}{\partial S} \in \mathbb{R}^{N \times C}$$<br>我们将其记为矩阵 $\delta$ (delta)，其中 $\delta_{ij} &#x3D; \frac{\partial L}{\partial S_{ij}}$。</p>
+<p><strong>目标：</strong><br>求损失函数 $L$ 关于权重 $W$ 的梯度 <code>dW</code>：<br>$$\frac{\partial L}{\partial W} \in \mathbb{R}^{D \times C}$$</p>
+<hr>
+<h2 id="2-标量求导法证明-Scalar-Derivation"><a href="#2-标量求导法证明-Scalar-Derivation" class="headerlink" title="2. 标量求导法证明 (Scalar Derivation)"></a>2. 标量求导法证明 (Scalar Derivation)</h2><p>这是最直观、最不容易出错的方法。我们将矩阵拆解为单个元素，利用<strong>多元函数链式法则</strong>进行推导，最后再组装回矩阵形式。</p>
+<h3 id="第一步：写出前向传播的标量形式"><a href="#第一步：写出前向传播的标量形式" class="headerlink" title="第一步：写出前向传播的标量形式"></a>第一步：写出前向传播的标量形式</h3><p>矩阵乘法 $S &#x3D; XW$ 中的任意一个元素 $S_{nc}$（第 $n$ 个样本，第 $c$ 类分数）可以表示为：</p>
+<p>$$S_{nc} &#x3D; \sum_{k&#x3D;1}^{D} X_{nk} W_{kc}$$</p>
+<h3 id="第二步：定义梯度的标量形式"><a href="#第二步：定义梯度的标量形式" class="headerlink" title="第二步：定义梯度的标量形式"></a>第二步：定义梯度的标量形式</h3><p>我们需要求的是 $\frac{\partial L}{\partial W_{ij}}$，即 $L$ 对权重矩阵中第 $i$ 行第 $j$ 列元素的偏导数。<br>根据**全微分链式法则 (Total Derivative Chain Rule)**，$L$ 是通过所有的 $S$ 来影响 $W_{ij}$ 的。</p>
+<p>$$\frac{\partial L}{\partial W_{ij}} &#x3D; \sum_{n&#x3D;1}^{N} \sum_{c&#x3D;1}^{C} \frac{\partial L}{\partial S_{nc}} \cdot \frac{\partial S_{nc}}{\partial W_{ij}}$$</p>
+<blockquote>
+<p><strong>INFO</strong> 直觉理解<br>权重 $W_{ij}$ 参与了每一个样本（$n&#x3D;1 \dots N$）的计算，但它只参与了第 $j$ 个类别的分数计算。因此它会收到来自所有样本的梯度回传。</p>
+</blockquote>
+<h3 id="第三步：计算偏导项-frac-partial-S-nc-partial-W-ij"><a href="#第三步：计算偏导项-frac-partial-S-nc-partial-W-ij" class="headerlink" title="第三步：计算偏导项 $\frac{\partial S_{nc}}{\partial W_{ij}}$"></a>第三步：计算偏导项 $\frac{\partial S_{nc}}{\partial W_{ij}}$</h3><p>回顾公式 $S_{nc} &#x3D; \sum_{k&#x3D;1}^{D} X_{nk} W_{kc}$。</p>
+<p>当我们对 $W_{ij}$ 求导时：</p>
+<ol>
+<li>如果 $c \neq j$，则 $S_{nc}$ 的计算公式里根本不包含 $W_{ij}$，导数为 0。</li>
+<li>如果 $c &#x3D; j$，则 $S_{nj} &#x3D; \dots + X_{ni} W_{ij} + \dots$。</li>
+</ol>
+<p>因此：<br>$$\frac{\partial S_{nc}}{\partial W_{ij}} &#x3D; \begin{cases} X_{ni} &amp; \text{if } c &#x3D; j \ 0 &amp; \text{if } c \neq j \end{cases}$$</p>
+<h3 id="第四步：代回链式法则公式"><a href="#第四步：代回链式法则公式" class="headerlink" title="第四步：代回链式法则公式"></a>第四步：代回链式法则公式</h3><p>将第三步的结果代入第二步的求和公式中。由于当 $c \neq j$ 时项为 0，我们可以去掉对 $c$ 的求和，直接令 $c&#x3D;j$：</p>
+<p>$$\frac{\partial L}{\partial W_{ij}} &#x3D; \sum_{n&#x3D;1}^{N} \frac{\partial L}{\partial S_{nj}} \cdot X_{ni}$$</p>
+<h3 id="第五步：重组为矩阵形式-Matrix-Reassembly"><a href="#第五步：重组为矩阵形式-Matrix-Reassembly" class="headerlink" title="第五步：重组为矩阵形式 (Matrix Reassembly)"></a>第五步：重组为矩阵形式 (Matrix Reassembly)</h3><p>让我们仔细观察上述结果：<br>$$(\frac{\partial L}{\partial W})<em>{ij} &#x3D; \sum</em>{n&#x3D;1}^{N} X_{ni} \cdot \delta_{nj}$$</p>
+<p>注意下标的顺序：</p>
+<ul>
+<li>$X$ 的下标是 $(n, i)$。</li>
+<li>$\delta$ (<code>dscores</code>) 的下标是 $(n, j)$。</li>
+</ul>
+<p>为了构建矩阵乘法，我们需要相邻的下标一致。我们将 $X_{ni}$ 转置看作 $(X^T)_{in}$：</p>
+<p>$$(\frac{\partial L}{\partial W})<em>{ij} &#x3D; \sum</em>{n&#x3D;1}^{N} (X^T)<em>{in} \cdot \delta</em>{nj}$$</p>
+<p>这正是矩阵乘法的定义：**$A$ 的第 $i$ 行与 $B$ 的第 $j$ 列的点积**。<br>这里 $A &#x3D; X^T$, $B &#x3D; \delta$。</p>
+<p>$$\frac{\partial L}{\partial W} &#x3D; X^T \delta$$</p>
+<p>对应代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">dW = X.T.dot(dscores)<br><br></code></pre></td></tr></table></figure>
+
+<h2 id="3-维度分析验证-Dimensional-Analysis"><a href="#3-维度分析验证-Dimensional-Analysis" class="headerlink" title="3. 维度分析验证 (Dimensional Analysis)"></a>3. 维度分析验证 (Dimensional Analysis)</h2><p>在编写代码时，维度检查是防止错误的最好方法。</p>
+<p>$$ \underbrace{\frac{\partial L}{\partial W}}<em>{(D, C)} &#x3D; \underbrace{X^T}</em>{(D, N)} \cdot \underbrace{\frac{\partial L}{\partial S}}_{(N, C)} $$</p>
+<ul>
+<li><p>$X$: $(N, D) \rightarrow X^T: (D, N)$</p>
+</li>
+<li><p>$dscores$: $(N, C)$</p>
+</li>
+<li><p>结果: $(D, N) \times (N, C) &#x3D; (D, C)$</p>
+</li>
+</ul>
+<p>维度完全匹配权重的形状。</p>
+<hr>
+<h2 id="4-进阶：矩阵微分法-Matrix-Calculus"><a href="#4-进阶：矩阵微分法-Matrix-Calculus" class="headerlink" title="4. 进阶：矩阵微分法 (Matrix Calculus)"></a>4. 进阶：矩阵微分法 (Matrix Calculus)</h2><p>如果你熟悉迹（Trace）技巧，证明会非常优雅且只有一行。</p>
+<blockquote>
+<p><strong>TIP</strong> 核心公式</p>
+<p>对于标量函数 $L$，我们有微分关系：$dL &#x3D; \text{Tr}( (\frac{\partial L}{\partial X})^T dX )$</p>
+</blockquote>
+<ol>
+<li><p><strong>前向微分</strong>：</p>
+<p> $$ S &#x3D; XW \implies dS &#x3D; X dW $$</p>
+</li>
+<li><p><strong>反向传播关系</strong>：</p>
+<p> $$ dL &#x3D; \text{Tr}( (\frac{\partial L}{\partial S})^T dS ) $$</p>
+</li>
+<li><p><strong>代入并利用迹的性质</strong> ($\text{Tr}(AB) &#x3D; \text{Tr}(BA)$)：</p>
+<p> $$ dL &#x3D; \text{Tr}( \delta^T (X dW) ) &#x3D; \text{Tr}( (X^T \delta)^T dW ) $$</p>
+</li>
+<li><p><strong>对比定义</strong>：</p>
+<p> $$ dL &#x3D; \text{Tr}( (\frac{\partial L}{\partial W})^T dW ) $$</p>
+</li>
+<li><p><strong>结论</strong>：</p>
+<p> $$ \frac{\partial L}{\partial W} &#x3D; X^T \delta $$</p>
+</li>
+</ol>
+<hr>
+<h2 id="5-物理-直觉解释"><a href="#5-物理-直觉解释" class="headerlink" title="5. 物理&#x2F;直觉解释"></a>5. 物理&#x2F;直觉解释</h2><p><strong>为什么是 $X^T$？</strong></p>
+<ul>
+<li><p><strong>$X$ (Input)</strong> 代表了<strong>输入强度</strong>。</p>
+</li>
+<li><p><strong>$dscores$ (Error Signal)</strong> 代表了<strong>该样本预测偏差的严重程度</strong>。</p>
+</li>
+</ul>
+<p>权重的梯度 $\frac{\partial L}{\partial W}$ 实际上在问：<strong>“如果不小心把这个权重调大一点，Loss 会怎么变？”</strong></p>
+<p>如果输入 $X$ 很大，且该样本的误差梯度 $dscores$ 也很大，那么这个连接权重的责任就很大（梯度大）。</p>
+<ul>
+<li><p>$X^T \cdot dscores$ 本质上是在计算<strong>输入特征</strong>与<strong>误差信号</strong>的<strong>相关性（Correlation）</strong>。</p>
+</li>
+<li><p>只有当输入被激活（$X &gt; 0$）<strong>且</strong>该次预测有误差时，我们才需要更新权重。</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>INFO</strong> 特殊</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>softmax 梯度计算</div>
+      <div>https://augusteing.github.io/2026/04/14/softmax-梯度计算/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年4月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/04/22/CS61B-ch19-note-%E5%93%88%E5%B8%8C%E8%A1%A8/" title="Introduction to Hashing: Data Indexed Arrays">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Introduction to Hashing: Data Indexed Arrays</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/04/12/CS231N-assignment2%EF%BC%9Adropout/" title="CS231N assignment2：dropout">
+                        <span class="hidden-mobile">CS231N assignment2：dropout</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

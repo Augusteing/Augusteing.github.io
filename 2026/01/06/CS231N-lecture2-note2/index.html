@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="linear classification在上一节中我们介绍了图像分类问题，即从固定的类别集合中为图像分配一个单一标签的任务。此外，我们还描述了 k-近邻（kNN）分类器，它通过将图像与训练集中的（标注过的）图像进行比较来对图像进行分类。如我们所见，kNN 存在一些缺点：  分类器必须记住所有的训练数据，并将其存储以便将来与测试数据进行比较。这在空间上是低效的，因为数据集的大小可能轻松达到几十 G">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture2 note2">
+<meta property="og:url" content="https://augusteing.github.io/2026/01/06/CS231N-lecture2-note2/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="linear classification在上一节中我们介绍了图像分类问题，即从固定的类别集合中为图像分配一个单一标签的任务。此外，我们还描述了 k-近邻（kNN）分类器，它通过将图像与训练集中的（标注过的）图像进行比较来对图像进行分类。如我们所见，kNN 存在一些缺点：  分类器必须记住所有的训练数据，并将其存储以便将来与测试数据进行比较。这在空间上是低效的，因为数据集的大小可能轻松达到几十 G">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251217203722.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251218170507.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251218170638.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251218212227.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020260106005155.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251220163250.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224131743.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224131755.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224132116.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224132235.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224132402.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224132635.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224132653.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224135302.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251224135508.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251227214139.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251227215944.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251227215949.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251227220331.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251227220403.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251227220440.png">
+<meta property="article:published_time" content="2026-01-05T16:52:04.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.613Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture2-note2/Pasted%20image%2020251217203722.png">
+  
+  
+  
+  <title>CS231N lecture2 note2 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture2 note2"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-06 00:52" pubdate>
+          2026年1月6日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture2 note2</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="linear-classification"><a href="#linear-classification" class="headerlink" title="linear classification"></a>linear classification</h1><p>在上一节中我们介绍了图像分类问题，即从固定的类别集合中为图像分配一个单一标签的任务。此外，我们还描述了 k-近邻（kNN）分类器，它通过将图像与训练集中的（标注过的）图像进行比较来对图像进行分类。如我们所见，kNN 存在一些缺点：</p>
+<ul>
+<li>分类器必须记住所有的训练数据，并将其存储以便将来与测试数据进行比较。这在空间上是低效的，因为数据集的大小可能轻松达到几十 GB。</li>
+<li>对测试图像进行分类的成本很高，因为它需要与所有训练图像进行比较。（算法效率低下）</li>
+</ul>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>概述。我们现在将开发一种更强大的图像分类方法，最终自然地将其扩展到整个神经网络和卷积神经网络。该方法将包含两个主要组成部分：一个得分函数，它将原始数据映射到类别得分；以及一个损失函数，它量化预测得分与真实标签之间的匹配程度。我们将把这视为一个优化问题，在该问题中，我们将通过最小化损失函数来优化得分函数的参数。</p>
+<h2 id="parameterized-mapping-from-images-to-label-scores"><a href="#parameterized-mapping-from-images-to-label-scores" class="headerlink" title="parameterized mapping from images to label scores"></a>parameterized mapping from images to label scores</h2><p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251217203722.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="linear-classification-score-function"><a href="#linear-classification-score-function" class="headerlink" title="linear classification score function"></a>linear classification score function</h2><p>f(xi,W,b)&#x3D;Wxi+b</p>
+<p>在上述方程中，我们假设图像 xi 的所有像素都被展平为一个形状为[D x 1]的单列向量。矩阵 W（大小为[K x D]）和向量 b（大小为[K x 1]）是该函数的参数。在 CIFAR-10 中， xi 包含第 i 张图像的所有像素展平为一个[3072 x 1]的单列向量，W 是[10 x 3072]，b 是[10 x 1]，因此 3072 个数字进入该函数（原始像素值），10 个数字输出（类别得分）。W 中的参数通常被称为权重，而 b 被称为偏置向量，因为它影响输出得分，但不与实际数据 xi 相互作用。然而，你经常会听到人们将权重和参数这两个词混用。</p>
+<p>这几点请你注意：（如果你的线性代数不太好。请去补习）</p>
+<ul>
+<li>首先，注意单次矩阵乘法 Wxi 实际上是在并行地评估 10 个独立的分类器（每个类别一个），其中每个分类器对应 W 中的一行。</li>
+<li>请注意，我们还将输入数据 (xi,yi) 视为已知且固定的，但我们能够控制参数 W,b 的设置。我们的目标是将这些参数设置为使得计算出的得分在整个训练集上与真实标签相匹配。我们将更详细地讨论如何实现这一点，但直观上，我们希望正确的类别得分高于错误类别的得分。</li>
+<li>这种方法的一个优势是，训练数据用于学习参数 W,b，但一旦学习完成，我们可以丢弃整个训练集，只保留学习到的参数。这是因为新的测试图像可以简单地通过该函数进行前向传播，并基于计算出的得分进行分类。</li>
+<li>最后，需要注意的是，对测试图像进行分类仅涉及一次矩阵乘法和加法，这比将测试图像与所有训练图像进行比较要快得多。</li>
+</ul>
+<p><em>Foreshadowing: Convolutional Neural Networks will map image pixels to scores exactly as shown above, but the mapping ( f ) will be more complex and will contain more parameters.</em></p>
+<h2 id="Interpreting-a-linear-classifier"><a href="#Interpreting-a-linear-classifier" class="headerlink" title="Interpreting a linear classifier"></a>Interpreting a linear classifier</h2><p>请注意，一个线性分类器将一个类的得分计算为该类所有像素值在三个颜色通道上的加权和。根据我们为这些权重设置的具体值，该函数有能力喜欢或不喜欢（根据每个权重的符号）图像中某些位置的特定颜色。例如，你可以想象，如果图像的侧面有很多蓝色（这可能对应于水），那么“船”这个类可能更有可能被识别。你可能会预期，“船”分类器在蓝色通道上会有大量的正权重（蓝色的存在会增加船的得分），而在红色&#x2F;绿色通道上会有负权重（红色或绿色的存在会降低船的得分）。</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251218170507.png" srcset="/img/loading.gif" lazyload></p>
+<p>将图像映射到类别得分的一个例子。为了便于可视化，我们假设图像只有 4 个像素（4 个单色像素，在这个例子中为了简洁我们不考虑颜色通道），并且有 3 个类别（红色代表猫，绿色代表狗，蓝色代表船）。（说明：这里的颜色仅表示 3 个类别，并与 RGB 通道无关。）我们将图像像素拉伸成一列，并通过矩阵乘法来获得每个类别的得分。请注意，这组特定的权重 W 并不好：权重将我们的猫图像分配了一个非常低的猫得分。特别是，这组权重似乎确信它正在看一只狗。</p>
+<h3 id="Analogy-of-images-as-high-dimensional-points"><a href="#Analogy-of-images-as-high-dimensional-points" class="headerlink" title="Analogy of images as high-dimensional points."></a><strong>Analogy of images as high-dimensional points.</strong></h3><p>由于图像被拉伸为高维的列向量，我们可以将每张图像解释为空间中的一个点（例如，CIFAR-10 中的每张图像都是 32x32x3 像素的 3072 维空间中的一个点）。类似地，整个数据集可以看作是一组（带标签的）点。</p>
+<p>由于我们定义了每个类别的得分作为所有图像像素的加权和，每个类别的得分都是该空间上的线性函数。我们无法可视化 3072 维的空间，但如果我们将所有这些维度压缩到只有两个维度，那么我们可以尝试可视化分类器可能在做什么：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251218170638.png" srcset="/img/loading.gif" lazyload></p>
+<p>图像空间的表示，其中每张图像都是一个点，三个分类器被可视化。以汽车分类器（红色）为例，红色的线表示在空间中所有对汽车类别得分为零的点。红色箭头表示得分增加的方向，因此红色线右侧的所有点得分都是正的（并且线性增加），而左侧的所有点得分都是负的（并且线性减少）。</p>
+<p>或许你对此处的数学逻辑不太理解，如果一个分类器只有两个数 w1、w2，分别对应两个像素点x、y。那么对于任意的x和y存在这样一条直线：w1 x + w2y &#x3D; 0</p>
+<h2 id="geometry-interpretation"><a href="#geometry-interpretation" class="headerlink" title="geometry interpretation"></a>geometry interpretation</h2><p>如上所述， W 的每一行都是一个类别的分类器。这些数值的几何解释是，当我们改变 W 的某一行时，像素空间中的对应直线会在不同的方向上旋转。另一方面，偏置项 b 允许我们的分类器平移这些直线。特别地，请注意，如果没有偏置项，无论权重如何，将 xi&#x3D;0（请注意这里是0向量而不是标量0） 代入都会得到零分，因此所有直线都会被强制通过原点。</p>
+<h3 id="template-interpretation"><a href="#template-interpretation" class="headerlink" title="template interpretation"></a>template interpretation</h3><p>另一种对权重 W 的解释是， W 中的每一行对应一个类别的一个模板（有时也称为原型）。每个类别的得分是通过依次用内积（或点积）将每个模板与图像进行比较，找到最“匹配”的模板来获得的。用这种术语来说，线性分类器是在进行模板匹配，其中模板是通过学习得到的。另一种思考方式是，我们仍然在进行最近邻分类，只不过不是使用成千上万的训练图像，而是每个类别只使用一张图像（尽管我们会学习它，它不一定要是训练集中的某一张图像），并且使用（负的）内积作为距离，而不是 L1 或 L2 距离。</p>
+<p>以下图片展示了训练完成后，W的各行分类器得到的权重的图像</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251218212227.png" srcset="/img/loading.gif" lazyload></p>
+<p>略过一些内容：训练结束后 CIFAR-10 的示例学习到的权重。请注意，例如，船的模板包含大量蓝色像素，这是符合预期的。因此，当该模板与海洋中的船的图像进行内积匹配时，会得到一个高分。</p>
+<p>此外，请注意马的模板似乎包含了一匹双头马，这是由于数据集中同时存在左看和右看的马。线性分类器将数据中的这两种马的模式合并为一个模板。同样，汽车分类器似乎也将多种模式合并为一个模板，该模板需要从各个角度和各种颜色中识别汽车。特别是，这个模板最终呈现为红色，这表明 CIFAR-10 数据集中红色汽车的数量比其他颜色都多。线性分类器无法很好地处理不同颜色的汽车，但正如我们后面将看到的，神经网络将允许我们完成这项任务。展望一下，神经网络将在其隐藏层中发展出中间神经元，以检测特定类型的汽车（例如绿色左向汽车、蓝色正向汽车等），而下一层的神经元则可以通过对各个汽车检测器的加权求和，将这些信息组合成更准确的汽车得分。<br><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020260106005155.png" srcset="/img/loading.gif" lazyload><br>实际上线性分类器存在局限</p>
+<h3 id="bias-trick"><a href="#bias-trick" class="headerlink" title="bias trick"></a>bias trick</h3><p>在继续之前，我们想提到一个常用的简化技巧，即将两个参数 W,b 表示为一个。回想一下，我们定义的得分函数为：</p>
+<p>f(xi,W,b)&#x3D;Wxi+b</p>
+<p>随着我们逐步学习材料，单独跟踪两个参数集（偏置 b 和权重 W ）会有些繁琐。一个常用的技巧是将这两个参数集合并到一个矩阵中，通过在向量 xi 中增加一个额外的维度，该维度始终保存常数 1 ——一个默认值。有了这个额外的维度，新的得分函数将简化为一次矩阵乘法：</p>
+<p>f(xi,W)&#x3D;Wxi</p>
+<p>在我们的 CIFAR-10 例子中， xi 现在是 [3073 x 1] 而不是 [3072 x 1] -（额外的维度保存的是常数 1），而 W 现在是 [10 x 3073] 而不是 [10 x 3072]。 W 的额外列现在对应的是偏置 b 。一个示意图或许有助于澄清：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251220163250.png" srcset="/img/loading.gif" lazyload></p>
+<p>偏差技巧的示意图。进行矩阵乘法然后加上一个偏差向量（左）等同于将所有输入向量添加一个常数为 1 的偏差维度，并将权重矩阵扩展为一个包含偏差列的矩阵（右）。因此，如果我们预处理数据时在所有向量末尾添加 1，我们只需要学习一个权重矩阵，而不需要两个分别存储权重和偏差的矩阵。</p>
+<h3 id="Image-data-preprocessing"><a href="#Image-data-preprocessing" class="headerlink" title="Image data preprocessing."></a><strong>Image data preprocessing.</strong></h3><p>图像数据预处理。作为快速说明，在上面的例子中我们使用了原始像素值（范围为[0…255]）。在机器学习中，对输入特征进行归一化是一个非常常见的做法（在图像的情况下，每个像素都被视为一个特征）。特别是，对数据进行中心化处理（即从每个特征中减去均值）是非常重要的。在图像的情况下，这对应于计算训练图像的均值图像，并将其从每张图像中减去，以得到像素值范围大约在[-127 … 127]的图像。进一步常见的预处理步骤是将每个输入特征缩放，使其值范围在[-1, 1]之间。</p>
+<p>其中，零均值中心化被认为更为重要，但其合理性我们将在理解梯度下降的动态过程之后才能得到充分的解释。</p>
+<h2 id="loss-function"><a href="#loss-function" class="headerlink" title="loss function"></a>loss function</h2><p>在上一节中，我们定义了一个从像素值到类别得分的函数，该函数由一组权重 W 参数化。此外，我们还看到，我们无法控制数据 (xi,yi) （它是固定且给定的），但我们能够控制这些权重，并希望设置它们使得预测的类别得分与训练数据中的真实标签保持一致。</p>
+<p>例如，回到我们之前提到的猫的示例图像及其对“cat”、“dog”和“ship”类别的得分，我们发现该示例中的特定权重集并不十分优秀：我们输入了描绘猫的像素，但“cat”类的得分却非常低（-96.8），与其他类别（“dog”得分 437.9，“ship”得分 61.95）相比。我们将使用损失函数（有时也称为成本函数或目标函数）来衡量我们对这种结果的不满程度。直观来说，如果我们对训练数据分类效果不好，损失就会很高；如果我们分类效果很好，损失就会很低。</p>
+<h3 id="Multiclass-Support-Vector-Machine-loss"><a href="#Multiclass-Support-Vector-Machine-loss" class="headerlink" title="Multiclass Support Vector Machine loss"></a>Multiclass Support Vector Machine loss</h3><p>有几种方式可以定义损失函数的细节。作为第一个例子，我们将开发一个常用的损失函数，称为 SVM 损失。SVM 损失的设置使得 SVM“希望”每张图像的正确类别得分比所有错误类别高一个固定的边界 Δ 。请注意，有时将损失函数拟人化是有帮助的，如上所述：SVM“希望”某种结果，意味着这种结果会带来更低的损失（这是好的）。</p>
+<p>现在让我们更加精确。回想一下，对于第 i 个示例，我们给出了图像 xi 的像素和标签 yi ，该标签指定了正确类别的索引。得分函数接收像素并计算类别得分向量 f(xi,W) ，我们将它缩写为 s （得分缩写）。例如，第 j 个类别的得分是第 j 个元素： sj&#x3D;f(xi,W)j 。第 i 个示例的多类 SVM 损失形式化为如下：<br><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224131743.png" srcset="/img/loading.gif" lazyload><br>让我们用一个例子来解释它是如何工作的。假设我们有三个类别，它们得到的分数分别是 s&#x3D;[13,−7,11] ，并且第一个类别是真实类别（即 yi&#x3D;0 ）。同时假设 Δ （一个我们很快会详细讨论的超参数）是 10。上面的表达式对所有错误类别（ j≠yi ）求和，所以我们得到两个项：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224131755.png" srcset="/img/loading.gif" lazyload><br>你可以看到，第一项为零，因为 [-7 - 13 + 10] 得到一个负数，然后通过 max(0,−) 函数被阈值化为零。这对的损失为零，因为正确类别的分数（13）比错误类别的分数（-7）至少大 10 的间隔。实际上差异是 20，这远大于 10，但 SVM 只关心差异至少为 10；超过间隔的任何额外差异都会通过 max 操作被钳位为零。第二项计算 [11 - 13 + 10]，结果为 8。也就是说，尽管正确类别的分数（13）高于错误类别（11），但它并没有达到期望的 10 的间隔。差异只有 2，这就是为什么损失为 8（即差异需要高出多少才能满足间隔）。总之，SVM 损失函数希望正确类别的分数 yi 比错误类别的分数至少大 Δ （delta）。如果不是这样，我们就会累积损失。</p>
+<p>请注意，在这个特定模块中我们使用的是线性评分函数（ f(xi;W)&#x3D;Wxi ），因此我们也可以将损失函数以这种等价形式重写：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224132116.png" srcset="/img/loading.gif" lazyload><br>其中 wj 是 W 重构为列的 j 行。然而，一旦我们开始考虑更复杂的分数函数 f 的形式，情况就不一定是这样了。</p>
+<p>在我们结束本节之前，我们将提到最后一个术语，即零处的阈值函数通常被称为 。有时你会听到人们使用平方 hinge 损失 SVM（或 L2-SVM）的情况，它使用形式 max(0,−)2 ，更强烈地惩罚违反边界的部分（二次方而不是线性）。未平方的版本更标准，但在某些数据集上平方 hinge 损失可能效果更好。这可以在交叉验证期间确定。</p>
+<p><em>The loss function quantifies our unhappiness with predictions on the training set</em></p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224132235.png" srcset="/img/loading.gif" lazyload></p>
+<p>多类支持向量机“希望”正确类别的分数比所有其他分数至少高出 delta。如果任何类别的分数在红色区域内（或更高），则会产生累积损失。否则损失将为零。我们的目标将是找到能够同时满足训练数据中所有样本的约束条件的权重，并使总损失尽可能低。</p>
+<h3 id="regularization"><a href="#regularization" class="headerlink" title="regularization"></a>regularization</h3><p>我们上面提出的损失函数存在一个缺陷。假设我们有一个数据集和一组参数，这些参数能够正确分类每个样本（即所有得分都满足所有间隔条件，并且对于所有 i， Li&#x3D;0 ）。问题在于，这组参数不一定是唯一的：可能存在许多相似的参数也能正确分类样本。一个简单的方法是，如果某些参数能正确分类所有样本（即每个样本的损失为零），那么这些参数的任何倍数 λW （其中 λ&gt;1 ）也会给出零损失，因为这种变换会均匀地拉伸所有得分的大小，从而也拉伸了它们的绝对差值。例如，如果正确类别和最近错误类别之间的得分差是 15，那么将的所有元素乘以 2 会使新的差值变为 30。</p>
+<p>换句话说，我们希望对某些权重集优先考虑，以消除这种歧义。我们可以通过在损失函数中添加一个 R(W) 来实现这一点。最常见的正则化惩罚是平方范数，它通过在所有参数上对每个元素进行二次惩罚来抑制大的权重：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224132402.png" srcset="/img/loading.gif" lazyload></p>
+<p>在上述表达式中，我们对 W 的所有平方元素进行求和。请注意，正则化函数不是数据函数，它仅基于权重。包含正则化惩罚完成了完整的多元支持向量机损失，该损失由两个部分组成：（即所有样本上的平均损失 Li ）和。也就是说，完整的多元 SVM 损失变为：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224132635.png" srcset="/img/loading.gif" lazyload></p>
+<p>或者以完整形式展开：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224132653.png" srcset="/img/loading.gif" lazyload></p>
+<p>其中 N 是训练样本的数量。如您所见，我们将正则化惩罚附加到损失目标上，其权重由超参数 λ 调整。没有简单的方法来设置这个超参数，它通常通过交叉验证来确定。</p>
+<p>除了我们上面提供的动机之外，包含正则化惩罚还有许多理想特性，其中许多我们将在后面的章节中再次讨论。例如，事实证明包含 L2 惩罚会导致 SVM 中吸引人的最大间隔特性（如果您感兴趣，可以参考 CS229 课程笔记了解详细信息）。</p>
+<p>最吸引人的特性是惩罚大的权重（这里的意思是，会让W中不会出现太大的值）往往会提高泛化能力，因为这意味着没有任何一个输入维度能够单独对分数产生很大的影响。例如，假设我们有一个输入向量 x&#x3D;[1,1,1,1] 和两个权重向量 w1&#x3D;[1,0,0,0] 、 w2&#x3D;[0.25,0.25,0.25,0.25] 。那么 wT1x&#x3D;wT2x&#x3D;1 ，所以这两个权重向量导致相同的点积，但 w1 的 L2 惩罚是 1.0，而 w2 的 L2 惩罚只有 0.25。因此，根据 L2 惩罚，权重向量 w2 会被优先选择，因为它实现了更低的正则化损失。直观上，这是因为 w2 中的权重更小且更分散。由于 L2 惩罚倾向于更小、更分散的权重向量，最终的分类器被鼓励考虑所有输入维度以少量，而不是少数几个输入维度且非常强烈。正如我们将在课程后面看到的，这种效果可以提高分类器在测试图像上的泛化性能，并导致更少。</p>
+<p>请注意，偏差（b）的影响并不相同，因为与权重不同，它们不控制输入维度的影响力强度。因此，通常只正则化权重 W 但不正则化偏差 b 。然而，在实践中，这通常被证明几乎没有影响。最后，请注意，由于正则化惩罚，我们永远无法在所有示例上实现精确的 0.0 损失，因为这种情况只有在 W&#x3D;0 的病态设置下才可能发生。</p>
+<h3 id="code"><a href="#code" class="headerlink" title="code"></a>code</h3><p>代码。以下是损失函数（未包含正则化）的 Python 实现，包括未向量化形式和半向量化形式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">L_i</span>(<span class="hljs-params">x, y, W</span>):<br>  <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">  unvectorized version. Compute the multiclass svm loss for a single example (x,y)</span><br><span class="hljs-string">  - x is a column vector representing an image (e.g. 3073 x 1 in CIFAR-10)</span><br><span class="hljs-string">    with an appended bias dimension in the 3073-rd position (i.e. bias trick)</span><br><span class="hljs-string">  - y is an integer giving index of correct class (e.g. between 0 and 9 in CIFAR-10)</span><br><span class="hljs-string">  - W is the weight matrix (e.g. 10 x 3073 in CIFAR-10)</span><br><span class="hljs-string">  &quot;&quot;&quot;</span><br>  delta = <span class="hljs-number">1.0</span> <span class="hljs-comment"># see notes about delta later in this section</span><br>  scores = W.dot(x) <span class="hljs-comment"># scores becomes of size 10 x 1, the scores for each class</span><br>  correct_class_score = scores[y]<br>  D = W.shape[<span class="hljs-number">0</span>] <span class="hljs-comment"># number of classes, e.g. 10</span><br>  loss_i = <span class="hljs-number">0.0</span><br>  <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(D): <span class="hljs-comment"># iterate over all wrong classes</span><br>    <span class="hljs-keyword">if</span> j == y:<br>      <span class="hljs-comment"># skip for the true class to only loop over incorrect classes</span><br>      <span class="hljs-keyword">continue</span><br>    <span class="hljs-comment"># accumulate loss for the i-th example</span><br>    loss_i += <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, scores[j] - correct_class_score + delta)<br>  <span class="hljs-keyword">return</span> loss_i<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">L_i_vectorized</span>(<span class="hljs-params">x, y, W</span>):<br>  <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">  A faster half-vectorized implementation. half-vectorized</span><br><span class="hljs-string">  refers to the fact that for a single example the implementation contains</span><br><span class="hljs-string">  no for loops, but there is still one loop over the examples (outside this function)</span><br><span class="hljs-string">  &quot;&quot;&quot;</span><br>  delta = <span class="hljs-number">1.0</span><br>  scores = W.dot(x)<br>  <span class="hljs-comment"># compute the margins for all classes in one vector operation</span><br>  margins = np.maximum(<span class="hljs-number">0</span>, scores - scores[y] + delta)<br>  <span class="hljs-comment"># on y-th position scores[y] - scores[y] canceled and gave delta. We want</span><br>  <span class="hljs-comment"># to ignore the y-th position and only consider margin on max wrong class</span><br>  margins[y] = <span class="hljs-number">0</span><br>  loss_i = np.<span class="hljs-built_in">sum</span>(margins)<br>  <span class="hljs-keyword">return</span> loss_i<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">L</span>(<span class="hljs-params">X, y, W</span>):<br>  <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">  fully-vectorized implementation :</span><br><span class="hljs-string">  - X holds all the training examples as columns (e.g. 3073 x 50,000 in CIFAR-10)</span><br><span class="hljs-string">  - y is array of integers specifying correct class (e.g. 50,000-D array)</span><br><span class="hljs-string">  - W are weights (e.g. 10 x 3073)</span><br><span class="hljs-string">  &quot;&quot;&quot;</span><br>  <span class="hljs-comment"># evaluate loss over all examples in X without using any for loops</span><br>  <span class="hljs-comment"># left as exercise to reader in the assignment</span><br></code></pre></td></tr></table></figure>
+
+<p>本节的重点在于，SVM 损失采用了一种特定的方法来衡量训练数据上的预测与真实标签的一致性。此外，在训练集上做出良好的预测等同于最小化损失。</p>
+<p><em>All we have to do now is to come up with a way to find the weights that minimize the loss.</em></p>
+<h3 id="Practical-Considerations"><a href="#Practical-Considerations" class="headerlink" title="Practical Considerations"></a>Practical Considerations</h3><p>请注意，我们忽略了超参数 Δ 及其设置。它应该设置为多少，我们是否需要进行交叉验证？事实证明，这个超参数在所有情况下都可以安全地设置为 Δ&#x3D;1.0 。超参数 Δ 和 λ 看起来像是两个不同的超参数，但实际上它们都控制着同一个权衡：目标函数中数据损失和正则化损失之间的权衡。理解这个问题的关键在于权重的幅度（翻译成比例或者更好） W 对分数（以及它们的差异）有直接影响：当我们缩小 W 内的所有值时，分数差异会变得较低，而当我们放大权重时，分数差异会全部变得较高。因此，分数之间的边际的确切值（例如 Δ&#x3D;1 ，或 Δ&#x3D;100 ）在某种程度上是无意义的，因为权重可以任意地缩小或放大差异。</p>
+<p>因此，唯一真正的权衡是我们允许权重增长到多大（通过正则化强度 λ ）。</p>
+<h4 id="relation-with-binary-support-vector-machine"><a href="#relation-with-binary-support-vector-machine" class="headerlink" title="relation with binary support vector machine"></a>relation with binary support vector machine</h4><p>与二元支持向量机的关系。你可能带着之前学习二元支持向量机的经验来到这个课程，其中第 i 个样本的损失可以表示为：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224135302.png" srcset="/img/loading.gif" lazyload></p>
+<p>其中 C 是一个超参数，和 yi∈{−1,1} 。你可以证明本节提出的公式包含了只有两个类别时二元支持向量机作为特例。也就是说，如果只有两个类别，那么损失会简化为上面展示的二元支持向量机。此外，本公式中的 C 和我们的公式中的 λ 控制相同的权衡，并通过倒数关系 C∝1λ 相关联。</p>
+<p>旁注：原始问题中的优化。如果你带着对 SVMs 的先前知识来上这门课，你可能也听说过核函数、对偶问题、SMO 算法等。在这门课中（就像神经网络通常的情况一样），我们将始终使用无约束的原始形式优化目标。其中许多目标在技术上不可微（例如，max(x,y)函数不可微，因为它在 x&#x3D;y 时有尖点），但在实践中这不是问题，通常使用次梯度。</p>
+<p>aside：其他多类 SVM 公式。值得注意的是，本节介绍的多类 SVM 是少数几种用于多类别的 SVM 公式之一。另一种常用形式是 One-Vs-All（OVA）SVM，它为每个类别与其他所有类别训练一个独立的二分类 SVM。相关但实践中较少见的是 All-vs-All（AVA）策略。我们的公式遵循 Weston 和 Watkins 1999（pdf）版本，这是一个比 OVA 更强大的版本（在你可以构建多类数据集，这个版本可以实现零数据损失，而 OVA 不能。如果感兴趣，请查看论文的详细内容）。你可能看到的最后一种公式是结构化 SVM，它最大化正确类别分数与最高分次优类别分数之间的间隔。理解这些公式的差异超出了本课程的范围。这些笔记中介绍的版本在实践中是安全的，但 arguably 最简单的 OVA 策略可能同样有效（正如 Rikin 等人 2004 年在《捍卫 One-Vs-All 分类》（pdf）中所论证的那样）。</p>
+<h3 id="softmax-classification"><a href="#softmax-classification" class="headerlink" title="softmax classification"></a>softmax classification</h3><p>结果表明，SVM 是两种常见的分类器中的一种。另一种流行的选择是 Softmax，它具有不同的损失函数。如果你之前听说过二元逻辑回归分类器，那么 Softmax 分类器就是它的多类别推广。与 SVM 将输出 f(xi,W) 视为（未校准且可能难以解释）的类别分数不同，Softmax 分类器给出一个更直观的输出（归一化类别概率），并且具有我们稍后将描述的概率解释。在 Softmax 分类器中，映射函数 f(xi;W)&#x3D;Wxi 保持不变，但我们现在将这些分数解释为每个类别的未归一化对数概率，并将替换为具有以下形式的：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251224135508.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们在使用 fj 表示类分数向量 f 的第 j 个元素。和之前一样，数据集的完整损失是所有训练样本的 Li 的平均值，再加上正则化项 R(W) 。函数 fj(z)&#x3D;ezj∑kezk 被称为：它将任意实数值分数向量（在 z 中）压缩成一个值在零和一之间且总和为一的向量。涉及 softmax 函数的完整交叉熵损失，如果你是第一次看到它可能会觉得吓人，但它相对容易解释。</p>
+<h4 id="Probabilistic-interpretation"><a href="#Probabilistic-interpretation" class="headerlink" title="Probabilistic interpretation."></a><strong>Probabilistic interpretation</strong>.</h4><p>观察表达式，我们看到</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251227214139.png" srcset="/img/loading.gif" lazyload><br>可以解释为在给定图像 xi 和参数 W 的情况下，分配给正确标签 yi 的（归一化）概率。要理解这一点，请记住 Softmax 分类器将输出向量 f 中的分数解释为未归一化的对数概率(也就是说这个分类器认为输出的分数已经是取过对数的结果，因为我们的分数有正有负，所以我们对分数向量取指数）。对这些量取指数因此给出（未归一化）概率，而除法执行归一化操作，使得概率之和为 1。在概率解释中，因此我们是在最小化正确类别的负对数似然，这可以解释为执行（最大似然估计）。这种观点的一个优点是，我们现在还可以将完整损失函数中的正则化项 R(W) 解释为来自权重矩阵 W 上的高斯先验，其中我们不是执行最大似然估计，而是执行（贝叶斯估计）。我们提到这些解释是为了帮助你的直觉，但这个推导的完整细节超出了本课程的范围。</p>
+<h4 id="practical-issues"><a href="#practical-issues" class="headerlink" title="practical issues"></a>practical issues</h4><p>当你实际编写计算 Softmax 函数的代码时，由于指数运算，中间项 efyi 和 ∑jefj 可能会非常大。除大数可能导致数值不稳定，因此使用归一化技巧非常重要。注意到如果我们将分数的上下乘以一个常数 C 并把它移入求和，我们会得到以下（数学上等价）的表达式：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251227215944.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251227215949.png" srcset="/img/loading.gif" lazyload><br>&#96;&#96;</p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs maxima">f = <span class="hljs-built_in">np</span>.<span class="hljs-built_in">array</span>([<span class="hljs-number">123</span>, <span class="hljs-number">456</span>, <span class="hljs-number">789</span>]) # <span class="hljs-built_in">example</span> with <span class="hljs-number">3</span> classes <span class="hljs-keyword">and</span> each having large scores<br>p = <span class="hljs-built_in">np</span>.<span class="hljs-built_in">exp</span>(f) / <span class="hljs-built_in">np</span>.<span class="hljs-built_in">sum</span>(<span class="hljs-built_in">np</span>.<span class="hljs-built_in">exp</span>(f)) # Bad: Numeric problem, <span class="hljs-built_in">potential</span> blowup<br><br># instead: <span class="hljs-built_in">first</span> shift the <span class="hljs-built_in">values</span> of f so that the highest number <span class="hljs-built_in">is</span> <span class="hljs-number">0</span>:<br>f -= <span class="hljs-built_in">np</span>.<span class="hljs-built_in">max</span>(f) # f becomes [-<span class="hljs-number">666</span>, -<span class="hljs-number">333</span>, <span class="hljs-number">0</span>]<br>p = <span class="hljs-built_in">np</span>.<span class="hljs-built_in">exp</span>(f) / <span class="hljs-built_in">np</span>.<span class="hljs-built_in">sum</span>(<span class="hljs-built_in">np</span>.<span class="hljs-built_in">exp</span>(f)) # safe to <span class="hljs-keyword">do</span>, gives the correct answer<br></code></pre></td></tr></table></figure>
+
+<h4 id="命名上的问题"><a href="#命名上的问题" class="headerlink" title="命名上的问题"></a>命名上的问题</h4><p>可能令人困惑的命名惯例。准确地说，SVM 分类器使用的是 hinge loss，有时也称为 max-margin loss。Softmax 分类器使用的是 cross-entropy loss。Softmax 分类器得名于 softmax 函数，该函数用于将原始类别分数压缩成归一化的正值，这些值之和为 1，以便可以应用交叉熵损失。特别要注意的是，从技术上讲，谈论“softmax loss”没有意义，因为 softmax 只是一个压缩函数，但它是一个相对常用的简称。</p>
+<h3 id="SVM-和-softMax的区别"><a href="#SVM-和-softMax的区别" class="headerlink" title="SVM 和 softMax的区别"></a>SVM 和 softMax的区别</h3><p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251227220331.png" srcset="/img/loading.gif" lazyload></p>
+<p>SVM 和 Softmax 分类器在单个数据点上的差异示例。在两种情况下，我们都计算相同的得分向量 f（例如，在本节中通过矩阵乘法计算）。差异在于对 f 中得分的解释：SVM 将这些得分解释为类别得分，其损失函数鼓励正确类别（蓝色类别 2）的得分比其他类别得分高出一个间隔。Softmax 分类器则将得分解释为每个类别的（未归一化）对数概率，然后鼓励正确类别的（归一化）对数概率较高（等效地，其负值较低）。此示例中，SVM 的最终损失为 1.58，Softmax 分类器的最终损失为 1.04（注意，这是使用自然对数计算的，不是以 2 或 10 为底的对数），但请注意，这些数字不可比较；它们仅在相同分类器和相同数据计算出的损失中才有意义。</p>
+<p>与支持向量机（SVM）计算未经校准且难以解释的所有类别的分数不同，Softmax 分类器允许我们为所有标签计算“概率”。例如，对于一张图像，SVM 分类器可能会给出类别“猫”、“狗”和“船”的分数[12.5, 0.6, -23.0]。而 Softmax 分类器则可以计算这三个标签的概率为[0.9, 0.09, 0.01]，这使你能够解释它在每个类别中的置信度。然而，我们之所以将“概率”一词加引号，是因为这些概率的峰值或弥散程度直接取决于正则化强度 λ ——这是你作为系统输入负责的。例如，假设某些三个类别的未归一化对数概率为[1, -2, 0]。Softmax 函数随后会计算：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251227220403.png" srcset="/img/loading.gif" lazyload></p>
+<p>其中步骤是取指数并归一化以使其和为 1。现在，如果正则化强度 λ 更高，权重 W 会受到更大惩罚，这将导致权重更小。例如，假设权重减小了一半([0.5, -1, 0])。Softmax 现在会计算：</p>
+<p><img src="/images/CS231N-lecture2-note2/Pasted%20image%2020251227220440.png" srcset="/img/loading.gif" lazyload><br>在概率分布更加分散的情况下。此外，当权重W由于非常强的正则化强度 λ 而趋于极小值时，输出概率将接近均匀分布。因此，Softmax 分类器计算出的概率更应被视为置信度，类似于 SVM，分数的排序是可解释的，但绝对数值（或它们的差异）在技术上是不确定的。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture2 note2</div>
+      <div>https://augusteing.github.io/2026/01/06/CS231N-lecture2-note2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月6日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/01/17/CS61B-ch13-note%EF%BC%9A%E6%B8%90%E8%BF%9B%E5%88%86%E6%9E%90/" title="An Introduction to Asymptotic Analysis">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">An Introduction to Asymptotic Analysis</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/05/CS231N-lecture2-note-1/" title="CS231N lecture2 note 1">
+                        <span class="hidden-mobile">CS231N lecture2 note 1</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

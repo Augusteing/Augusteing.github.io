@@ -1,0 +1,712 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="视觉的由来大约5亿四千万年前的寒武纪，感光细胞出现在了一种名为“三叶虫”的生物中，这是迄今为止发现的最早的视觉细胞出现记录。  human is especially visual animal.大约超过半数的皮层细胞参与视觉处理  哺乳动物的视觉通路发现一 负责视觉的神经元在初级视觉皮层中都有自己独立的感受野，通常是非常狭窄的区域在神经科学里，一个神经元的感受野就是它对视觉场景中某一区域的“敏感">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture 1 note 1">
+<meta property="og:url" content="https://augusteing.github.io/2025/12/08/CS231N-lecture-1-note-1/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="视觉的由来大约5亿四千万年前的寒武纪，感光细胞出现在了一种名为“三叶虫”的生物中，这是迄今为止发现的最早的视觉细胞出现记录。  human is especially visual animal.大约超过半数的皮层细胞参与视觉处理  哺乳动物的视觉通路发现一 负责视觉的神经元在初级视觉皮层中都有自己独立的感受野，通常是非常狭窄的区域在神经科学里，一个神经元的感受野就是它对视觉场景中某一区域的“敏感">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191215.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191319.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191649.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203193712.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205120857.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205212922.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205213137.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205215954.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205220040.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251206185955.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251206192200.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251206192706.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251208222317.png">
+<meta property="article:published_time" content="2025-12-08T15:04:52.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.168Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="本笔记用于记录视频的一些笔记，对于数学处理请参见纸质版">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191215.png">
+  
+  
+  
+  <title>CS231N lecture 1 note 1 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture 1 note 1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-12-08 23:04" pubdate>
+          2025年12月8日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          12 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture 1 note 1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="视觉的由来"><a href="#视觉的由来" class="headerlink" title="视觉的由来"></a>视觉的由来</h1><p>大约5亿四千万年前的寒武纪，感光细胞出现在了一种名为“三叶虫”的生物中，这是迄今为止发现的最早的视觉细胞出现记录。</p>
+<blockquote>
+<p>human is especially visual animal.<br>大约超过半数的皮层细胞参与视觉处理</p>
+</blockquote>
+<h1 id="哺乳动物的视觉通路"><a href="#哺乳动物的视觉通路" class="headerlink" title="哺乳动物的视觉通路"></a>哺乳动物的视觉通路</h1><h2 id="发现一"><a href="#发现一" class="headerlink" title="发现一"></a>发现一</h2><ul>
+<li>负责视觉的神经元在初级视觉皮层中都有自己独立的感受野，通常是非常狭窄的区域<br><em>在神经科学里，<strong>一个神经元的感受野就是它对视觉场景中某一区域的“敏感范围”</strong>。</em></li>
+<li>初级视觉皮层是大脑接收到来自视网膜和丘脑信息的第一个皮层区域。（大概在后脑勺这片区域）</li>
+<li>每个 V1 神经元连接到视网膜上一小群感光细胞的输入，所以它只处理来自这个小区域的信息。</li>
+<li>也就是说，<strong>不同的神经元分工明确，每个都“盯着”画面上的一小块</strong>，共同拼起来就覆盖了整个视觉场景。</li>
+</ul>
+<h2 id="发现二"><a href="#发现二" class="headerlink" title="发现二"></a>发现二</h2><ul>
+<li>视觉通路是具有分层结构，更深或者更高层级的神经元具有更复杂的感受野</li>
+</ul>
+<p>以上是 David Hunter Hubel 和 Torsten N. Wiesel在1959年的工作，因此他们获得了1981年的诺贝尔生理学或医学奖，这一发现为后世的卷积神经网络的提出奠定了意义深远的基础。</p>
+<h1 id="计算机视觉的根本问题"><a href="#计算机视觉的根本问题" class="headerlink" title="计算机视觉的根本问题"></a>计算机视觉的根本问题</h1><p>光子通过晶状体等结构投射到视网膜上，大致为2-D图像，但是很明显的是，我们真正看到的是3维的物体。</p>
+<blockquote>
+<p>这在数学上是不适定问题</p>
+</blockquote>
+<p>自然界解决了这个问题，人类发展了两只眼睛就是为了解决这个事情，但是很遗憾的是，人的眼睛数量并不是很够，不能完全看透三维影像。<br>当然，计算机视觉也要解决这个问题。</p>
+<h1 id="计算机视觉的另一个问题"><a href="#计算机视觉的另一个问题" class="headerlink" title="计算机视觉的另一个问题"></a>计算机视觉的另一个问题</h1><p>这里提到另外一个概念：语言。众所周知，语言并不存在于自然环境中，是生成式的（Generate）,呈现一维和连续的特点，实际上这种特点对于生成式 AI 算法设计具有很深远的影响。</p>
+<p>但是很遗憾的是，视觉是一种完全不同的东西，根据马克思唯物主义理论，物理世界真实存在，我们不能说某个地方生成了视觉，所以这是算法设计的困难所在，语言ai有生成的逻辑可以遵循，而视觉却需要面对整个世界。</p>
+<h1 id="发展历程"><a href="#发展历程" class="headerlink" title="发展历程"></a>发展历程</h1><h2 id="1970"><a href="#1970" class="headerlink" title="1970"></a>1970</h2><p>1970年代大家开始研究用圆柱体来代替人的结构，这是一种抽象和简化。<br><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191215.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1980"><a href="#1980" class="headerlink" title="1980"></a>1980</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191319.png" srcset="/img/loading.gif" lazyload><br>边缘检测技术开始出现。</p>
+<p><em>此后，计算机视觉和人工智能进入寒冬，大量的资金减少了投入，但是认知和神经科学蓬勃发展</em></p>
+<h2 id="认知和神经科学的发展"><a href="#认知和神经科学的发展" class="headerlink" title="认知和神经科学的发展"></a>认知和神经科学的发展</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203191649.png" srcset="/img/loading.gif" lazyload></p>
+<p>实际上这两张图片中的自行车落在了相同的地方，但是其余的图像块影响了我们看待它的方式。</p>
+<p>认知和神经科学家还意识到视觉系统处理图片是很快的事情，大约在150m就能处理完一张图片</p>
+<p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251203193712.png" srcset="/img/loading.gif" lazyload></p>
+<p>同时在90年代，mit的科学家发现了人真的很擅长物体分类和识别，并且进化出了相关的脑区用以针对性的识别人物、物体等。</p>
+<h2 id="2000s"><a href="#2000s" class="headerlink" title="2000s"></a>2000s</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205120857.png" srcset="/img/loading.gif" lazyload></p>
+<p>互联网的普及使得数据量开始激增，为计算机视觉提供良好的数据来源</p>
+<h2 id="深度学习的发展"><a href="#深度学习的发展" class="headerlink" title="深度学习的发展"></a>深度学习的发展</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205212922.png" srcset="/img/loading.gif" lazyload></p>
+<p>1986年，反向传播被发明了</p>
+<p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205213137.png" srcset="/img/loading.gif" lazyload></p>
+<p>实际上到了21世纪，人们才意识到数据的重要性。我们开始了数据集工程，李飞飞和她的团队致力于此。</p>
+<p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205215954.png" srcset="/img/loading.gif" lazyload><br>于是ImageNet产生了，这是新时代的数据集成果。</p>
+<p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251205220040.png" srcset="/img/loading.gif" lazyload></p>
+<p>于是2012年时，出现了质的飞跃：2012出现了卷积神经网络这个东西。</p>
+<h2 id="AlexNet"><a href="#AlexNet" class="headerlink" title="AlexNet"></a>AlexNet</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251206185955.png" srcset="/img/loading.gif" lazyload><br>主要是反向传播算法的实现，使得在数学上有一个严谨的计算卷积层参数的方法。</p>
+<h2 id="无聊的事实"><a href="#无聊的事实" class="headerlink" title="无聊的事实"></a>无聊的事实</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251206192200.png" srcset="/img/loading.gif" lazyload><br>自2012年之后，CV领域的论文数量激增，大家开始往热门的方向一窝蜂涌去，巨大的突破引来更大的突破。</p>
+<h2 id="硬件方向的突破"><a href="#硬件方向的突破" class="headerlink" title="硬件方向的突破"></a>硬件方向的突破</h2><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251206192706.png" srcset="/img/loading.gif" lazyload></p>
+<p>或许你的个人电脑就拥有一张英伟达或者AMD的显卡（笔者的笔记本上有一张3060的laptop的版本）。如图展示了每一美元的算力图，我们可以看到，自从2020年之后算力的成本越来越便宜（当然是相对的）。现在的新GPU甚至有张量核心，为了深度学习而单独设计。</p>
+<h1 id="在计算机视觉之外"><a href="#在计算机视觉之外" class="headerlink" title="在计算机视觉之外"></a>在计算机视觉之外</h1><p><img src="/images/CS231N-lecture-1-note-1/Pasted%20image%2020251208222317.png" srcset="/img/loading.gif" lazyload><br>但是在计算机视觉之外还有很多有意思的事情，机器目前体会不到这一点。</p>
+<h1 id="有关计算机视觉的任务"><a href="#有关计算机视觉的任务" class="headerlink" title="有关计算机视觉的任务"></a>有关计算机视觉的任务</h1><p>计算机视觉的最基本的任务是进行图片的理解，比如我们输入一张猫的图片，那么模型应该输出“猫”的标签。这是最基本的视觉识别，也是后面医学诊断、自动驾驶的基础。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%9C%AC%E7%AC%94%E8%AE%B0%E7%94%A8%E4%BA%8E%E8%AE%B0%E5%BD%95%E8%A7%86%E9%A2%91%E7%9A%84%E4%B8%80%E4%BA%9B%E7%AC%94%E8%AE%B0%EF%BC%8C%E5%AF%B9%E4%BA%8E%E6%95%B0%E5%AD%A6%E5%A4%84%E7%90%86%E8%AF%B7%E5%8F%82%E8%A7%81%E7%BA%B8%E8%B4%A8%E7%89%88/" class="print-no-link">#本笔记用于记录视频的一些笔记，对于数学处理请参见纸质版</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture 1 note 1</div>
+      <div>https://augusteing.github.io/2025/12/08/CS231N-lecture-1-note-1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年12月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/12/09/CS61B-ch2-note/" title="Static vs. Non-Static Methods">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Static vs. Non-Static Methods</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/12/05/CS61B-ch1-note/" title="说明">
+                        <span class="hidden-mobile">说明</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

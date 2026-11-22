@@ -1,0 +1,857 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="序列建模任务我们之前的任务是为一张图片输出一个标签，这是很常见的分类任务。 现在我们想要更进一步！如果我们要为一张图片生成一串字幕或者描述呢？这就涉及到我们新的领域，我们称之为一对多的任务。这里的描述为可变的长度，而不是固定长度的单词。 当然，函数的关系适用于很多领域：我们也有可能有多对一的任务,比如我们需要为很多的视频帧数标记类别，这是常见的任务。 你可能会猜想会不会有多对多的任务，是的！我们有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture7 note 1">
+<meta property="og:url" content="https://augusteing.github.io/2026/03/22/CS231N-lecture7-note-1/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="序列建模任务我们之前的任务是为一张图片输出一个标签，这是很常见的分类任务。 现在我们想要更进一步！如果我们要为一张图片生成一串字幕或者描述呢？这就涉及到我们新的领域，我们称之为一对多的任务。这里的描述为可变的长度，而不是固定长度的单词。 当然，函数的关系适用于很多领域：我们也有可能有多对一的任务,比如我们需要为很多的视频帧数标记类别，这是常见的任务。 你可能会猜想会不会有多对多的任务，是的！我们有">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260312145312.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260210214407.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260210215859.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260210221659.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314154726.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314160639.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314161516.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314161626.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314162315.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314162926.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314162844.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314164044.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314164715.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314165743.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314170624.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314171419.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314171654.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314172305.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314173352.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314174234.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314174758.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260314172720.png">
+<meta property="article:published_time" content="2026-03-22T07:47:56.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.964Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture7-note-1/Pasted%20image%2020260312145312.png">
+  
+  
+  
+  <title>CS231N lecture7 note 1 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture7 note 1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-03-22 15:47" pubdate>
+          2026年3月22日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          71 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture7 note 1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="序列建模任务"><a href="#序列建模任务" class="headerlink" title="序列建模任务"></a>序列建模任务</h1><p>我们之前的任务是为一张图片输出一个标签，这是很常见的分类任务。</p>
+<p>现在我们想要更进一步！如果我们要为一张图片生成一串字幕或者描述呢？这就涉及到我们新的领域，我们称之为一对多的任务。这里的描述为可变的长度，而不是固定长度的单词。</p>
+<p>当然，函数的关系适用于很多领域：我们也有可能有多对一的任务,比如我们需要为很多的视频帧数标记类别，这是常见的任务。</p>
+<p>你可能会猜想会不会有多对多的任务，是的！我们有可能为视频来记录解说或者描述字幕，这些任务具体来说分为严格输入输出对等和差额输入输出。</p>
+<p><em>rnn实际上更加关注输出和输入对等的结果:典型的任务是对于视频的每一帧分类</em></p>
+<h1 id="RNN"><a href="#RNN" class="headerlink" title="RNN"></a>RNN</h1><h2 id="核心思想"><a href="#核心思想" class="headerlink" title="核心思想"></a>核心思想</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260312145312.png" srcset="/img/loading.gif" lazyload></p>
+<p>RNN 有一个”隐藏状态“，随着输入序列被处理而不断地进行更新。也就是说，当有新的输入时，我们会处理并更新我们的隐藏状态。或许这张图会让你感到疑惑，那么你需要下面这张slides。</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260210214407.png" srcset="/img/loading.gif" lazyload></p>
+<hr>
+<h3 id="数学公式"><a href="#数学公式" class="headerlink" title="数学公式"></a>数学公式</h3><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260210215859.png" srcset="/img/loading.gif" lazyload></p>
+<p>$$h_t &#x3D; f_W(h_{t-1}, x_t)$$<br>新的状态依赖于之前状态和新的输入，我们使用 $f_W$ 进行状态的更新。不过之前的输出也会影响到我们新的时间步，在接下来中我们会看到这一点。</p>
+<p>请注意我们对于所有的时间步都使用相同的$W$ 和 $f$</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260210221659.png" srcset="/img/loading.gif" lazyload></p>
+<p>$$y_t &#x3D; f_{W_{hy}}(h_t)$$</p>
+<p>新的输出由 $f_{W_{hy}}$ 和 $h_t$ 给出，其中，$h_t$ 为之前计算出来的隐藏状态， ${W_{hy}}$ 为矩阵。<br>这一步骤完成了以下两项工作：</p>
+<ul>
+<li>将隐藏状态的维度转化为输出的维度</li>
+<li>在此过程中 $W_hy$ 也需要学习</li>
+</ul>
+<h2 id="具体的数学公式"><a href="#具体的数学公式" class="headerlink" title="具体的数学公式"></a>具体的数学公式</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314154726.png" srcset="/img/loading.gif" lazyload></p>
+<p>与传统的前馈神经网络不同，循环神经网络（RNN，有时被称为 Elman RNN）引入了“状态（State）”的概念，使其能够处理具有序列性质的数据。网络的状态由一个单一的隐藏向量（Hidden Vector）$h$ 来表示，这个向量充当了网络的内部记忆 ，负责保留历史时间步中提取的上下文信息。</p>
+<p>从架构图可以看出，RNN 模块带有一个自环（Self-loop），这意味着网络在任意时间步的计算，都同时依赖于当前的外部输入和网络自身的历史状态。</p>
+<p>这种记忆的更新机制可以通过一个严谨的递推公式来描述：</p>
+<p>$$h_t &#x3D; \tanh(W_{hh}h_{t-1} + W_{xh}x_t)$$</p>
+<p>其中 $$tanh(x) &#x3D; \frac {e^x - e^x} {e^x + e^x} $$</p>
+<p>在每一个时间步 $t$，网络接收当前输入 $x_t$ 以及来自上一个时间步的隐藏状态 $h_{t-1}$。这两个向量分别乘以它们对应的权重矩阵 $W_{xh}$ 和 $W_{hh}$，求和后通过一个非线性激活函数。在这里，标准的 Vanilla RNN 采用了双曲正切函数 $\tanh$ 作为激活函数。正如函数图像所示，$\tanh$ 将线性的相加结果映射并压缩到 $[-1, 1]$ 的区间内。这种有界的非线性变换不仅赋予了网络拟合复杂函数的能力，同时也防止了隐藏状态的数值在多步迭代中无限发散。</p>
+<p>当网络需要在特定的时间步输出预测结果时，当前时间步的输出 $y_t$ 是直接基于当前的隐藏状态计算得出的：</p>
+<p>$$y_t &#x3D; W_{hy}h_t$$</p>
+<p>随后，根据具体的任务需求（例如多分类任务），通常还会在此基础上叠加一个特定的输出函数 $f_y$（如 Softmax），以将原始的输出向量转化为最终的概率分布或其他形式的预测值。</p>
+<hr>
+<h2 id="RNN-的具体实例"><a href="#RNN-的具体实例" class="headerlink" title="RNN 的具体实例"></a>RNN 的具体实例</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314160639.png" srcset="/img/loading.gif" lazyload></p>
+<p>为了更直观地理解循环神经网络的内部运作机制，我们可以考察一个手动设置权重的“玩具模型”（Toy Model）。这个模型的核心任务是：遍历一个由 0 和 1 组成的输入序列 $X$，只有当模型在当前时间步和上一个时间步都接收到输入“1”时（即检测到连续的两个“1”），才在输出序列 $Y$ 中输出1，否则输出 0。</p>
+<p>值得注意的是，为了方便实现类似逻辑门的功能，这里的激活函数从标准 Vanilla RNN 的 $\tanh$ 替换成了 $\text{ReLU}$，这也是标题中带有“ish”的原因。</p>
+<p>在这个精心设计的例子中，隐藏状态向量 $h_t$ 被设定为一个三维向量。它的三个维度分别被赋予了明确的含义：第一维用于直接存储<strong>当前时间步的输入</strong>（Current），第二维用于存储<strong>上一个时间步的输入</strong>（Previous），第三维则作为一个<strong>常数偏置项</strong>（始终固定为 1）。这种将历史信息显式地分配到向量特定维度的设计，是整个网络能够产生“短期记忆”的关键。</p>
+<p>网络通过输入权重矩阵 $W_{xh}$ 和隐藏状态权重矩阵 $W_{hh}$ 来共同更新隐藏状态。结合递推公式 $h_t &#x3D; \text{ReLU}(W_{hh}h_{t-1} + W_{xh}x_t)$ 来看，输入矩阵 $W_{xh}$（值为 <code>[[1], [0], [0]]</code>）的作用非常直接，它负责将当前的标量输入 $x_t$ 放置到隐藏状态的第一维（Current）。而隐藏状态矩阵 $W_{hh}$（值为 <code>[[0,0,0], [1,0,0], [0,0,1]]</code>）的作用则是在模拟时间步的推进：它将 $h_{t-1}$ 中的第一维（上一步的 Current）平移到了 $h_t$ 的第二维（现在的 Previous），同时维持第三维的常数 1 不变，并清空第一维以便接收新输入。</p>
+<p>最终的输出预测由输出权重矩阵 $W_{hy}$ 决定。在这个例子中，$W_{hy}$ 的值被设定为 <code>[1, 1, -1]</code>。当我们将它与隐藏状态 $h_t$ 相乘，并通过 ReLU 激活函数得到 $y_t &#x3D; \text{ReLU}(W_{hy}h_t)$ 时，这实质上等同于计算 $\max(\text{Current} + \text{Previous} - 1, 0)$。这一步巧妙地实现了一个逻辑与（AND）的操作：只有当 Current 和 Previous 都为 1 时，求和减 1 的结果才为 1，ReLU 输出 1；对于其他任何组合（如一个 0 一个 1，或者两个 0），结果都会小于等于 0，从而被 ReLU 截断输出 0。</p>
+<h2 id="反向传播"><a href="#反向传播" class="headerlink" title="反向传播"></a>反向传播</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314161516.png" srcset="/img/loading.gif" lazyload></p>
+<p>当我们把循环神经网络沿着时间维度展开 (unroll) 时，就能得到如上图所示的计算图。这张图展示了最经典的“多对多”(Many-to-Many) 架构，即网络接收一个完整的输入序列 $x_1, x_2, \dots, x_T$，并在每一个对应的时间步都产生一个输出预测 $y_1, y_2, \dots, y_T$。这种序列到序列的密集预测架构，非常适合处理诸如视频每一帧的分类或文本的词性标注等任务。</p>
+<p>在这张计算图的左侧，初始隐藏状态 $h_0$ 作为一个独立的输入进入网络，它通常被初始化为全零向量，作为网络记忆的起点。随着时间的推移，前一个时间步的隐藏状态 $h_{t-1}$ 会顺着水平箭头流入下一个时间步。</p>
+<p>图中最关键的细节在于左下角的权重节点 $W$。你可以观察到，有多条引出的箭头将这同一个参数矩阵 $W$ 传递到了每一个时间步的函数计算 $f_W$ 中 。这种<strong>参数共享 (Parameter Sharing)</strong> 机制是 RNN 的核心特征。它确保了模型无论在处理序列的开头还是结尾，都在使用同一套逻辑来提取特征和更新状态。这不仅大幅减少了模型参数量，还赋予了 RNN 处理任意长度序列的灵活性。</p>
+<h3 id="多对多的梯度计算"><a href="#多对多的梯度计算" class="headerlink" title="多对多的梯度计算"></a>多对多的梯度计算</h3><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314161626.png" srcset="/img/loading.gif" lazyload></p>
+<p>在“多对多”架构中，网络不仅在每个时间步产生预测输出 $y_t$，同时我们也会在每个时间步计算一个局部损失 (Local Loss) $L_t$。正如计算图顶部追加的节点所示，这些局部损失是通过将模型在该时间步的预测值 $y_t$ 与对应的真实标签 (Ground Truth) 进行计算得出的。</p>
+<p>为了在训练过程中进行梯度下降，我们需要一个单一的标量指标来衡量模型在处理整个序列时的整体表现。因此，最终的全局损失 (Total Loss) $L$ 被定义为所有时间步局部损失的直接求和：</p>
+<p>$$L &#x3D; \sum_{t&#x3D;1}^{T} L_t$$</p>
+<p>当网络执行<strong>沿时间反向传播 (Backpropagation Through Time, BPTT)</strong> 时，核心目标是计算全局损失 $L$ 对共享权重矩阵 $W$ 的梯度 $\frac{\partial L}{\partial W}$。由于 $W$ 在每一个时间步都参与了隐藏状态更新的计算（体现在图底部从 $W$ 引出的多条分支箭头），我们需要将每个时间步 $t$ 对 $W$ 产生的局部梯度累加起来：</p>
+<p>$$\frac{\partial L}{\partial W} &#x3D; \sum_{t&#x3D;1}^{T} \frac{\partial L_t}{\partial W}$$</p>
+<p>这种梯度相加的机制确保了网络在更新核心记忆权重 $W$ 时，能够平等且综合地吸收来自序列每一个时刻的误差反馈 。</p>
+<h3 id="多对一的梯度计算"><a href="#多对一的梯度计算" class="headerlink" title="多对一的梯度计算"></a>多对一的梯度计算</h3><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314162315.png" srcset="/img/loading.gif" lazyload></p>
+<p>在多对一架构中，网络的核心运作机制与多对多架构依然保持一致：隐藏状态 $h_t$ 依然在每个时间步吸收当前输入 $x_t$ 和前一步的状态 $h_{t-1}$，并且整个序列依然共享同一个权重矩阵 $W$ 。这种架构的典型应用场景是序列分类任务，比如情感分析（输入一段影评序列，输出一个好评&#x2F;差评的二分类标签）或动作识别（输入一段视频帧序列，输出一个动作类别）。</p>
+<p>这张计算图中有一个非常值得注意的细节。在最基础的教科书定义中，多对一网络通常只利用最后一个时间步的隐藏状态 $h_T$ 来计算最终的输出 $y$。然而，观察这张图可以发现，除了 $h_T$ 之外，之前所有时间步的中间隐藏状态（$h_1, h_2, h_3, \dots$）顶部都引出了一条灰色的弧线，共同汇聚到了最终的输出节点 $y$ 上。这种设计具有很强的现实工程意义：由于我们之前讨论过 Vanilla RNN 存在梯度消失的问题，如果只依赖最后一个状态 $h_T$，网络很容易“遗忘”序列开头的关键信息。通过将所有历史时间步的隐藏状态进行聚合（例如进行平均池化 Average Pooling 或最大池化 Max Pooling），最终的输出层就能够直接“看”到整个序列的全局特征，从而有效缓解了长距离依赖丢失的问题 🛡️。</p>
+<p>在训练这种架构时，损失函数 $L$ 只会在序列的最后被计算一次。当进行沿时间反向传播 (BPTT) 时，梯度会从最终的这一个输出节点出发，沿着所有的路径（包括状态转移路径和那些汇聚的弧线路径）向回传播，并同样将各个时间步对共享权重 $W$ 的梯度累加起来更新参数。</p>
+<hr>
+<h3 id="一对多的梯度计算"><a href="#一对多的梯度计算" class="headerlink" title="一对多的梯度计算"></a>一对多的梯度计算</h3><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314162926.png" srcset="/img/loading.gif" lazyload></p>
+<p>一对多的梯度计算可以由图中这种方式转化为多对多的形式。</p>
+<h3 id="内存的限制"><a href="#内存的限制" class="headerlink" title="内存的限制"></a>内存的限制</h3><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314162844.png" srcset="/img/loading.gif" lazyload><br>当我们需要处理非常长的序列（例如一整本书的文本，或者长视频）时，标准的沿时间反向传播 (BPTT) 会面临巨大的挑战。由于需要将整个序列展开并在内存中保存所有时间步的中间状态以计算梯度，这不仅会导致<strong>内存开销爆炸</strong> （boom！），也会使之前讨论的梯度消失&#x2F;爆炸问题变得更加难以控制。</p>
+<p>为了解决这个问题，工程上常采用<strong>截断沿时间反向传播 (TBPTT)</strong> 。观察幻灯片上的计算图，我们可以清晰地看到它的运作机制：</p>
+<p> **分块处理 (Chunking)**：将无限长或超长的输入序列切割成固定长度的较短片段（即图中灰色方框圈出的窗口）。网络每次只对这一个窗口内的数据计算局部的 Loss。<br>  2. <strong>状态连续，梯度截断</strong>：这是 TBPTT 最核心的妥协设计。</p>
+<p>**前向传播 (Forward Pass)**：隐藏状态依然会从上一个片段无缝传递到当前片段（如图底部的灰色长箭头所示），这保证了网络在前向推理时依然拥有长期的上下文记忆。</p>
+<p><strong>反向传播 (Backward Pass)<strong>：当计算梯度并更新权重时（如图底部的红色粗箭头所示），反向传播只会停留在当前灰色窗口的边界处，</strong>绝对不会</strong>继续向更早的历史片段回传。</p>
+<p>但是很遗憾的是这个步骤会遗漏部分的损失，导致梯度更新的效果没有那么的好。</p>
+<h3 id="single-out-tbptt"><a href="#single-out-tbptt" class="headerlink" title="single out tbptt"></a>single out tbptt</h3><p>当我们把“截断机制”应用到“多对一 (Many to One)”架构时，就产生了单输出场景下的截断沿时间反向传播。与之前每个时间步都计算损失的密集预测不同，在这种架构下，网络仅仅在最后一个截断窗口 的末尾，才生成一个最终的预测输出并计算唯一的全局损失 (Loss)。</p>
+<p>虽然不再有每个时间步的局部损失，但在最后一个窗口内部，梯度的计算和反向传播依然会逐时间步进行。窗口内部的隐藏状态会依赖从最终损失处传来的上游梯度 (upstream gradients) 来更新参数。然而，正如幻灯片底部的红色箭头所示，无论最终的损失有多大，梯度回传依然会严格停止在当前这最后一个窗口的左边界 ，绝对不会继续向前跨越。</p>
+<h2 id="language-model-example"><a href="#language-model-example" class="headerlink" title="language model example"></a>language model example</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314164044.png" srcset="/img/loading.gif" lazyload></p>
+<p>语言模型的核心任务是根据已经出现的历史序列，预测下一个最有可能出现的元素。在这张幻灯片中，我们构建了一个极简的字符级语言模型，用来学习并生成单词 “hello”。</p>
+<p>首先，我们需要建立一个<strong>词表 (Vocabulary)<strong>。对于 “hello” 这个词，不重复的字符只有四个：<code>[h, e, l, o]</code>。为了让神经网络能够理解这些字符，我们采用</strong>独热编码 (One-hot Encoding)</strong> 将它们转化为向量表示。因为词表大小为 4，所以每一个字符都会被表示为一个四维的列向量，其中该字符在词表中的索引位置为 1，其余位置均为 0。例如，输入序列的第一个字符 “h” 对应的输入向量就是 $\begin{pmatrix} 1 \ 0 \ 0 \ 0 \end{pmatrix}$。<br>在训练阶段，我们将输入序列设定为 “h-e-l-l”，而模型需要预测的<strong>目标序列 (Target sequence)</strong> 则是向后错开一位的 “e-l-l-o”</p>
+<p>整个前向传播过程如计算图所示：</p>
+<p>在每一个时间步，网络接收当前的输入向量和上一步的隐藏状态，通过权重矩阵 $W_{xh}$ 和 $W_{hh}$ 计算出当前的三维隐藏层状态 (Hidden layer)。随后，隐藏状态通过输出权重矩阵 $W_{hy}$ 映射为最终的输出层 (Output layer)。</p>
+<p>这里的输出层是一个四维向量，代表了词表中四个字符作为“下一个字符”的<strong>原始得分 (Logits)<strong>。幻灯片中用绿色数字特意标出了当前时间步</strong>正确目标字符</strong>的得分，红色数字则是错误字符的得分。例如，在第一个时间步输入 “h” 后，网络输出的向量中，代表目标字符 “e” 的得分是 2.2。网络在训练初期的表现往往是不完美的，比如在第二个时间步输入 “e” 时，目标字符 “l” 的得分只有 -1.0，反而不如其他字符得分高，这就意味着网络在这个时间步产生了较大的预测误差。</p>
+<hr>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314164715.png" srcset="/img/loading.gif" lazyload></p>
+<p>在处理文本等离散序列数据时，虽然独热编码 (One-hot Encoding) 是一种基础且直观的表示方法，但在现代深度学习架构中，我们几乎总是会在输入层和隐藏层之间插入一个**嵌入层 (Embedding Layer)**。正如幻灯片左侧的矩阵等式所揭示的那样，将一个权重矩阵与一个独热向量相乘，其数学本质仅仅是“提取出该权重矩阵中对应索引的那一列”。这意味着在底层实现中，网络根本无需进行耗时的全矩阵乘法运算，而是可以等效为一个极其高效的查表 (Look-up Table) 操作。这种将离散索引映射为具体向量的层级，构成了嵌入层的基础物理形态。</p>
+<p>相比于直接将独热向量输入给 RNN，使用嵌入层在维度控制和语义表达上具有决定性的优势。首先是打破维度灾难与稀疏性瓶颈。独热向量的维度严格等于词汇表的大小。如果我们在处理包含五万个单词的真实语料库，那么每个输入都是一个五万维且极度稀疏（只有一个维度为 1，其余四万九千九百九十九个维度为 0）的向量。这不仅会造成严重的内存浪费，还会导致与之相乘的权重矩阵变得极为庞大，使模型极易陷入过拟合。嵌入层则充当了一个降维映射器，它能将这种高维稀疏的离散输入，压缩映射到一个低维且密集的连续向量空间中（例如常见的 256 维或 512 维），从而大幅精简了网络后续的参数量。</p>
+<p>更核心的飞跃在于语义表达能力的重塑。独热编码存在一个致命的数学缺陷：它是完全正交的。在独热空间中，词汇表内任意两个单词向量的点积始终为零 。在模型看来，“猫”和“狗”之间的距离，与“猫”和“石头”之间的距离是完全相等的，独热编码无法向模型传递任何字面背后的相似性暗示。而嵌入层由于包含了可学习的连续权重参数，它会在训练过程中不断调整内部的向量表示。在这个被学习出来的密集连续空间里，经常在相似上下文中出现、具有相近语义的词，它们的向量会被推向彼此，形成具有空间意义的聚类。这使得 RNN 在进行序列推导之前，就已经获得了一个蕴含丰富语义先验知识的优良起点。</p>
+<h3 id="ai编程"><a href="#ai编程" class="headerlink" title="ai编程"></a>ai编程</h3><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314165743.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们刚刚看到模型是如何通过计算概率分布，利用历史序列 “h-e-l-l” 来预测下一个字符 “o” 的。对于 GitHub Copilot 或 Cursor 这样的代码辅助工具来说，它接收到的历史序列就是人类写的自然语言指令（比如图左下角的 “Add this image…”）或者是你已经写好的前面几行代码。模型也是在一步步地预测接下来最可能出现的“代码符号”是什么，最终拼凑出图右侧完整的 JavaScript 代码块。</p>
+<p>语言模型采用的是一种叫做**自监督学习 (Self-Supervised Learning)**的方法</p>
+<h2 id="可解释性"><a href="#可解释性" class="headerlink" title="可解释性"></a>可解释性</h2><p>在我们之前讨论的字符级语言模型中，隐藏状态 $h_t$ 是一个包含许多维度（即神经元）的向量。虽然神经网络通常被视为一个复杂的“黑盒”，但研究人员发现了一个非常有趣的现象：如果我们单独追踪 $h_t$ 向量中的<strong>某一个特定神经元</strong>，观察它在处理整个输入序列时的激活状态，会发现有些神经元实际上学到了非常具体、人类可解释的规则</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314170624.png" srcset="/img/loading.gif" lazyload><br>这张幻灯片展示了模型在逐个字符阅读一段 C 语言代码时，<strong>某一个单一神经元</strong>的内部激活值变化。背景的红色和蓝色代表了该神经元在读取到当前字符时的活跃程度（例如，红色代表受到强烈刺激&#x2F;高度激活，蓝色代表被抑制&#x2F;极度不活跃）。这种可视化有力地证明了，RNN 并非只是在盲目地计算概率，它的内部状态确确实实建立起了对文本上下文结构的长期记忆</p>
+<h2 id="RNN的优缺点"><a href="#RNN的优缺点" class="headerlink" title="RNN的优缺点"></a>RNN的优缺点</h2><p>从理论设计的角度来看，RNN 展现出了极高的优雅性。由于它在每个时间步都严格共享同一套权重矩阵，这使得<strong>模型的大小完全独立于输入序列的长度</strong>。无论是在处理十个单词的短句，还是一万个单词的文档，网络参数量都保持恒定。这种权重共享不仅极大降低了内存开销，还赋予了模型在时间维度上的平移对称性（Symmetry）——即网络能够用完全相同的逻辑，去处理出现在序列开头或结尾的同一特征模式。此外，理论上 RNN 摆脱了固定上下文窗口的限制，它能够在任意时间步 $t$ 调用来自无限久远历史步骤的信息。</p>
+<p>然而，当这些理论优势落地到实际的硬件训练中时，却遭遇了严重的瓶颈。RNN 最致命的结构性缺陷在于其<strong>循环计算的强时序依赖性</strong> 。由于当前隐藏状态 $h_t$ 的计算必须严格等待前一步 $h_{t-1}$ 的完成，这意味着整个网络的计算过程是高度串行的，根本无法在现代 GPU 上沿着时间维度展开大规模并行计算，导致训练速度极其缓慢。更糟糕的是，正如我们之前通过连续矩阵相乘推导出的“梯度消失”现象，尽管 RNN 在理论上拥有无限长的记忆，但在真实的工程实践中，模型<strong>极难真正访问和利用长距离的历史信息</strong>，它很快就会把序列开头的重要线索忘得一干二净。</p>
+<hr>
+<h2 id="CNN和RNN的结合"><a href="#CNN和RNN的结合" class="headerlink" title="CNN和RNN的结合"></a>CNN和RNN的结合</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314171419.png" srcset="/img/loading.gif" lazyload></p>
+<p>这张幻灯片展示了一个极其经典的“编码器-解码器” (Encoder-Decoder) 架构，它将计算机视觉 (CV) 模型和自然语言处理 (NLP) 模型缝合在了一起，用于让计算机“看图说话”。 整个网络结构可以清晰地分为两个核心部分：</p>
+<ul>
+<li><p>*<em>CNN 图像特征编码器</em>：</p>
+<p>  幻灯片左侧是一个深层的卷积神经网络（在这个例子中是经典的 VGG 结构，包含多个 <code>conv</code> 和 <code>maxpool</code> 层）。在这个架构中，CNN 剥离了原本用于图像分类的最后一层，其纯粹的作用是作为一个“特征提取器”。输入的测试图片经过层层卷积和池化，最终被压缩成一个 4096 维的全连接层向量 (<code>FC-4096</code>)。这个密集的向量就是整张图片的“高维语义浓缩精华”。</p>
+</li>
+<li><p>**RNN 文本序列解码器 **：</p>
+<p>  幻灯片右侧是我们熟悉的 RNN 架构。最关键的设计在于图中的那条黑色长箭头：<strong>CNN 提取出的 4096 维图像特征向量，直接被用作了 RNN 初始隐藏状态 $h_0$ 的输入（或其一部分）</strong>。这意味着 RNN 在开始写句子之前，脑海里已经被“灌输”了整张画面的全局信息。</p>
+</li>
+<li><p>**自回归生成过程 **：</p>
+</li>
+<li><p>在时间步 $t&#x3D;0$，模型接收到一个特殊的开始符号 <code>&lt;START&gt;</code>，结合包含图像信息的初始状态 $h_0$，输出第一个预测词汇的概率分布 $y_0$（这里采样到了 “straw”）。</p>
+</li>
+<li><p>随后，上一步的输出 “straw” 变成下一步的输入，模型不断滚动更新隐藏状态并预测下一个词 (“hat”)。</p>
+</li>
+<li><p>这个过程会一直持续，直到模型在某个时间步输出了一个特殊的终止符号 <code>&lt;END&gt;</code>，整个句子的生成过程才宣告结束。</p>
+</li>
+</ul>
+<h2 id="VQA任务"><a href="#VQA任务" class="headerlink" title="VQA任务"></a>VQA任务</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314171654.png" srcset="/img/loading.gif" lazyload></p>
+<p>视觉问答 (VQA) 代表了计算机视觉与自然语言处理深度融合的又一个核心里程碑。如果说图像描述生成 (Image Captioning) 只是让模型泛泛地“看图说话”，那么 VQA 则要求模型进行更深层次的跨模态逻辑推理 。</p>
+<p>在这个任务中，模型同时接收两个独立的输入源：一张图像以及一个关于该图像的自然语言特定的问题。模型的目标是准确理解两者的语义，并输出一个切题的答案。 幻灯片中展示的四个经典例子生动地揭示了 VQA 任务的极高复杂性。为了回答这些问题，模型不能仅仅停留在基础的物体检测层面。它不仅需要具备细粒度的对象识别能力（例如认出卡车上的“秃鹰”或是伞下的“两名女性”），还需要掌握对自然场景中文字的阅读理解能力（例如读取交通路牌上的“24 ¾ Rd”），甚至需要具备结合人类常识进行场景级上下文推理的能力（例如通过切蛋糕的动作和穿着推断出这是在“婚礼”期间）。</p>
+<h2 id="多层RNN"><a href="#多层RNN" class="headerlink" title="多层RNN"></a>多层RNN</h2><p><em>实际上除了rnn的开篇之作，几乎所有的rnn介绍论文都是多层rnn</em></p>
+<p>在我们之前看到的所有架构中，网络内部只有一个隐藏层在随着时间步流转。然而，正如在卷积神经网络 (CNN) 中我们可以通过不断堆叠卷积层来提取更高级的特征一样，我们也可以在 RNN 中引入<strong>深度 (Depth)</strong> ，构建多层循环神经网络。</p>
+<p>观察这张二维的计算图，水平方向依然代表着<strong>时间 (Time)</strong> 维度的展开，而垂直方向则代表了<strong>深度 (Depth)</strong> 的堆叠。</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314172305.png" srcset="/img/loading.gif" lazyload></p>
+<p>在这种多层架构中，信息不仅沿着时间线向前流动，同时也沿着深度方向自下而上地传递：</p>
+<p><strong>底层网络</strong>：最底下的第一层 RNN（最下方的绿色方块）接收原始的序列输入（红色的 $x_t$），并结合自己上一步的隐藏状态，更新当前的隐藏状态。</p>
+<p><strong>高层网络</strong>：位于上层的 RNN 不再直接接触原始输入。相反，上一层 RNN 在当前时间步计算出的隐藏状态，直接被当作了下一层 RNN 在同一时间步的“输入”。</p>
+<p><strong>输出层</strong>：最终的网络预测（蓝色的 $y_t$）通常仅仅是由处于最顶层、吸收了所有底层抽象信息的隐藏状态计算得出的。</p>
+<p>这种分层设计的核心优势在于特征的层次化学习。底层 RNN 可以专注于学习序列中局部的、低级别的模式（例如在语言模型中学习词汇的组合），而高层 RNN 则能在底层特征的基础上，整合出更宏观的高级语义概念（例如长句子的整体语法结构或情感基调）。</p>
+<p>ps：这里所有的隐藏状态更新使用相同的权重<br>但是这种设计会导致很难训练的问题，我们会看到LSTM对这个问题的解决。</p>
+<h2 id="rnn的训练难题"><a href="#rnn的训练难题" class="headerlink" title="rnn的训练难题"></a>rnn的训练难题</h2><p><em><strong>Bengio et al. (1994)</strong> _”Learning long-term dependencies with gradient descent is difficult”<em>：这篇论文从理论上严谨地证明了，由于每次时间步的反向传播都要乘以相同的 $W</em>{hh}$，标准的梯度下降法在处理长序列时必定会遭遇梯度消失或爆炸，这在当时为神经网络的发展指出了一个巨大的结构性难题。</em></p>
+<p>$$\frac{\partial h_t}{\partial h_{t-1}} &#x3D; \tanh’(W_{hh}h_{t-1} + W_{xh}x_t) W_{hh}$$</p>
+<p>这个公式揭示了 RNN 梯度流动的核心。当我们要计算当前隐藏状态 $h_t$ 对上一步隐藏状态 $h_{t-1}$ 的偏导数时，计算过程包含了两部分：首先要穿过非线性激活函数（乘以 $\tanh$ 的导数），然后要沿着全连接层反向流动（乘以权重矩阵 $W_{hh}$，在实际的反向传播代码中是乘以它的转置 $W_{hh}^T$）。</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314173352.png" srcset="/img/loading.gif" lazyload></p>
+<p>这张ppt展示了计算$W$梯度的全过程，我们计算W的梯度，需要从输出开始反向传播梯度，直到最初的输入，然后将所有的时间步下损失的W的梯度累加起来。</p>
+<p>红框中指出了该过程的核心步骤，也就是上一隐藏状态对于下一隐藏状态的求导。</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314174234.png" srcset="/img/loading.gif" lazyload></p>
+<p>首先是权重矩阵的连续自乘 $W_{hh}^{T-1}$，如果其特征值小于 1，指数级的衰减立刻就会发生。</p>
+<p>而很遗憾的是我们的$tanh$ 函数的导函数的最大值为1，这也就意味着很多时候可能会导致梯度消失。（连续乘以一个很小很小的数）</p>
+<h2 id="狡诈恶徒"><a href="#狡诈恶徒" class="headerlink" title="狡诈恶徒"></a>狡诈恶徒</h2><p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314174758.png" srcset="/img/loading.gif" lazyload></p>
+<p>或许你会说，啊那我们不使用 tanh就好啦，我们就不用担心乘以很小的数。</p>
+<p>在去除了非线性因素后，跨越 $T$ 个时间步的梯度公式被极度简化，暴露出其最危险的核心：权重矩阵的连续自乘 $W_{hh}^{T-1}$。在经过线性代数的视角审视后，这种连续的矩阵乘法会直接受制于该矩阵的<strong>最大奇异值 (Largest Singular Value)</strong> ：</p>
+<ul>
+<li><p>如果最大奇异值 <strong>大于 1</strong>：就像复利一样，梯度在反复相乘后会呈指数级暴增，导致**梯度爆炸 (Exploding Gradients)**，这会让参数更新瞬间失控，甚至算出 <code>NaN</code> 导致训练崩溃。</p>
+</li>
+<li><p>如果最大奇异值 <strong>小于 1</strong>：如同我们在上一页推导的，梯度会迅速衰减归零，导致**梯度消失 (Vanishing Gradients)**。</p>
+</li>
+</ul>
+<p>为了应对极其危险的梯度爆炸，工程实践中引入了一个简单粗暴但极为有效的技巧：<strong>梯度裁剪 (Gradient Clipping)</strong> 。正如幻灯片右下角的代码所示，我们在每次更新参数前，会先计算整个梯度向量的范数（即长度 <code>grad_norm</code>）。如果这个长度超过了我们预设的安全阈值 (<code>threshold</code>)，我们就强行按照比例将其缩放回阈值大小。这种做法绝妙的地方在于，它严格保留了梯度的<strong>方向</strong>，仅仅限制了其<strong>步长</strong>，从而防止了模型在损失曲面上发生灾难性的飞跃。</p>
+<h1 id="LSTM"><a href="#LSTM" class="headerlink" title="LSTM"></a>LSTM</h1><p>为了解决 Vanilla RNN 在长距离反向传播时遭遇的梯度消失问题，研究人员提出了一种极其精巧的变体架构——<strong>长短期记忆网络 (LSTM)<strong>。与 Vanilla RNN 单一的隐藏状态 $h_t$ 不同，LSTM 最核心的创新在于引入了双状态机制：它不仅保留了用于短期上下文传递的隐藏状态 $h_t$（Short-term Memory），还额外开辟了一条被称为</strong>细胞状态 (Cell State)</strong> $c_t$ 的“信息高速公路” （Long-term Memory）。</p>
+<p>观察幻灯片右侧的公式，LSTM 的内部运作被拆解为了一系列被称为“门 (Gates) ”的精细操作。在每一个时间步，网络会将上一时刻的隐藏状态 $h_{t-1}$ 与当前的输入 $x_t$ 拼接起来，乘以一个庞大的权重矩阵 $W$，从而一口气计算出四个维度相同的向量：$i$、$f$、$o$ 和 $g$。</p>
+<p><img src="/images/CS231N-lecture7-note-1/Pasted%20image%2020260314172720.png" srcset="/img/loading.gif" lazyload></p>
+<p>这四个向量各司其职，共同管理着细胞状态的读写操作。其中，$g$ (Gate&#x2F;Candidate) 是通过 $\tanh$ 函数计算出的<strong>候选信息</strong>，它代表了当前时间步提取到的、可能需要被写入记忆的新知识。而另外三个向量——<strong>遗忘门 (Forget Gate) $f$<strong>、</strong>输入门 (Input Gate) $i$</strong> 和 **输出门 (Output Gate) $o$**，则充当着信息流动的阀门。</p>
+<p>LSTM 解决梯度消失的魔法，就藏在细胞状态的更新公式里：</p>
+<p>$$c_t &#x3D; f \odot c_{t-1} + i \odot g$$</p>
+<p>这里的 $\odot$ 代表向量的逐元素相乘。网络首先用遗忘门 $f$ 乘以旧的细胞状态 $c_{t-1}$，决定从历史长期记忆中“擦除”哪些不再相关的信息；接着，用输入门 $i$ 乘上新的候选信息 $g$，决定将多少当前的新知识“写入”长期记忆。最后将两者相加，就得到了全新的细胞状态 $c_t$。这种以<strong>加法</strong>为主的更新方式，使得梯度在反向传播时能够沿着 $c_t$ 这条高速公路顺畅地回流，极大地缓解了连续矩阵相乘带来的衰减。而在最后一步，网络会使用输出门 $o$ 来决定从当前的长期记忆 $c_t$ 中提取多少信息，生成对外的短期隐藏状态 $h_t$。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture7 note 1</div>
+      <div>https://augusteing.github.io/2026/03/22/CS231N-lecture7-note-1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年3月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/03/23/CS231N-lecture4-note-2/" title="CS231N lecture4 note 2">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N lecture4 note 2</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/03/22/CS231N-lecture5-note2/" title="CS231N lecture5 note2">
+                        <span class="hidden-mobile">CS231N lecture5 note2</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

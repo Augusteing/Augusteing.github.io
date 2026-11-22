@@ -1,0 +1,843 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="ImageNet Classification with Deep Convolutional Neural Networks摘要 (Abstract)我们训练了一个大型的深度卷积神经网络，用于将 ImageNet LSVRC-2010 竞赛中的 120 万张高分辨率图像分类到 1000 个不同的类别中 。在测试数据上，我们实现了 37.5% 的 Top-1 错误率和 17.0% 的 Top-5">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture6 note2">
+<meta property="og:url" content="https://augusteing.github.io/2026/02/07/CS231N-lecture6-note2/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="ImageNet Classification with Deep Convolutional Neural Networks摘要 (Abstract)我们训练了一个大型的深度卷积神经网络，用于将 ImageNet LSVRC-2010 竞赛中的 120 万张高分辨率图像分类到 1000 个不同的类别中 。在测试数据上，我们实现了 37.5% 的 Top-1 错误率和 17.0% 的 Top-5">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note2/Pasted%20image%2020260207115350.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note2/Pasted%20image%2020260207162110.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note2/Pasted%20image%2020260207165457.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture6-note2/Pasted%20image%2020260207170110.png">
+<meta property="article:published_time" content="2026-02-07T09:01:45.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.897Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="cnn">
+<meta property="article:tag" content="cs231n">
+<meta property="article:tag" content="论文翻译">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture6-note2/Pasted%20image%2020260207115350.png">
+  
+  
+  
+  <title>CS231N lecture6 note2 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture6 note2"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-07 17:01" pubdate>
+          2026年2月7日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture6 note2</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="ImageNet-Classification-with-Deep-Convolutional-Neural-Networks"><a href="#ImageNet-Classification-with-Deep-Convolutional-Neural-Networks" class="headerlink" title="ImageNet Classification with Deep Convolutional Neural Networks"></a>ImageNet Classification with Deep Convolutional Neural Networks</h1><h2 id="摘要-Abstract"><a href="#摘要-Abstract" class="headerlink" title="摘要 (Abstract)"></a><strong>摘要 (Abstract)</strong></h2><p>我们训练了一个大型的深度卷积神经网络，用于将 ImageNet LSVRC-2010 竞赛中的 120 万张高分辨率图像分类到 1000 个不同的类别中 。在测试数据上，我们实现了 37.5% 的 Top-1 错误率和 17.0% 的 Top-5 错误率，这显著优于之前的现有技术水平 。</p>
+<p>该神经网络包含 6000 万个参数和 65 万个神经元，由五个卷积层（其中一些层后面跟随最大池化层）和三个全连接层组成，最后是一个 1000 路的 Softmax 输出 。为了加快训练速度，我们使用了非饱和神经元（Non-saturating neurons）和非常高效的卷积运算 GPU 实现 。</p>
+<p>为了减少全连接层的过拟合（Overfitting），我们采用了一种最近开发的名为 “Dropout”（丢弃法）的正则化方法，证明非常有效 。我们也使用该模型的一个变体参加了 ILSVRC-2012 竞赛，并取得了 15.3% 的获胜 Top-5 测试错误率，相比之下，第二名的成绩为 26.2% 。</p>
+<h1 id="1-引言"><a href="#1-引言" class="headerlink" title="1.引言"></a>1.引言</h1><p>当前的对象识别方法本质上使用了机器学习方法 。为了提高它们的性能，我们可以收集更大的数据集，学习更强大的模型，并使用更好的技术来防止过拟合 。直到最近，标记图像的数据集相对较小——大约是数万张图像的数量级（例如：NORB , Caltech-101&#x2F;256 , 和 CIFAR-10&#x2F;100 ）。对于这种规模的数据集，简单的识别任务可以解决得相当好，特别是如果通过标签保留转换（label-preserving transformations）对数据进行增强的话 。例如，目前 MNIST 数字识别任务的最佳错误率（&lt;0.3%）已经接近人类表现 。</p>
+<p>但是，现实环境中的对象表现出相当大的可变性，因此要学习识别它们，必须使用大得多的训练集 。事实上，小图像数据集的缺陷已被广泛认识到（例如 Pinto 等人 ），但直到最近才使得收集包含数百万张图像的标记数据集成为可能 。新的大型数据集包括 LabelMe ，其包含数十万张完全分割的图像，以及 ImageNet ，其包含超过 1500 万张标记的高分辨率图像，涵盖超过 22,000 个类别。</p>
+<p>为了从数百万张图像中学习成千上万的对象，我们需要一个具有大“学习容量”（learning capacity）的模型 。然而，对象识别任务的巨大复杂性意味着即使是像 ImageNet 这样大的数据集也无法完全指定这个问题，因此我们的模型还应该拥有大量的先验知识，以补偿我们所没有的数据 。卷积神经网络（CNNs）就是这样一类模型 。它们的容量可以通过改变其深度和广度来控制，而且它们对图像的本质做出了强烈且大部分正确的假设（即统计的平稳性和像素依赖的局部性） 。因此，与具有相似大小层的标准前馈神经网络相比，CNN 的连接和参数要少得多，因此它们更容易训练，而其理论上的最佳性能可能仅比前者稍差 。</p>
+<p>尽管 CNN 具有吸引人的品质，并且其局部架构具有相对较高的效率，但将其大规模应用于高分辨率图像在过去仍然昂贵得令人望而却步 。幸运的是，当前的 GPU（图形处理单元），搭配高度优化的 2D 卷积实现，其强大程度足以促进大型 CNN 的训练；同时，像 ImageNet 这样的最新数据集包含了足够的标记样本，可以在没有严重过拟合的情况下训练此类模型 。</p>
+<p>本文的具体贡献如下：我们在 ILSVRC-2010 和 ILSVRC-2012 竞赛 中使用的 ImageNet 子集上训练了迄今为止最大的卷积神经网络之一，并取得了迄今为止在这些数据集上报道的最佳结果。我们编写了 2D 卷积以及训练卷积神经网络所固有的所有其他运算的高度优化的 GPU 实现，并将其公开发布 。我们的网络包含许多新的和不寻常的特性，这些特性提高了其性能并减少了训练时间，详见第 3 节 。即使有 120 万个标记的训练样本，我们网络的规模使得过拟合成为一个严重的问题，因此我们使用了几种有效的技术来防止过拟合，详见第 4 节 。我们最终的网络包含五个卷积层和三个全连接层，这种深度似乎很重要：我们发现移除任何一个卷积层（每个卷积层包含的模型参数不超过 1%）都会导致性能下降 。</p>
+<p>最后，网络的大小主要受限于当前 GPU 上可用的内存量以及我们愿意容忍的训练时间 。我们的网络在两个 GTX 580 3GB GPU 上训练需要五到六天 。我们所有的实验都表明，只要等待更快的 GPU 和更大的数据集可用，我们的结果就可以简单地通过这些途径得到改善 。</p>
+<h1 id="2-数据集-The-Dataset"><a href="#2-数据集-The-Dataset" class="headerlink" title="2. 数据集 (The Dataset)"></a>2. 数据集 (The Dataset)</h1><p>ImageNet 是一个包含超过 1500 万张标记的高分辨率图像的数据集，属于大约 22,000 个类别 。这些图像是从网络上收集的，并使用亚马逊的 Mechanical Turk 众包工具由人工标记 。从 2010 年开始，作为 Pascal 视觉对象挑战赛的一部分，每年都会举办名为 ImageNet 大规模视觉识别挑战赛（ILSVRC）的年度竞赛 。ILSVRC 使用 ImageNet 的一个子集，其中 1000 个类别中的每个类别大约有 1000 张图像 。总共有大约 120 万张训练图像，50,000 张验证图像和 150,000 张测试图像 。</p>
+<p>ILSVRC-2010 是唯一一个测试集标签可用的 ILSVRC 版本，因此这是我们要执行大部分实验的版本 。由于我们也让我们的模型参加了 ILSVRC-2012 竞赛，在第 6 节中，我们也报告了在这个版本数据集上的结果（该版本的测试集标签不可用） 。在 ImageNet 上，习惯上报告两个错误率：Top-1 和 Top-5，其中 Top-5 错误率是指正确标签不在模型认为最可能的五个标签中的测试图像的比例 。</p>
+<p>ImageNet 包含各种分辨率的图像，而我们的系统需要恒定的输入维度 。因此，我们将图像下采样（down-sampled）到 $256 \times 256$ 的固定分辨率。给定一个矩形图像，我们首先重新缩放图像，使其短边长度为 256，然后从结果图像中裁剪出中央的 $256 \times 256$ 块 。除了从每个像素中减去训练集上的平均活跃度（mean activity）之外，我们没有以任何其他方式对图像进行预处理 。因此，我们在像素的（中心化）原始 RGB 值上训练我们的网络 。</p>
+<hr>
+<p><strong>译者注：</strong></p>
+<p>到目前为止，我们已经涵盖了背景和数据准备。接下来的 <strong>第 3 部分：架构 (The Architecture)</strong> 是这篇论文的核心，包含了 ReLU、多 GPU 训练、局部响应归一化 (LRN) 和重叠池化等关键技术细节。</p>
+<p>我们网络的架构概览如图 2 所示 。它包含八个学习层——五个卷积层和三个全连接层 。下面，我们将描述我们网络架构中一些新颖或不寻常的特征 。第 3.1 至 3.4 节按照我们评估的重要性进行排序，最重要的排在最前面 。</p>
+<h2 id="3-架构"><a href="#3-架构" class="headerlink" title="3.架构"></a>3.架构</h2><h4 id="3-1-ReLU-非线性-ReLU-Nonlinearity"><a href="#3-1-ReLU-非线性-ReLU-Nonlinearity" class="headerlink" title="3.1 ReLU 非线性 (ReLU Nonlinearity)"></a><strong>3.1 ReLU 非线性 (ReLU Nonlinearity)</strong></h4><p>将神经元的输出 $f$ 建模为其输入 $x$ 的函数的标准方式是使用 $f(x) &#x3D; \tanh(x)$ 或 $f(x) &#x3D; (1 + e^{-x})^{-1}$ 。就梯度下降的训练时间而言，这些饱和非线性（saturating nonlinearities）比非饱和非线性 $f(x) &#x3D; \max(0, x)$ 慢得多 。遵循 Nair 和 Hinton [20] 的做法，我们将具有这种非线性的神经元称为<strong>修正线性单元 (Rectified Linear Units, ReLUs)</strong> 。</p>
+<p>带有 ReLU 的深度卷积神经网络的训练速度比带有 tanh 单元的等效网络快几倍 。图 1 展示了这一点，该图显示了在 CIFAR-10 数据集上，通过特定的四层卷积网络达到 25% 训练错误率所需的迭代次数 。这表明，如果我们使用传统的饱和神经元模型，我们将无法在这项工作中实验如此巨大的神经网络 。</p>
+<blockquote>
+<p><img src="/images/CS231N-lecture6-note2/Pasted%20image%2020260207115350.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>图片描述</strong>：图 1 展示了两条曲线。实线代表 ReLU 网络，虚线代表 tanh 网络。</p>
+<p><strong>图注翻译</strong>：带有 ReLU 的四层卷积神经网络（实线）在 CIFAR-10 上达到 25% 训练错误率的速度比带有 tanh 神经元的等效网络（虚线）快六倍 。为了使训练尽可能快，每个网络的学习率都是独立选择的 。没有采用任何形式的正则化 。此处展示的效果幅度随网络架构而变化，但带有 ReLU 的网络始终比带有饱和神经元的等效网络学习得快几倍 。</p>
+</blockquote>
+<p>我们并不是第一个在 CNN 中考虑替代传统神经元模型的人 。例如，Jarrett 等人 [11] 声称非线性 $f(x) &#x3D; |\tanh(x)|$ 与他们的对比度归一化（contrast normalization）及随后的局部平均池化在 Caltech-101 数据集上效果特别好 。然而，在这个数据集上，主要关注点是防止过拟合，所以他们观察到的效果与我们报告的使用 ReLU 时拟合训练集的<strong>加速能力</strong>是不同的 。更快的学习速度对在大型数据集上训练的大型模型的性能有巨大影响 。</p>
+<h4 id="3-2-多-GPU-训练-Training-on-Multiple-GPUs"><a href="#3-2-多-GPU-训练-Training-on-Multiple-GPUs" class="headerlink" title="3.2 多 GPU 训练 (Training on Multiple GPUs)"></a><strong>3.2 多 GPU 训练 (Training on Multiple GPUs)</strong></h4><p>单个 GTX 580 GPU 只有 3GB 的内存，这限制了可以在其上训练的网络的每一个最大尺寸 。事实证明，120 万个训练样本足以训练大到单个 GPU 无法容纳的网络 。因此，我们将网络分布在两个 GPU 上 。当前的 GPU 特别适合跨 GPU 并行化，因为它们能够直接从彼此的内存中读取和写入，而无需通过主机内存 。</p>
+<p>我们采用的并行化方案本质上是将一半的核（或神经元）放在每个 GPU 上，并有一个额外的技巧：<strong>GPU 仅在某些层进行通信</strong> 。这意味着，例如，第 3 层的核从第 2 层的所有核特征图（kernel maps）接收输入 。然而，第 4 层的核<strong>仅</strong>从第 3 层中位于<strong>同一 GPU</strong> 上的那些核特征图接收输入 。选择连接模式是一个交叉验证问题，但这允许我们精细地调整通信量，直到它占计算量的比例是可以接受的 。</p>
+<p>最终的架构与 Cireşan 等人 [5] 采用的“柱状” (columnar) CNN 有些相似，不同之处在于我们的“柱”不是独立的（见图 2） 。与在单个 GPU 上训练的每个卷积层内核数量减半的网络相比，该方案将我们的 Top-1 和 Top-5 错误率分别降低了 1.7% 和 1.2% 。双 GPU 网络的训练时间比单 GPU 网络略少 。</p>
+<h4 id="3-3-局部响应归一化-Local-Response-Normalization"><a href="#3-3-局部响应归一化-Local-Response-Normalization" class="headerlink" title="3.3 局部响应归一化 (Local Response Normalization)"></a><strong>3.3 局部响应归一化 (Local Response Normalization)</strong></h4><p>ReLU 具有一个理想的属性，即它们不需要输入归一化来防止饱和 。如果至少有一些训练样本对 ReLU 产生正输入，学习就会在该神经元中发生 。然而，我们仍然发现以下局部归一化方案有助于泛化 。</p>
+<p>设 $a_{x,y}^{i}$ 为通过在位置 $(x, y)$ 应用核 $i$ 然后应用 ReLU 非线性计算出的神经元活跃度，响应归一化后的活跃度 $b_{x,y}^{i}$ 由以下表达式给出 ：</p>
+<p>$$b_{x,y}^{i} &#x3D; a_{x,y}^{i} &#x2F; \left( k + \alpha \sum_{j&#x3D;\max(0, i-n&#x2F;2)}^{\min(N-1, i+n&#x2F;2)} (a_{x,y}^{j})^2 \right)^\beta$$</p>
+<p>其中求和是在相同的空间位置上，对 $n$ 个“相邻”的核特征图进行的，$N$ 是该层中核的总数 。核特征图的顺序当然是任意的，是在训练开始前确定的 。这种响应归一化实现了一种形式的**侧抑制 (lateral inhibition)**，灵感来自于在真实神经元中发现的类型，为使用不同核计算出的神经元输出之间创造了针对大活跃度的竞争 。</p>
+<p>常量 $k, n, \alpha, \beta$ 是超参数，其值使用验证集确定 。我们使用 $k&#x3D;2, n&#x3D;5, \alpha&#x3D;10^{-4}, \beta&#x3D;0.75$ 。我们在某些层应用 ReLU 非线性之后应用此归一化（见第 3.5 节） 。该方案与 Jarrett 等人 [11] 的局部对比度归一化方案有些相似，但我们的方案更准确地应称为“亮度归一化”，因为我们没有减去平均活跃度 。响应归一化将我们的 Top-1 和 Top-5 错误率分别降低了 1.4% 和 1.2% 。</p>
+<hr>
+<p>译者注：LRN</p>
+<h4 id="3-4-重叠池化-Overlapping-Pooling"><a href="#3-4-重叠池化-Overlapping-Pooling" class="headerlink" title="3.4 重叠池化 (Overlapping Pooling)"></a><strong>3.4 重叠池化 (Overlapping Pooling)</strong></h4><p>CNN 中的池化层总结了同一核特征图中相邻神经元组的输出 。传统上，相邻池化单元总结的邻域是不重叠的（例如 [17, 11, 4]） 。更确切地说，可以将池化层视为由间隔 $s$ 像素的池化单元网格组成，每个池化单元总结以其位置为中心的 $z \times z$ 大小的邻域 。如果我们设置 $s&#x3D;z$，我们就得到了 CNN 中通常采用的传统局部池化 。如果我们设置 $s &lt; z$，我们就得到了<strong>重叠池化 (overlapping pooling)</strong> 。</p>
+<p>这就是我们在整个网络中使用的方案，其中 $s&#x3D;2$ 且 $z&#x3D;3$ 。与产生相当维度输出的非重叠方案（$s&#x3D;2, z&#x3D;2$）相比，该方案将 Top-1 和 Top-5 错误率分别降低了 0.4% 和 0.3% 。我们通常在训练过程中观察到，具有重叠池化的模型稍微更难过拟合 。</p>
+<h4 id="3-5-整体架构-Overall-Architecture"><a href="#3-5-整体架构-Overall-Architecture" class="headerlink" title="3.5 整体架构 (Overall Architecture)"></a><strong>3.5 整体架构 (Overall Architecture)</strong></h4><p>现在我们准备描述我们 CNN 的整体架构 。如图 2 所示，该网络包含八个带权重的层；前五个是卷积层，其余三个是全连接层 。最后一个全连接层的输出被送入一个 1000 路的 softmax，该 softmax 产生 1000 个类别标签上的分布 。我们的网络最大化多项逻辑回归目标，这等同于最大化训练案例中正确标签在预测分布下的对数概率的平均值 。</p>
+<blockquote>
+<p><img src="/images/CS231N-lecture6-note2/Pasted%20image%2020260207162110.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>图片描述</strong>：这是一张长条形的架构流程图，明显分为上下两部分，代表两个 GPU 的处理路径。</p>
+<p><strong>图注翻译</strong>：图 2：我们 CNN 架构的图解，明确显示了两个 GPU 之间的责任划分 。一个 GPU 运行图顶部的层部分，而另一个运行底部的层部分 。GPU 仅在特定层进行通信。网络的输入是 150,528 维的（即 $224 \times 224 \times 3$），网络其余层中的神经元数量依次为：253,440 - 186,624 - 64,896 - 64,896 - 43,264 - 4096 - 4096 - 1000 。</p>
+</blockquote>
+<p><strong>连接细节</strong>：</p>
+<ul>
+<li><p>第 2、4、5 个卷积层的核<strong>仅</strong>连接到前一层中位于<strong>同一 GPU</strong> 上的那些核特征图（见图 2） 。</p>
+</li>
+<li><p>第 3 个卷积层的核连接到第 2 层中的<strong>所有</strong>核特征图 。</p>
+</li>
+<li><p>全连接层中的神经元连接到前一层中的<strong>所有</strong>神经元 。</p>
+</li>
+</ul>
+<p><strong>层级顺序</strong>：</p>
+<ol>
+<li><p><strong>第 1 卷积层</strong>：过滤 $224 \times 224 \times 3$ 的输入图像，使用 <strong>96 个核</strong>，大小为 $11 \times 11 \times 3$，步长为 4 像素（这是相邻感受野中心之间的距离） 。</p>
+<ul>
+<li><p><em>响应归一化层</em> 跟随在第 1 卷积层之后 。</p>
+</li>
+<li><p><em>最大池化层</em> 跟随在响应归一化层之后 。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>第 2 卷积层</strong>：将第 1 卷积层（经过归一化和池化）的输出作为输入，使用 <strong>256 个核</strong>，大小为 $5 \times 5 \times 48$ 。</p>
+<ul>
+<li><p><em>响应归一化层</em> 跟随在第 2 卷积层之后 。</p>
+</li>
+<li><p><em>最大池化层</em> 跟随在响应归一化层之后 。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>第 3 卷积层</strong>：有 <strong>384 个核</strong>，大小为 $3 \times 3 \times 256$，连接到第 2 卷积层的（归一化、池化后的）输出 。</p>
+</li>
+<li><p><strong>第 4 卷积层</strong>：有 <strong>384 个核</strong>，大小为 $3 \times 3 \times 192$ 。</p>
+</li>
+<li><p><strong>第 5 卷积层</strong>：有 <strong>256 个核</strong>，大小为 $3 \times 3 \times 192$ 。</p>
+<ul>
+<li><p>第 3、4、5 卷积层之间没有任何中间的池化或归一化层 。</p>
+</li>
+<li><p><em>最大池化层</em> 跟随在第 5 卷积层之后 。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>全连接层</strong>：最后是两个全连接层，每层各有 <strong>4096 个神经元</strong> 。</p>
+</li>
+</ol>
+<p><strong>ReLU 的应用</strong>：ReLU 非线性应用于每个卷积层和全连接层的输出 。</p>
+<h2 id="4-减少过拟合-Reducing-Overfitting"><a href="#4-减少过拟合-Reducing-Overfitting" class="headerlink" title="4. 减少过拟合 (Reducing Overfitting)"></a><strong>4. 减少过拟合 (Reducing Overfitting)</strong></h2><p>我们的神经网络架构拥有 6000 万个参数。尽管 ILSVRC 的 1000 个类别使得每个训练样本对从图像到标签的映射施加了 10 比特的约束，但这仍不足以在没有严重过拟合的情况下学习这么多参数。下面，我们将描述我们用来对抗过拟合的两种主要方法。</p>
+<h4 id="4-1-数据增强-Data-Augmentation"><a href="#4-1-数据增强-Data-Augmentation" class="headerlink" title="4.1 数据增强 (Data Augmentation)"></a><strong>4.1 数据增强 (Data Augmentation)</strong></h4><p>减少图像数据过拟合最简单且最常用的方法是使用标签保留转换（label-preserving transformations）来人为地扩充数据集（例如 [25, 4, 5]）。我们采用了两种不同形式的数据增强，这两种形式都允许仅用极少的计算量从原始图像生成转换后的图像，因此转换后的图像不需要存储在磁盘上。在我们的实现中，转换后的图像是在 CPU 上通过 Python 代码生成的，而此时 GPU 正在通过上一批图像进行训练。因此，这些数据增强方案实际上是<strong>计算免费</strong>的。</p>
+<p><strong>第一种形式</strong>的数据增强包括生成图像平移和水平翻转。我们通过从 $256 \times 256$ 的图像中提取随机的 $224 \times 224$ 图块（以及它们的水平翻转）并在这些提取的图块上训练我们的网络来实现这一点 。这将我们的训练集大小增加了 2048 倍，尽管产生的训练样本当然是高度相互依赖的。如果没有这个方案，我们的网络会遭受严重的过拟合，这将迫使我们使用小得多的网络。在测试时，网络通过提取五个 $224 \times 224$ 的图块（四个角图块和中心图块）以及它们的水平翻转（因此总共 10 个图块）来进行预测，并对网络的 Softmax 层在这 10 个图块上做出的预测进行平均 。</p>
+<p><strong>第二种形式</strong>的数据增强包括改变训练图像中 RGB 通道的强度。具体来说，我们在整个 ImageNet 训练集的 RGB 像素值集合上执行主成分分析（PCA）。对于每个训练图像，我们添加找到的主成分的倍数，其幅度与相应的特征值成正比，并乘以一个从均值为零、标准差为 0.1 的高斯分布中抽取的随机变量 。因此，对于每个 RGB 图像像素 $I_{xy} &#x3D; [I_{xy}^{R}, I_{xy}^{G}, I_{xy}^{B}]^T$，我们添加以下数量：</p>
+<p>$$[p_1, p_2, p_3][\alpha_1\lambda_1, \alpha_2\lambda_2, \alpha_3\lambda_3]^T$$</p>
+<p>其中 $p_i$ 和 $\lambda_i$ 分别是 RGB 像素值的 $3 \times 3$ 协方差矩阵的第 $i$ 个特征向量和特征值，而 $\alpha_i$ 是上述提到的随机变量。对于特定训练图像的所有像素，每个 $\alpha_i$ 仅抽取一次，直到该图像再次用于训练时，此时它会被重新抽取。这个方案近似地捕捉了自然图像的一个重要属性，即<strong>对象身份对于光照强度和颜色的变化是不变的</strong>。该方案将 Top-1 错误率降低了 1% 以上 。</p>
+<h4 id="4-2-Dropout-丢弃法"><a href="#4-2-Dropout-丢弃法" class="headerlink" title="4.2 Dropout (丢弃法)"></a><strong>4.2 Dropout (丢弃法)</strong></h4><p>结合许多不同模型的预测是减少测试错误的一种非常成功的方法 [1, 3]，但对于已经需要几天时间训练的大型神经网络来说，这显得太昂贵了。然而，有一种非常有效的模型组合版本，在训练期间仅花费约两倍的成本。这种最近引入的技术被称为 “Dropout” [10]，它包括以 0.5 的概率将每个隐藏神经元的输出设置为零。以这种方式被“丢弃”的神经元不参与前向传播，也不参与反向传播。</p>
+<p>因此，每次呈现输入时，神经网络都会采样一个不同的架构，但所有这些架构都共享权重。这种技术减少了神经元之间复杂的互相适应（co-adaptations），因为一个神经元不能依赖于特定其他神经元的存在。因此，它被迫学习更鲁棒的特征，这些特征在与许多不同的其他神经元随机子集结合时是有用的。在测试时，我们使用所有的神经元，但将它们的输出乘以 0.5，这是对指数级数量的 Dropout 网络产生的预测分布取几何平均值的合理近似。</p>
+<p>我们在图 2 中的前两个全连接层使用了 Dropout 。如果没有 Dropout，我们的网络会表现出严重的过拟合。Dropout 大致使收敛所需的迭代次数翻倍。</p>
+<hr>
+<h2 id="5-学习细节-Details-of-learning"><a href="#5-学习细节-Details-of-learning" class="headerlink" title="5. 学习细节 (Details of learning)"></a><strong>5. 学习细节 (Details of learning)</strong></h2><p>我们使用随机梯度下降（Stochastic Gradient Descent, SGD）训练我们的模型，批量大小（batch size）为 128 个样本，动量（momentum）为 0.9，权重衰减（weight decay）为 0.0005。我们发现这种少量的权重衰减对于模型学习很重要。换句话说，这里的权重衰减不仅仅是一个正则化器：它减少了模型的训练误差。权重 $w$ 的更新规则是：</p>
+<p>$$v_{i+1} &#x3D; 0.9 \cdot v_i - 0.0005 \cdot \epsilon \cdot w_i - \epsilon \cdot \left\langle \frac{\partial L}{\partial w}|<em>{w_i} \right\rangle</em>{D_i}$$</p>
+<p>$$w_{i+1} &#x3D; w_i + v_{i+1}$$</p>
+<p>其中 $i$ 是迭代索引，$v$ 是动量变量，$\epsilon$ 是学习率，$\left\langle \frac{\partial L}{\partial w}|<em>{w_i} \right\rangle</em>{D_i}$ 是目标函数关于 $w$ 的导数在第 $i$ 批次 $D_i$ 上的平均值，并在 $w_i$ 处求值。</p>
+<p>我们从标准差为 0.01 的零均值高斯分布中初始化每一层的权重 。我们用常数 1 初始化第二、第四和第五个卷积层以及全连接隐藏层中的神经元偏置（biases）。这种初始化通过为 ReLU 提供正输入来加速学习的早期阶段。我们用常数 0 初始化其余层中的神经元偏置 。</p>
+<p>我们对所有层使用相等的学习率，并在整个训练过程中手动调整。我们遵循的启发式方法是，当验证错误率随当前学习率停止改善时，将学习率除以 10。学习率初始化为 0.01，并在终止前降低了三次 。我们对 120 万张图像的训练集进行了大约 90 个循环（cycles&#x2F;epochs）的训练，这在两个 NVIDIA GTX 580 3GB GPU 上花费了五到六天的时间。</p>
+<blockquote>
+<p><img src="/images/CS231N-lecture6-note2/Pasted%20image%2020260207165457.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>图片描述</strong>：图 3 展示了第一卷积层在 $224 \times 224 \times 3$ 输入图像上学习到的 96 个大小为 $11 \times 11 \times 3$ 的卷积核。</p>
+<p><strong>图注翻译</strong>：前 48 个核是在 GPU 1 上学习的，而后 48 个核是在 GPU 2 上学习的（详见第 6.1 节）。</p>
+<p><strong>注意</strong>：你会发现 GPU 1 学习到的核主要是不关心颜色的（黑白纹理、边缘），而 GPU 2 学习到的核主要是关心颜色的（色彩斑点）。这种分工是网络自动学习出来的。</p>
+</blockquote>
+<h2 id="6-结果-Results"><a href="#6-结果-Results" class="headerlink" title="6. 结果 (Results)"></a><strong>6. 结果 (Results)</strong></h2><p>我们在 ILSVRC-2010 上的结果总结在表 1 中。我们的网络实现了 <strong>37.5%</strong> 的 Top-1 错误率和 <strong>17.0%</strong> 的 Top-5 错误率 。在 ILSVRC-2010 竞赛期间实现的最佳性能是 47.1% 和 28.2%，那是通过一种平均六个在不同特征上训练的稀疏编码模型预测结果的方法实现的 。自那时以来，已发表的最佳结果是 45.7% 和 25.7%，那是通过一种平均两个在从两种类型的密集采样特征计算出的 Fisher 向量 (FVs) 上训练的分类器预测结果的方法实现的 。</p>
+<p>我们还将我们的模型参加了 ILSVRC-2012 竞赛，并在表 2 中报告了我们的结果。由于 ILSVRC-2012 的测试集标签未公开，我们无法报告我们尝试过的所有模型的测试错误率。在本段的其余部分，我们将互换使用验证和测试错误率，因为根据我们的经验，它们之间的差异不超过 0.1%（见表 2）。本文描述的 CNN 实现了 <strong>18.2%</strong> 的 Top-5 错误率 。平均五个类似 CNN 的预测结果给出了 <strong>16.4%</strong> 的错误率 。训练一个 CNN，在最后一个池化层之上增加第六个卷积层，对整个 ImageNet 2011 秋季版（1500 万张图像，22000 个类别）进行分类，然后在 ILSVRC-2012 上进行“微调” (fine-tuning)，给出了 <strong>16.6%</strong> 的错误率 。将两个在整个 2011 秋季版上预训练的 CNN 与上述五个 CNN 的预测结果进行平均，给出了 <strong>15.3%</strong> 的错误率 。竞赛的第二名实现了 26.2% 的错误率，其方法是平均在从不同类型的密集采样特征计算出的 FV 上训练的几个分类器的预测结果 。</p>
+<p>最后，我们也报告了我们在 ImageNet 2009 秋季版上的错误率，该版本有 10,184 个类别和 890 万张图像。在这个数据集上，我们遵循文献中的惯例，使用一半的图像进行训练，一半进行测试。由于没有既定的测试集，我们的分割必然与之前的作者使用的分割不同，但这不会显著影响结果。我们在这个数据集上的 Top-1 和 Top-5 错误率是 <strong>67.4%</strong> 和 **40.9%**，这是通过上述描述的网络但在最后一个池化层之上增加额外的第六个卷积层获得的 。该数据集上已发表的最佳结果是 78.1% 和 60.9% 。</p>
+<h4 id="6-1-定性评估-Qualitative-Evaluations"><a href="#6-1-定性评估-Qualitative-Evaluations" class="headerlink" title="6.1 定性评估 (Qualitative Evaluations)"></a><strong>6.1 定性评估 (Qualitative Evaluations)</strong></h4><p>图 3 显示了网络两个数据连接层学习到的卷积核。网络学习了各种频率和方向选择性的核，以及各种颜色的斑点。注意两个 GPU 表现出的**专业化 (specialization)**，这是第 3.5 节中描述的受限连接的结果。GPU 1 上的核主要是颜色无关的，而 GPU 2 上的核主要是颜色特定的。这种专业化发生在每次运行期间，并且独立于任何特定的随机权重初始化（以 GPU 的重新编号为模）。</p>
+<p><img src="/images/CS231N-lecture6-note2/Pasted%20image%2020260207170110.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+</blockquote>
+<p>  <strong>图片描述</strong>：</p>
+<blockquote>
+<ul>
+<li><p><strong>左图</strong>：展示了 8 张测试图像，以及模型给出的概率最高的 5 个标签（Top-5）。正确的标签在图像下方，红条代表正确标签的概率。</p>
+</li>
+<li><p><strong>右图</strong>：展示了 5 张测试图像（第一列）。后面的列展示了在训练集中，根据最后一个隐藏层的特征向量，与测试图像欧几里得距离最近的 6 张训练图像。</p>
+</li>
+</ul>
+</blockquote>
+<p>在图 4 的左侧面板中，我们通过计算网络对八张测试图像的 Top-5 预测，定性地评估了网络学到了什么。注意，即使是偏离中心的物体，如左上角的螨虫 (mite)，也能被网络识别。大多数 Top-5 标签看起来是合理的。例如，对于豹子 (leopard)，只有其他类型的猫科动物被认为是合理的标签。在某些情况下（如格栅 grille、樱桃 cherry），关于照片的预期焦点存在真正的歧义 。</p>
+<p>探测网络视觉知识的另一种方法是考虑图像在最后一个 4096 维隐藏层中诱导的特征激活。如果两张图像产生的特征激活向量具有较小的欧几里得分离度，我们可以说神经网络的更高层认为它们是相似的。图 4 显示了来自测试集的五张图像，以及来自训练集的根据此度量与它们最相似的六张图像。注意，在像素级别上，检索到的训练图像通常在 L2 范数上与第一列的查询图像并不接近。例如，检索到的狗和大象以各种姿势出现。我们在补充材料中展示了更多测试图像的结果 。</p>
+<p>使用两个 4096 维实值向量之间的欧几里得距离来计算相似度是低效的，但可以通过训练一个自动编码器将这些向量压缩为短的二进制代码来使其变得高效。这应该会产生一种比将自动编码器应用于原始像素 [14] 更好的图像检索方法，因为后者不利用图像标签，因此倾向于检索具有相似边缘模式的图像，无论它们在语义上是否相似 。</p>
+<hr>
+<h2 id="7-讨论-Discussion"><a href="#7-讨论-Discussion" class="headerlink" title="7. 讨论 (Discussion)"></a><strong>7. 讨论 (Discussion)</strong></h2><p>我们的结果表明，一个大型的深度卷积神经网络能够使用纯监督学习在极具挑战性的数据集上取得破纪录的结果。值得注意的是，如果移除单个卷积层，我们网络的性能会下降。例如，移除任何中间层都会导致网络的 Top-1 性能损失约 2%。因此，<strong>深度</strong>对于实现我们的结果真的很重要 。</p>
+<p>为了简化我们的实验，我们没有使用任何无监督的预训练，尽管我们预计它会有所帮助，特别是如果我们获得了足够的计算能力来显著增加网络的大小而没有获得相应数量的标记数据增加的话。到目前为止，随着我们将网络变大并训练更长时间，我们的结果有所改善，但为了匹配人类视觉系统的下颞叶通路（infero-temporal pathway），我们还有许多数量级要走。最终，我们希望在视频序列上使用非常大且深度的卷积网络，因为视频序列的时序结构提供了非常有用的信息，而这些信息在静态图像中是缺失或不太明显的 。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/cnn/" class="print-no-link">#cnn</a>
+      
+        <a href="/tags/cs231n/" class="print-no-link">#cs231n</a>
+      
+        <a href="/tags/%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" class="print-no-link">#论文翻译</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture6 note2</div>
+      <div>https://augusteing.github.io/2026/02/07/CS231N-lecture6-note2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/02/18/CS231N-assignment1/" title="CS231N assignment1">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N assignment1</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/02/06/CS231N-lecture5-note1/" title="CS231N lecture5 note1">
+                        <span class="hidden-mobile">CS231N lecture5 note1</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

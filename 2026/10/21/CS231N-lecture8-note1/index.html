@@ -1,0 +1,805 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="RNN 回顾RNN 的弱点 常见的序列处理任务如将英语翻译为意大利语，过程如上图所示。我们使用一个 RNN 网络作为编码器，使用另外一个架构相同的 RNN 作为解码器。 编码器的作用是接收输入的文本序列，将其转化为一个输出向量 $c$ ，其中 $c$ 的长度在网络之处设定的通常为 128或1024之类（这么做有什么坏处吗？） 解码器的作用是利用编码器的输出 $c$ 和隐藏状态 $s_{t-1}$">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N lecture8 note1">
+<meta property="og:url" content="https://augusteing.github.io/2026/10/21/CS231N-lecture8-note1/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="RNN 回顾RNN 的弱点 常见的序列处理任务如将英语翻译为意大利语，过程如上图所示。我们使用一个 RNN 网络作为编码器，使用另外一个架构相同的 RNN 作为解码器。 编码器的作用是接收输入的文本序列，将其转化为一个输出向量 $c$ ，其中 $c$ 的长度在网络之处设定的通常为 128或1024之类（这么做有什么坏处吗？） 解码器的作用是利用编码器的输出 $c$ 和隐藏状态 $s_{t-1}$">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322152345.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322152326.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322152357.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322154448.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322152536.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322155633.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322154317.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322160755.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322165157.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322172635.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322174258.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322174405.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322174828.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322175054.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322175420.png">
+<meta property="article:published_time" content="2026-10-21T11:31:06.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.995Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="DeepLearning">
+<meta property="article:tag" content="cs231n">
+<meta property="article:tag" content="RNN">
+<meta property="article:tag" content="Transformer">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-lecture8-note1/Pasted%20image%2020260322152345.png">
+  
+  
+  
+  <title>CS231N lecture8 note1 - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N lecture8 note1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-10-21 19:31" pubdate>
+          2026年10月21日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          42 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N lecture8 note1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="RNN-回顾"><a href="#RNN-回顾" class="headerlink" title="RNN 回顾"></a>RNN 回顾</h1><h2 id="RNN-的弱点"><a href="#RNN-的弱点" class="headerlink" title="RNN 的弱点"></a>RNN 的弱点</h2><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322152345.png" srcset="/img/loading.gif" lazyload></p>
+<p>常见的序列处理任务如将英语翻译为意大利语，过程如上图所示。我们使用一个 RNN 网络作为编码器，使用另外一个架构相同的 RNN 作为解码器。</p>
+<p>编码器的作用是接收输入的文本序列，将其转化为一个输出向量 $c$ ，其中 $c$ 的长度在网络之处设定的通常为 128或1024之类（这么做有什么坏处吗？）</p>
+<p>解码器的作用是利用编码器的输出 $c$ 和隐藏状态 $s_{t-1}$ 、上一阶段的输出 $y_{t-1}$ 输出本时间步的结果 $y_t$ 。（请忽略其中意大利语的输出结果，我并不知道这到底是不是正确的翻译）</p>
+<p>如果 $c$ 设置为128，那么对于此问题似乎是可行的。但是如果我们需要翻译一篇文章，一个段落呢？128的容量似乎不太够，或许你会说我可以提高我们的 $c$ 的长度设置。但是这样的解决方法不够自然和完美，我们需要自适应的模型。</p>
+<p>所以我们的解决方案是：当模型输出时，给它机会回看整个输入序列。</p>
+<hr>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322152326.png" srcset="/img/loading.gif" lazyload></p>
+<p>如图所示，我们需要开始构建我们的解决方案了！请不要被他吓到这一切实际上非常容易。</p>
+<p>实际上结构和传统的 RNN 结构类似，只是稍稍有所变化。在编码器方面，我们仍然采用一个 RNN 网络作为编码器。重要的改变发生在解码器端，解码器仍然是一个 RNN 网络，但是当我们”初始化”了该循环神经网络的隐藏状态 $s_0$ 时，我们会让它“回看”我们的输入序列。具体来说，对于输入序列中的每一个token和编码器中的 RNN 所形成的隐藏状态 $h_i$ , 这个初始的隐藏状态都会与其进行一层线性组合（我们称之为 $ftt$ 层），这样得到该状态和隐藏状态 $h_i$ 的一个得分，也就是图中的 $e_{11}$ 到 $e_{14}$ 得分反映了 $h_i$ 和该隐藏状态的“相似度”。</p>
+<p>在这个例子中，我们有四个输入的token，编码器有四个隐藏状态，所以得到了四个得分。线性层 $ftt$ 的特点在以后会得到讲述，这里仅指出一点：我们得到的四个得分没有被限制，即对于 $e_{1i} \in [-\infty, +\infty]$ 。所以，我们使用 $softmax$ 函数的优良性质，得到一个能够被数学解释的概率分布。这四个数被认为四个注意力权重分数，作为编码器隐藏状态 $h_i$ 的线性组合权重，从而得到了得分向量 $c_0$ ，这个得分向量被认为蕴含有注意力机制。所以我们有： $$ c_i &#x3D; &lt; a_{1i}{h_i}&gt; $$<br>正如上图中<strong>intuition</strong>所写，我们采用了一种<strong>注意力机制</strong>，在生成输出 $y_1$ 时，我们提供初始状态 $s_0$ 和得分向量 $c_1$ 还有上一次输出的 $y_0$ 来作为输入。根据新的隐藏状态 $s_1$ 输出我们新的结果 $y_1$。</p>
+<p>回顾我们对于 $softmax$ 函数的理解： $$ L &#x3D; \frac {e_i}{\sum e_i} $$<br>我们将得分向量归一化，可以将得到的”概率“。这种概率在我们的观点中被解释为<strong>注意力</strong>，意为：当前输出对于输入序列的依赖比例。图中我们可以看到在翻译 “vediamo” 时，$a_{11} &#x3D; a_{12} &#x3D; 0.45$。说明其可能重点关注了 “we” “see” 等单词。（这实际上为我们理解神经网络的训练过程提供了一个理解思路)</p>
+<hr>
+<h1 id="注意力机制的提出"><a href="#注意力机制的提出" class="headerlink" title="注意力机制的提出"></a>注意力机制的提出</h1><p>现在我们需要做的是将<strong>注意力机制</strong>和<strong>循环神经网络</strong>相剥离，使得注意力机制本身成为卓有成效的计算机原语。接下来你会看到的这一过程，所以敬请见证吧。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322152357.png" srcset="/img/loading.gif" lazyload></p>
+<p>在此之前我再次说明注意力机制的作用效果，如上图所示，右侧的二维矩阵被称为<strong>注意力矩阵</strong>。其列方向（就是 The -&gt; end）是英文的原文，行方向是它的法语翻译（很遗憾我并不会法语）。<br>越白的方块代表着该法语单词依赖该方块对应的英文单词越高。</p>
+<p>观察右侧的注意力矩阵，不难发现首尾两个部分有着明确的对角线。这说明了对应矩阵中的单词具有对齐的关系（或许不是一一对应，但也语义上会相近）。左侧输入和输出的蓝&#x2F;紫字符也说明这一关系。</p>
+<p>而中间的部分呈现了反对角线的特点，反映了英文和法语在语序或者语法上的不对称关系，这是网络相当卓越的表现，我们只是给与了网络大量的语料和计算资源，并没有告知它任何关于语法的内功，但是它仍然给出了正确的语序翻译，我认为这是神经网络巨大作用的体现之一。</p>
+<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322154448.png" srcset="/img/loading.gif" lazyload><br>上图中绿色的部分 $s_0$ 我们称之为查询向量，而编码器 rnn 中的 $h_i$ 我们称之为数据向量。（目前我们还没有摒弃RNN，但请相信我，我会做到的，我是专业人士）每当我们需要输出向量 $c_i$ 时。我们利用线性层 $ftt$ 计算查询向量和数据向量之间的相似度之后利用 $softmax$ 函数进行归一化。然后计算每一个 $c_i$ 的元素 $h_i s_0$ 得出我们的输出向量。</p>
+<p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322152536.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="ftt"><a href="#ftt" class="headerlink" title="ftt"></a>ftt</h3><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322155633.png" srcset="/img/loading.gif" lazyload><br>常见的 $ftt$ 层是使用点积计算为相似度得分$$q \cdot X_i &#x3D; \sum_{k&#x3D;1}^{D_X} q_k X_{i,k}$$<br>但是由于点积和 $softmax$ 函数的特殊作用：假设向量的元素是常数，那么向量的长度 $|a|$ 与维度的平方根 $\sqrt{D}$ 成正比。这意味着高维向量的点积结果天然地会比低维向量大得多。当输入 Softmax 的数值（即未缩放的点积结果）非常大时，指数函数的特性会把这种差异呈指数级放大。假设三个得分是 <code>[10, 20, 30]</code>，Softmax 的结果可能是 <code>[0.00, 0.00, 1.00]</code>。最大值会占据几乎 100% 的权重，而其他值会被压迫到无限接近于 0。这被称为 Softmax 变得“极度陡峭”或进入了**饱和区</p>
+<p>我们在点积之后、Softmax 之前，强行除以 $\sqrt{D_X}$。这个操作将点积结果的方差强行拉回到了 1 左右。这样一来，无论特征维度 $D_X$ 有多大，输入给 Softmax 的数值都被控制在了一个合理的范围内（既不过大也不过小），从而保证了 Softmax 输出的平滑性。</p>
+<hr>
+<h3 id="向量计算"><a href="#向量计算" class="headerlink" title="向量计算"></a>向量计算</h3><p>预警：这部分可能有一些数学处理，所以请做好准备。</p>
+<p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322154317.png" srcset="/img/loading.gif" lazyload></p>
+<p>当我们开始计算输出向量 $c$ 时，其实我们不只是计算一个查询向量和数据向量的相似度。我们希望能够批量计算，所以我们有如下定义：<strong>查询矩阵 (Query vectors):</strong> $Q \in \mathbb{R}^{N_Q \times D_X}$ 其中，$N_Q$ 表示查询向量的数量。$D_X$ 表示每个查询向量的特征维度。$Q_i$ 表示第 $i$ 个查询向量。<strong>数据矩阵 (Data vectors):</strong> $X \in \mathbb{R}^{N_X \times D_X}$：其中，$N_X$ 表示数据向量（上下文）的数量。$D_X$ 表示每个数据向量的特征维度（与查询向量维度一致，以便计算点积）。$X_j$ 表示第 $j$ 个数据向量。</p>
+<p>注意力机制的第一步是计算每一个查询向量 $Q_i$ 与每一个数据向量 $X_j$ 之间的相关性（相似度）。图中使用的是<strong>缩放点积</strong>。<br>$$E &#x3D; \frac{QX^T}{\sqrt{D_X}}$$<br>回忆矩阵乘法：$E_{ij} &#x3D; {Q_i}{X_{j}^T}$ </p>
+<p>$softmax$ 层如下所示，由于我们的矩阵乘法顺序是查询矩阵乘以数据矩阵，所以我们取dim&#x3D;1<br>$$A &#x3D; \text{softmax}(E, \text{dim}&#x3D;1)$$<br>$$A_{ij} &#x3D; \frac{\exp(E_{ij})}{\sum_{k&#x3D;1}^{N_X} \exp(E_{ik})}$$<br>最后一步，根据计算出的注意力权重，对数据向量进行加权求和，得到最终的上下文表示。<br>$$Y &#x3D; AX$$<br>即为：$$Y_i &#x3D; \sum_{j&#x3D;1}^{N_X} A_{ij} X_j$$<br>利用矩阵乘法做效率上面的提升。</p>
+<h2 id="键和值"><a href="#键和值" class="headerlink" title="键和值"></a>键和值</h2><p>这是自注意力（Self-Attention）或交叉注意力（Cross-Attention）的基础。</p>
+<p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322160755.png" srcset="/img/loading.gif" lazyload></p>
+<p>但是你有没有注意到一个问题：<strong>我们使用数据向量了两次</strong></p>
+<p>比如说问 chatgpt：”江苏排名第三的学校是哪一个“，这是我的输入。gpt会在它后台无比巨大的数据量中检索，得到答案：南京航空航天大学。</p>
+<p>但是我们之前的做法是不是只考虑了”江苏排名第三的学校是哪一个“这个问题，而无法将之转化为答案。</p>
+<p>所以，我们采用一种变换的形式用于不同的功能：键和值</p>
+<p>数据矩阵 $X$ 分别乘上对应的权重矩阵，生成真正的“被查询对象（键）”和“实际内容（值）”。</p>
+<ul>
+<li><p>生成键 (Keys):$$K &#x3D; X W_K$$<br>维度计算：$[N_X \times D_X] \times [D_X \times D_Q] \rightarrow [N_X \times D_Q]$</p>
+</li>
+<li><p>生成值 (Values):$$V &#x3D; X W_V$$<br>维度计算：$[N_X \times D_X] \times [D_X \times D_V] \rightarrow [N_X \times D_V]$</p>
+</li>
+</ul>
+<p>后续的处理类似，只不过是将数据向量的作用一分为二。可以理解为以下内容：</p>
+<ul>
+<li><p><strong>Query ($Q$)</strong>: 你在搜索框里输入的关键词（你想找什么）。</p>
+</li>
+<li><p><strong>Key ($K$)</strong>: 图书馆系统中每本书的书名、作者、标签（用于匹配你的搜索）。</p>
+</li>
+<li><p><strong>Value ($V$)</strong>: 这本书的实际正文内容（匹配成功后你真正想获取的信息）。</p>
+</li>
+</ul>
+<h2 id="纯注意力机制"><a href="#纯注意力机制" class="headerlink" title="纯注意力机制"></a>纯注意力机制</h2><h3 id="交叉注意力"><a href="#交叉注意力" class="headerlink" title="交叉注意力"></a>交叉注意力</h3><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322165157.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们深入探讨交叉注意力层（Cross-Attention Layer）的核心计算机制。与自注意力机制最显著的区别在于，交叉注意力中的查询向量与提供上下文的数据向量来源于两个完全不同的输入序列。这种设计使得模型能够在一个序列的指引下，去另一个序列中提取并融合相关信息。在幻灯片的顶部也点明了这一核心思想：每一个查询都会产生一个输出，而这个输出是数据向量中信息的混合体。</p>
+<p>在这套计算体系中，我们首先需要定义系统的输入变量。系统接收一个查询矩阵 $Q$，其维度为 $N_Q \times D_Q$，代表着 $N_Q$ 个主动发起检索的查询向量。同时，系统接收一个数据矩阵 $X$，维度为 $N_X \times D_X$，它包含了 $N_X$ 个提供上下文信息的基础数据向量。为了让数据矩阵能够参与到后续的匹配与信息提取中，模型引入了两个可学习的投影矩阵：键投影矩阵 $W_K$（维度为 $D_X \times D_Q$）以及值投影矩阵 $W_V$（维度为 $D_X \times D_V$）。</p>
+<p>计算的第一步是对上下文数据进行特征空间的转换。数据矩阵 $X$ 分别与两个投影矩阵相乘，生成了真正用于注意力计算的键矩阵 $K$ 和值矩阵 $V$。具体而言，通过公式 $K &#x3D; X W_K$ 将数据映射到与查询向量相同的特征维度 $D_Q$ 中，生成维度为 $N_X \times D_Q$ 的键矩阵。同理，通过公式 $V &#x3D; X W_V$ 生成维度为 $N_X \times D_V$ 的值矩阵，这里的 $V$ 承载了最终将被提取出的实质性特征内容。从右侧的图解中也可以直观地看到，原始的 $X_1$ 到 $X_3$ 被各自独立地转换为对应的键和值序列。</p>
+<p>查询矩阵 $Q$ 与键矩阵的转置 $K^T$ 进行矩阵乘法，再除以缩放因子 $\sqrt{D_Q}$，从而得到能量矩阵 $E$。这个矩阵的维度为 $N_Q \times N_X$，其内部的每一个元素 $E_{ij}$ 都是查询向量 $Q_i$ 与键向量 $K_j$ 之间的缩放内积，代表了它们之间的原始相似度得分。随后，为了将这些绝对的得分转化为符合概率分布性质的相对权重，我们在能量矩阵 $E$ 的列方向应用 Softmax 函数。如右图中 Softmax 旁边的向上箭头所示，这一步在数据序列的维度上进行归一化，将原始得分转化为注意力权重矩阵 $A$。</p>
+<p>在获得注意力权重之后，最后一步是进行信息的加权聚合。我们将注意力权重矩阵 $A$ 与值矩阵 $V$ 相乘，得到最终的输出矩阵 $Y$，其维度为 $N_Q \times D_V$。在图解的右上角，这被生动地描绘为“乘积（向右）与求和（向上）”的结合过程：各个值向量 $V_j$ 沿着水平方向进入计算矩阵，乘以它们对应的注意力权重，然后为每一个独立的查询进行纵向的累加。最终，每一个查询向量都会产生一个独立的输出 $Y_i$（如 $Y_1$ 到 $Y_4$），这个输出完美地融合了数据向量中最符合该查询需求的信息。</p>
+<h3 id="自注意力机制"><a href="#自注意力机制" class="headerlink" title="自注意力机制"></a>自注意力机制</h3><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322172635.png" srcset="/img/loading.gif" lazyload></p>
+<p>在深度学习的序列处理与表示学习中，自注意力（Self-Attention）层是一种核心的上下文聚合机制。其基本原理在于：对于序列中的每一个输入元素，该机制会计算其与序列中所有其他输入元素的相互依赖关系，从而生成一个融合了全局信息的输出表示。换言之，每一个输出向量本质上都是所有输入信息在特定权重下的加权混合。</p>
+<p>形式化地讲，假设给定一组输入向量构成的矩阵 $X \in \mathbb{R}^{N \times D_{in}}$，其中 $N$ 代表输入序列的长度或向量的个数，$D_{in}$ 代表每个输入向量的特征维度。为了实现注意力计算，该层引入了三个可学习的参数矩阵：查询矩阵（Query matrix）$W_Q \in \mathbb{R}^{D_{in} \times D_{out}}$、键矩阵（Key matrix）$W_K \in \mathbb{R}^{D_{in} \times D_{out}}$ 以及值矩阵（Value matrix）$W_V \in \mathbb{R}^{D_{in} \times D_{out}}$。在通常的网络设计中，为了计算的对称性与简便性，通常会设定查询向量与值向量具有相同的输出维度，即 $D_Q &#x3D; D_V &#x3D; D_{out}$。</p>
+<p>前向传播的计算过程首先对输入矩阵 $X$ 进行三次独立的线性映射，将其分别转换至查询空间、键空间和值空间。具体而言，我们计算查询矩阵 $Q &#x3D; XW_Q$、键矩阵 $K &#x3D; XW_K$ 以及值矩阵 $V &#x3D; XW_V$。这三个结果矩阵的维度均为 $N \times D_{out}$。在这个隐空间中，序列内的第 $i$ 个输入元素被独立地表示为查询向量 $Q_i$、键向量 $K_i$ 和值向量 $V_i$。</p>
+<p>接下来，自注意力机制通过评估查询向量与键向量之间的几何相似度来刻画输入元素间的相关性。这一步通过缩放点积（Scaled Dot-Product）来计算未归一化的相似度得分矩阵 $E \in \mathbb{R}^{N \times N}$，其全局计算公式为 $E &#x3D; \frac{QK^T}{\sqrt{D_Q}}$。从局部元素的角度来看，矩阵 $E$ 中第 $i$ 行第 $j$ 列的元素 $E_{ij} &#x3D; \frac{Q_i \cdot K_j}{\sqrt{D_Q}}$，精确度量了第 $i$ 个查询与第 $j$ 个键之间的点积相似度。此处除以缩放因子 $\sqrt{D_Q}$ 的目的是为了防止高维空间下点积数值过大而导致后续 Softmax 函数进入梯度饱和区，从而保障模型训练的数值稳定性。</p>
+<p>在获得相似度矩阵 $E$ 后，系统会在指定的维度（通常沿键的维度，即 dim&#x3D;1）上应用 Softmax 激活函数进行概率归一化处理，进而得出注意力权重矩阵 $A &#x3D; \text{softmax}(E, \text{dim}&#x3D;1)$。该矩阵的维度同为 $N \times N$，其每一行构成了一个有效的概率分布，代表了特定输入元素对序列中所有其他元素的注意力分配情况。</p>
+<p>最终，通过将注意力权重矩阵 $A$ 与值矩阵 $V$ 进行矩阵乘法运算，我们获得了该层的最终输出矩阵 $Y &#x3D; AV \in \mathbb{R}^{N \times D_{out}}$。从单个输出向量的生成机制来看，第 $i$ 个输出向量 $Y_i$ 实质上是所有值向量的加权求和，其数学期望表达为 $Y_i &#x3D; \sum_j A_{ij}V_j$。通过这一系列严格的代数运算，自注意力层成功地将输入序列的全局上下文关系动态地注入到了每一个独立的输出特征表示中。</p>
+<p><em>ps：自注意力机制完全无法用于RNN</em></p>
+<h3 id="有关两种注意力机制的区别"><a href="#有关两种注意力机制的区别" class="headerlink" title="有关两种注意力机制的区别"></a>有关两种注意力机制的区别</h3><p>如果你观察两种注意力机制的计算方式，你会发现很大部分我们采用了相同的计算方法。大部分的区别是数据源的区别：自注意力机制采用线性变换的方式<strong>仿造</strong>查询向量，而交叉注意力机制有两个数据来源，无需数据向量构造查询向量。</p>
+<p>实际上二者并没有什么太可比较的地方，只不过是适用的场景和问题不同。如果你要做视频或者图片的描述，你总会牵扯到文字和影像两种数据来源。（我们会把图像作为查询向量，将文字作为数据向量，这是很自然的想法）。</p>
+<p>但如果你只是做图像分类的话，则使用自注意力机制是更好的方法。</p>
+<h3 id="自注意力机制的特性"><a href="#自注意力机制的特性" class="headerlink" title="自注意力机制的特性"></a>自注意力机制的特性</h3><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322174258.png" srcset="/img/loading.gif" lazyload></p>
+<p>尽管标准自注意力机制能够有效捕捉全局上下文依赖，但其纯粹基于特征点积的代数结构导致了一个核心的理论局限：<strong>缺乏对序列顺序的感知能力</strong>。（这实际上在放屁而已，就是我们的输出实际上不依赖于我们的输入顺序，所以你可以将单纯的自注意力机制视作为无序输入）由于注意力权重的计算仅依赖于输入向量间的相似度，原生的自注意力算子具有完全的排列等变性（Permutation Equivariance），这意味着模型实际上是将输入视为无序的集合（Set）而非结构化的序列（Sequence）进行处理。</p>
+<p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322174405.png" srcset="/img/loading.gif" lazyload></p>
+<p>所以，我们提出了这个方法，将某些查询向量和数据向量的相似度记作负无穷，那么经过 $softmax$ 其注意力分数会限制在0，也就是说当前输出不会依赖于这个数据向量</p>
+<h3 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h3><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322174828.png" srcset="/img/loading.gif" lazyload></p>
+<p>实际上的多头注意力方式只是对于相同的输入向量 $X$ , 多堆叠几个自注意力机制层而已。我们以不同的方式初始化 $W_k W_v W_Q W_o$ , 得到不同的输出 $O_1, O_2, O_3$ 。</p>
+<h1 id="注意力机制的总结"><a href="#注意力机制的总结" class="headerlink" title="注意力机制的总结"></a>注意力机制的总结</h1><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322175054.png" srcset="/img/loading.gif" lazyload></p>
+<p>实际上，我们只进行了四步矩阵乘法就完成了整个注意力机制的过程，这部分我之后再写吧，太累了</p>
+<p>但是我要说明的是：这个过程实际上需要巨大的矩阵运算能力。</p>
+<h1 id="序列数据处理的优缺点"><a href="#序列数据处理的优缺点" class="headerlink" title="序列数据处理的优缺点"></a>序列数据处理的优缺点</h1><p><img src="/images/CS231N-lecture8-note1/Pasted%20image%2020260322175420.png" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Lecture/" class="category-chain-item">Lecture</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/DeepLearning/" class="print-no-link">#DeepLearning</a>
+      
+        <a href="/tags/cs231n/" class="print-no-link">#cs231n</a>
+      
+        <a href="/tags/RNN/" class="print-no-link">#RNN</a>
+      
+        <a href="/tags/Transformer/" class="print-no-link">#Transformer</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N lecture8 note1</div>
+      <div>https://augusteing.github.io/2026/10/21/CS231N-lecture8-note1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年10月21日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/10/21/CS231N-assignment2%EF%BC%9A%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" title="CS231N assignment2：卷积神经网络">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N assignment2：卷积神经网络</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/10/21/CS231N-lecture10-note/" title="CS231N lecture10 note">
+                        <span class="hidden-mobile">CS231N lecture10 note</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,890 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="pluto">
+  <meta name="keywords" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+  
+    <meta name="description" content="多头注意力机制实际上 query、key、value 都是线性层，只是批处理的时候要注意维度的变化。 我们假设 query 为 [N, S, E]，key 和 value 有着相同的形状，为 [N, T, E] 其中 S 代表查询向量的数量，T 代表着 key 和 value 向量的数量，N 为批处理的大小， E 为上一层传入向量的维度， H 为注意力头的数量。 为了使得我们沿着 E 的方向进行裁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS231N assignment3：VIT">
+<meta property="og:url" content="https://augusteing.github.io/2026/10/21/CS231N-assignment3%EF%BC%9AVIT/index.html">
+<meta property="og:site_name" content="pluto">
+<meta property="og:description" content="多头注意力机制实际上 query、key、value 都是线性层，只是批处理的时候要注意维度的变化。 我们假设 query 为 [N, S, E]，key 和 value 有着相同的形状，为 [N, T, E] 其中 S 代表查询向量的数量，T 代表着 key 和 value 向量的数量，N 为批处理的大小， E 为上一层传入向量的维度， H 为注意力头的数量。 为了使得我们沿着 E 的方向进行裁">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260821010901.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260824004935.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260826174746.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260915133310.png">
+<meta property="og:image" content="https://augusteing.github.io/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260915183831.png">
+<meta property="article:published_time" content="2026-10-20T16:16:06.000Z">
+<meta property="article:modified_time" content="2026-11-22T13:29:36.087Z">
+<meta property="article:author" content="pluto">
+<meta property="article:tag" content="学习, 编程, 技术, 个人博客, 笔记, 记录">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://augusteing.github.io/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260821010901.png">
+  
+  
+  
+  <title>CS231N assignment3：VIT - pluto</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"augusteing.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CS231N assignment3：VIT"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-10-21 00:16" pubdate>
+          2026年10月21日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          32 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CS231N assignment3：VIT</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="多头注意力机制"><a href="#多头注意力机制" class="headerlink" title="多头注意力机制"></a>多头注意力机制</h1><p>实际上 query、key、value 都是线性层，只是批处理的时候要注意维度的变化。</p>
+<p>我们假设 query 为 [N, S, E]，key 和 value 有着相同的形状，为 [N, T, E]</p>
+<p>其中 S 代表查询向量的数量，T 代表着 key 和 value 向量的数量，N 为批处理的大小， E 为上一层传入向量的维度， H 为注意力头的数量。</p>
+<p>为了使得我们沿着 E 的方向进行裁剪，即为：</p>
+<p><img src="/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260821010901.png" srcset="/img/loading.gif" lazyload><br>所以我们对张量进行变换。</p>
+<pre><code class="hljs">    query_split = query.view(N, S, H, E // H).transpose(1, 2)
+    key_split = key.view(N, T, H, E // H).transpose(1, 2)
+    value_split = value.view(N, T, H, E // H).transpose(1, 2)
+</code></pre>
+<p><code>view</code> 存在一些特殊的内存上的规则。</p>
+<p>之后我们进行注意力分数的计算：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">scores</span> = query_split @ key_split.transpose(-<span class="hljs-number">1</span>, -<span class="hljs-number">2</span>)<br><span class="hljs-attr">scores</span> = scores / math.sqrt(E // H) <span class="hljs-comment"># using broadcast</span><br><span class="hljs-attr">attention_scores</span> = torch.softmax(scores, dim=<span class="hljs-number">3</span>)<br></code></pre></td></tr></table></figure>
+
+<p>注意这里我们防缩使用的是 E &#x2F;&#x2F; H 而不是完整的向量维度 E。具体可以见： lecture 5：attention、Transformer </p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ini">        <span class="hljs-attr">output_split</span> = attention_scores @ value_split<br>        <span class="hljs-attr">output</span> = output_split.transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>).reshape(N, S, E)<br></code></pre></td></tr></table></figure>
+
+<p>最后进行输出。</p>
+<p>值得一提的是这个过程的维度变化，我们利用广播机制计算了 query [N, H, S , E &#x2F;&#x2F;H] 和 key [N, H, T, E &#x2F;&#x2F;H] 得到了 [N , H, S , T] 的注意力分数。</p>
+<h2 id="mask"><a href="#mask" class="headerlink" title="mask"></a>mask</h2><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs css">        if attn_mask is not <span class="hljs-attribute">None</span>:<br>          scores = scores.<span class="hljs-built_in">masked_fill</span>(attn_mask == <span class="hljs-number">0</span>, <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;-inf&#x27;</span>))<br></code></pre></td></tr></table></figure>
+
+<p>如果掩码不为 0，则使用 maked_fill 函数来填充掩码为 0 的区域为负无穷，这样进行softmax 之后，我们就可以使得该项注意力权重为 0.</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-built_in">output</span> = <span class="hljs-built_in">self</span>.proj(<span class="hljs-built_in">output</span>)<br></code></pre></td></tr></table></figure>
+
+<p><code>nn.Linear(in_features, out_features)</code> 其实被设计为了一个可以处理<strong>任意维度</strong>（只要大于等于 2 维）张量的通用算子。它的核心计算规则是：<strong>只认张量的最后一个维度，把前面所有的维度都视作批量（Batch）的延伸</strong>。</p>
+<p>我们应用 $W^O$ 的目的，是<strong>在一个词（Token）的内部，把来自不同注意力头（Head）捕捉到的多维子空间特征进行一次线性融合</strong>。‘</p>
+<p><em>不要忘记。</em></p>
+<h1 id="位置编码"><a href="#位置编码" class="headerlink" title="位置编码"></a>位置编码</h1><p>这里先将一点语法：</p>
+<p>你会看到这样的函数：<code>self.register_buffer</code> </p>
+<p>这是一个 pytorch 框架中自带的函数之一，它的作用是：向模型注册一个张量，告诉系统“这个张量是模型状态的一部分，但它不是需要梯度的参数，优化器不需要更新它”。</p>
+<p>具体来说：</p>
+<p>在深度学习的数学抽象中，一个模型可以看作是一个复合函数 $f(X; \theta, \phi)$。</p>
+<ul>
+<li><p>**$X$**：输入数据。</p>
+</li>
+<li><p>**$\theta$**（Parameters）：模型中需要通过反向传播（Backpropagation）计算梯度 $\nabla_\theta \mathcal{L}$，并由优化器（如 Adam, SGD）不断迭代更新的变量。例如，注意力机制中的 $W^Q, W^K, W^V$。</p>
+</li>
+<li><p><strong>$\phi$<strong>（Buffers）：模型运行强依赖的</strong>固定的常量</strong>，或者是<strong>根据某些统计规则而非梯度进行更新的变量</strong>。</p>
+</li>
+</ul>
+<p>那向模型注册的量该怎么用呢？</p>
+<p><code>self.pe</code> 即可，没有太复杂的内容，我们的类继承自 <code>nn.Module</code> 也就继承了：</p>
+<ul>
+<li><p><code>self._parameters</code>：存放所有需要梯度的参数。</p>
+</li>
+<li><p><code>self._modules</code>：存放子神经网络层（比如 <code>nn.Linear</code>）。</p>
+</li>
+<li><p><code>self._buffers</code>：存放我们刚才说的那些不需要梯度的常量。</p>
+</li>
+</ul>
+<p>当你执行 <code>self.register_buffer(&#39;pe&#39;, pe)</code> 时，PyTorch 底层执行的逻辑伪代码类似于：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs Python"><span class="hljs-comment"># PyTorch 底层在偷偷帮你做这件事</span><br><span class="hljs-variable language_">self</span>._buffers[<span class="hljs-string">&#x27;pe&#x27;</span>] = pe<br></code></pre></td></tr></table></figure>
+
+<p>我们正式开始:</p>
+<p>构造位置编码相当于在每一个位置上存放一些信息，这里我们使用：</p>
+<p>$$</p>
+<p>\begin{cases}</p>
+<p>\text{sin}\left(i \cdot 10000^{-\frac{j}{d}}\right) &amp; \text{if j is even} \</p>
+<p>\text{cos}\left(i \cdot 10000^{-\frac{(j-1)}{d}}\right) &amp; \text{otherwise} \</p>
+<p>\end{cases}</p>
+<p>$$<br>对于实际上以 (2i, 2i+1) 形式结成一对的列具有相同的乘法因子，不难判断。</p>
+<p>对 sin内的取指数，这样10000 的指数问题就可以解决，处理好了之后共有 embed &#x2F; 2 长度的乘法因子，分别利用广播机制扩散，这样就得到 （maxL, embed) 大小的位置编码。</p>
+<p>我们希望模型能很容易地学习到“词与词之间的相对距离”。数学上，这就要求对于任意固定的偏移量 $k$，位置 $pos+k$ 的编码向量 $PE_{pos+k}$，都能被表示为位置 $pos$ 的编码向量 $PE_{pos}$ 的一个<strong>线性函数</strong>。</p>
+<p>利用高中的三角函数和差化积公式，对于特征空间中的任意一对相邻维度 $(2i, 2i+1)$，它们所对应的频率为 $\omega_i &#x3D; \frac{1}{10000^{2i&#x2F;d}}$。我们来看看位置 $pos+k$ 时的取值：</p>
+<p>$$\begin{cases} PE_{(pos+k, 2i)} &#x3D; \sin(\omega_i (pos+k)) &#x3D; \sin(\omega_i pos)\cos(\omega_i k) + \cos(\omega_i pos)\sin(\omega_i k) \ PE_{(pos+k, 2i+1)} &#x3D; \cos(\omega_i (pos+k)) &#x3D; \cos(\omega_i pos)\cos(\omega_i k) - \sin(\omega_i pos)\sin(\omega_i k) \end{cases}$$</p>
+<p>如果你把这对维度写成向量形式，你会发现这是一个标准的二维旋转矩阵（Rotation Matrix）相乘：</p>
+<p>$$\begin{pmatrix} PE_{(pos+k, 2i)} \ PE_{(pos+k, 2i+1)} \end{pmatrix} &#x3D; \begin{pmatrix} \cos(\omega_i k) &amp; \sin(\omega_i k) \ -\sin(\omega_i k) &amp; \cos(\omega_i k) \end{pmatrix} \begin{pmatrix} PE_{(pos, 2i)} \ PE_{(pos, 2i+1)} \end{pmatrix}$$</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>解释以下选择为何有益：</p>
+<p>1.使用多个注意力头而非单个注意力头。</p>
+<p>能够分别识别数据源不同性质的特征</p>
+<p>2.对注意力操作的输出添加一个线性变换。</p>
+<p>将得到的不同空间中的结果融合并投影到一个新的向量空间。</p>
+<p>3.1. Dividing by d&#x2F;h−−−√ before applying the softmax function. Recall that d is the feature dimension and h is the number of heads.</p>
+<p>详见lecture 5：attention、Transformer</p>
+<h1 id="解码器层构建"><a href="#解码器层构建" class="headerlink" title="解码器层构建"></a>解码器层构建</h1><p><img src="/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260824004935.png" srcset="/img/loading.gif" lazyload></p>
+<p>右侧为解码器层，我们主要实现后两层，也就是交叉注意力和 feedForward 层。</p>
+<p>值得注意的是交叉注意力有两个数据源，左侧解码器的输出会作为多头注意力的 key 和 value 的数据来源（其实和我们之前讨论的 RNN 编码器、解码器一致）</p>
+<p>同时，我们以上一层的输出作为 query</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">        shortcut = tgt<br>        tgt = <span class="hljs-variable language_">self</span>.cross_attn(query=tgt, key=memory, value=memory, attn_mask=<span class="hljs-literal">None</span>)<br>        tgt = <span class="hljs-variable language_">self</span>.dropout_cross(tgt)<br>        tgt = tgt + shortcut<br>        tgt = <span class="hljs-variable language_">self</span>.norm_cross(tgt)<br></code></pre></td></tr></table></figure>
+
+<p>这里注意顺序，我们在交叉注意力之后接一层 dropout，再接一层残差，最后在进行归一化，FeedForward 层顺序一致，不多赘述。</p>
+<p>实际上现代大语言模型不再使用这种架构了，这是因为：</p>
+<h3 id="1-Post-LN-架构下的梯度问题"><a href="#1-Post-LN-架构下的梯度问题" class="headerlink" title="1. Post-LN 架构下的梯度问题"></a>1. Post-LN 架构下的梯度问题</h3><p>Post-LN 的前向传播公式可以抽象为：</p>
+<p>$$x_{l+1} &#x3D; \text{LayerNorm}(x_l + f_l(x_l))$$</p>
+<p>其中 $f_l$ 代表第 $l$ 层的多头注意力或前馈网络。</p>
+<p>根据多元微积分的链式法则，我们来看损失函数 $\mathcal{L}$ 对第 $l$ 层输入 $x_l$ 的梯度，即计算雅可比矩阵 $\frac{\partial x_{l+1}}{\partial x_l}$：</p>
+<p>$$\frac{\partial x_{l+1}}{\partial x_l} &#x3D; \frac{\partial \text{LayerNorm}(y_l)}{\partial y_l} \left( I + \frac{\partial f_l(x_l)}{\partial x_l} \right)$$</p>
+<p><em>(设 $y_l &#x3D; x_l + f_l(x_l)$，且 $I$ 为单位矩阵)</em></p>
+<p><strong>缺陷出现在 $\frac{\partial \text{LayerNorm}(y_l)}{\partial y_l}$ 这一项上：</strong></p>
+<p>LayerNorm 的核心操作是将输入除以其标准差 $\sigma$。在 Post-LN 中，残差分支 $x_l$ 和计算分支 $f_l(x_l)$ 的方差在相加时会发生累积（假设两者独立，则 $\text{Var}(y_l) &#x3D; \text{Var}(x_l) + \text{Var}(f_l(x_l))$）。</p>
+<p>由于网络极深，随着层数 $l$ 的增加，$y_l$ 的方差会越来越大。</p>
+<p>这导致 LayerNorm 在前向时除以了一个极大的 $\sigma$。反映在反向传播中，LayerNorm 的雅可比矩阵可以近似看作是对梯度进行了 $\frac{1}{\sigma}$ 的缩放。</p>
+<p>当你把反向传播的链式法则展开，从第 $L$ 层传导回第 $1$ 层时：</p>
+<p>$$\frac{\partial x_L}{\partial x_1} &#x3D; \prod_{l&#x3D;1}^{L-1} \left[ \frac{\partial \text{LayerNorm}}{\partial y_l} \left( I + \frac{\partial f_l}{\partial x_l} \right) \right]$$</p>
+<p>这里发生了<strong>连续的矩阵乘法</strong>。因为 LayerNorm 雅可比矩阵的奇异值（Singular Values）大多远小于 $1$，经过几十上百次的连乘后，连乘矩阵的最大奇异值会呈指数级坍缩趋近于 $0$。</p>
+<p><strong>结论</strong>：在 Post-LN 中，底层（靠近输入）的梯度会极度消失，导致底层参数几乎无法更新。为了缓解这个问题，早期的 Transformer 必须使用极其复杂的 Learning Rate Warm-up（学习率预热）策略，小心翼翼地起步。</p>
+<p>现在主流大模型（LLaMA, GPT 系列等）将公式改写为了 Pre-LN：</p>
+<p>$$x_{l+1} &#x3D; x_l + f_l(\text{LayerNorm}(x_l))$$</p>
+<p>我们再次对其求雅可比矩阵：</p>
+<p>$$\frac{\partial x_{l+1}}{\partial x_l} &#x3D; I + \frac{\partial f_l(\tilde{x}_l)}{\partial \tilde{x}_l} \frac{\partial \text{LayerNorm}(x_l)}{\partial x_l}$$</p>
+<p>此时，从第 $L$ 层到第 $1$ 层的总雅可比矩阵变成了：</p>
+<p>$$\frac{\partial x_L}{\partial x_1} &#x3D; \prod_{l&#x3D;1}^{L-1} \left( I + \frac{\partial f_l}{\partial \dots} \frac{\partial \text{LN}}{\partial \dots} \right)$$</p>
+<h1 id="Transformer-构建"><a href="#Transformer-构建" class="headerlink" title="Transformer 构建"></a>Transformer 构建</h1><p>要求实现模型的 forward</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs excel">        Inpu<span class="hljs-symbol">ts:</span><br>         - featur<span class="hljs-symbol">es:</span> <span class="hljs-built_in">image</span> features, of shape (<span class="hljs-built_in">N</span>, D)<br>         - captio<span class="hljs-symbol">ns:</span> ground truth captions, of shape (<span class="hljs-built_in">N</span>, <span class="hljs-built_in">T</span>)<br></code></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<p>当你调用 <code>self.embedding(captions)</code> 时，输入 <code>captions</code> 的形状是 <code>(N, T)</code>（批次大小 $\times$ 序列长度），包含的是一个个离散的整数索引（即单词在词表中的 ID，比如 <code>[45, 876, 2, ...]</code>）。输出形状为 <strong><code>(N, T, wordvec_dim)</code></strong> 的连续稠密张量。</p>
+<p>我们构建的是 简单模型，没有 encoder，所以直接：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ini">        <span class="hljs-comment"># project the image to the same dimesions</span><br>        <span class="hljs-attr">feature</span> = self.visual_projection(features)<br></code></pre></td></tr></table></figure>
+
+<p>对文本进行嵌入和位置编码后：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs ini">        <span class="hljs-comment"># embed the caption</span><br>        <span class="hljs-attr">captions</span> = self.embedding(captions)<br>        <span class="hljs-attr">captions</span> = self.positional_encoding(captions)<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs ini">        <span class="hljs-attr">tgt_mask</span> = torch.tril(torch.<span class="hljs-literal">on</span>es(T, T, device=captions.device))<br>        <span class="hljs-attr">captions</span> = self.transformer(captions, memory, tgt_mask=tgt_mask)<br>        <span class="hljs-attr">scores</span> = self.output(captions)<br></code></pre></td></tr></table></figure>
+
+<p>请注意这里的 tgt_mask 的形状，在多头注意力中，进行 mask 的时候，会形成 (N, H, T, T) 的形状，我们再进行掩码，我们使用 <code>torch.trill()</code></p>
+<p><code>torch.tril</code> 的命名来源于 <strong>TRI-angle Lower（下三角）</strong>。它的作用是保留一个矩阵的主对角线及其下方的所有元素，并将右上方的所有元素强制归零。</p>
+<p>在注意力机制中，行索引 $i$ 代表 Query（当前的时间步），列索引 $j$ 代表 Key（被关注的时间步）。</p>
+<p>当 $j &gt; i$ 时，说明 Key 处于 Query 的“未来”，这在因果律中是绝对禁止越权访问的。</p>
+<p>$$\text{torch.tril}\left( \begin{pmatrix} 1 &amp; 1 &amp; 1 \ 1 &amp; 1 &amp; 1 \ 1 &amp; 1 &amp; 1 \end{pmatrix} \right) &#x3D; \begin{pmatrix} 1 &amp; 0 &amp; 0 \ 1 &amp; 1 &amp; 0 \ 1 &amp; 1 &amp; 1 \end{pmatrix}$$<br>因为注意力机制经常进行批处理，得到一个注意力矩阵之后，我们强制使某些值为负无穷，这样 softmax 就会赋予其 0 的权重，也就避免了提前偷看序列。</p>
+<p>详见：<a href="/2026/09/19/CS231N-lecture9-note1/">CS231N lecture9 note1</a></p>
+<h1 id="VIT-的实现"><a href="#VIT-的实现" class="headerlink" title="VIT 的实现"></a>VIT 的实现</h1><h2 id="PatchEmbed"><a href="#PatchEmbed" class="headerlink" title="PatchEmbed"></a>PatchEmbed</h2><p><img src="/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260826174746.png" srcset="/img/loading.gif" lazyload></p>
+<p>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs python"><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Forward pass for patch embedding.</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Inputs:</span><br><span class="hljs-string">    - x: Input image tensor of shape (N, C, H, W)</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Returns:</span><br><span class="hljs-string">    - out: Patch embeddings with shape (N, num_patches, embed_dim)</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    N, C, H, W = x.shape<br>    <span class="hljs-keyword">assert</span> H == <span class="hljs-variable language_">self</span>.img_size <span class="hljs-keyword">and</span> W == <span class="hljs-variable language_">self</span>.img_size, \<br>        <span class="hljs-string">f&quot;Expected image size (<span class="hljs-subst">&#123;self.img_size&#125;</span>, <span class="hljs-subst">&#123;self.img_size&#125;</span>), but got (<span class="hljs-subst">&#123;H&#125;</span>, <span class="hljs-subst">&#123;W&#125;</span>)&quot;</span><br>    out = torch.zeros(N, <span class="hljs-variable language_">self</span>.embed_dim)<br>    P = <span class="hljs-variable language_">self</span>.patch_size<br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment"># <span class="hljs-doctag">TODO:</span> Divide the image into non-overlapping patches of shape             #</span><br>    <span class="hljs-comment"># (C x patch_size x patch_size), and rearrange them into a tensor of       #</span><br>    <span class="hljs-comment"># shape (N, num_patches, patch_dim). Do not use a for-loop.                #</span><br>    <span class="hljs-comment"># Instead, you may find torch.reshape and torch.permute helpful for this   #</span><br>    <span class="hljs-comment"># step. Once the patches are flattened, embed them into latent vectors     #</span><br>    <span class="hljs-comment"># using the projection layer.                                              #</span><br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment"># Divide the image into pathes of shape (C * pathch_size * patches_Size)</span><br>    H_p = H // P<br>    W_p = W // P<br>    patches = x.reshape(N, C, H_p, P, W_p, P)<br>    patches = patches.permute(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">5</span>)<br>    <span class="hljs-comment"># take patches into (N, num_patches, patch_dim)</span><br>    patches = patches.reshape(N, <span class="hljs-variable language_">self</span>.num_patches, <span class="hljs-variable language_">self</span>.patch_dim)<br>    out = <span class="hljs-variable language_">self</span>.proj(patches)<br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment">#                             END OF YOUR CODE                             #</span><br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-keyword">return</span> out<br></code></pre></td></tr></table></figure>
+
+<p>这里对内存映射做一个解释：</p>
+<h3 id="1-初始状态：四维坐标系映射"><a href="#1-初始状态：四维坐标系映射" class="headerlink" title="1. 初始状态：四维坐标系映射"></a>1. 初始状态：四维坐标系映射</h3><p>在原始张量中，任何一个像素都可以用一个四元组坐标来唯一确定：$(n, c, h, w)$，其中：</p>
+<ul>
+<li><p>$n \in [0, N-1]$</p>
+</li>
+<li><p>$c \in [0, C-1]$</p>
+</li>
+<li><p>$h \in [0, H-1]$</p>
+</li>
+<li><p>$w \in [0, W-1]$</p>
+</li>
+</ul>
+<p>张量的“行优先（Row-major）”存储机制，将这个四元组映射到一维内存地址的公式是：</p>
+<p>$$\text{Addr}(n, c, h, w) &#x3D; n(CHW) + c(HW) + hW + w$$</p>
+<h3 id="2-第一步-reshape：欧几里得除法与坐标系裂变"><a href="#2-第一步-reshape：欧几里得除法与坐标系裂变" class="headerlink" title="2. 第一步 reshape：欧几里得除法与坐标系裂变"></a>2. 第一步 <code>reshape</code>：欧几里得除法与坐标系裂变</h3><p>代码：<code>patches = x.reshape(N, C, H_p, P, W_p, P)</code></p>
+<p>在数学上，根据<strong>带余除法（Euclidean division）</strong>，对于任意的行坐标 $h \in [0, H-1]$，由于 $H &#x3D; H_p \times P$，我们可以将其<strong>唯一</strong>分解为商和余数：</p>
+<p>$$h &#x3D; h_p \cdot P + p_y \quad (0 \le h_p &lt; H_p, ; 0 \le p_y &lt; P)$$</p>
+<p>同理，列坐标 $w$ 也可以唯一分解：</p>
+<p>$$w &#x3D; w_p \cdot P + p_x \quad (0 \le w_p &lt; W_p, ; 0 \le p_x &lt; P)$$</p>
+<p>这实际上建立了一个从二维空间 $(h, w)$ 到四维空间 $(h_p, p_y, w_p, p_x)$ 的<strong>严格双射（Bijection）</strong>。</p>
+<ul>
+<li><p>$(h_p, w_p)$ 代表这个像素属于哪个 Patch（即宏观网格坐标）。</p>
+</li>
+<li><p>$(p_y, p_x)$ 代表这个像素在该 Patch 内部的微观坐标。</p>
+</li>
+</ul>
+<p>此时，新的坐标元组变成了六维：$(n, c, h_p, p_y, w_p, p_x)$。</p>
+<p>如果你把代换关系带入最初的一维地址公式，你会发现：</p>
+<p>$$hW + w &#x3D; (h_p P + p_y)(W_p P) + (w_p P + p_x) &#x3D; h_p (P \cdot W_p \cdot P) + p_y (W_p \cdot P) + w_p P + p_x$$</p>
+<p>这恰好就是新形状 $(N, C, H_p, P, W_p, P)$ 的一维地址映射公式！</p>
+<p><strong>结论：</strong> 这一步 <code>reshape</code> 是一次完美的等价代换，底层内存数据<strong>完全没有移动</strong>，只是我们看待 $(h, w)$ 坐标的方式从“绝对坐标”变成了“宏观坐标+微观坐标”。</p>
+<h3 id="3-第二步-permute：笛卡尔积的重新结合（同构映射）"><a href="#3-第二步-permute：笛卡尔积的重新结合（同构映射）" class="headerlink" title="3. 第二步 permute：笛卡尔积的重新结合（同构映射）"></a>3. 第二步 <code>permute</code>：笛卡尔积的重新结合（同构映射）</h3><p>代码：<code>patches = patches.permute(0, 2, 4, 1, 3, 5)</code></p>
+<p>经过第一步后，我们的坐标空间是：</p>
+<p>$$\text{Space}_1 &#x3D; \text{Batch} \times \text{Channel} \times \text{Grid}_Y \times \text{Patch}_Y \times \text{Grid}_X \times \text{Patch}_X$$</p>
+<p>你会发现，属于同一个 Patch 的像素（即具有相同的 $h_p$ 和 $w_p$）在内存坐标上被 $Channel$ 和 $\text{Patch}_Y$ 隔开了。</p>
+<p>我们要把图像真正“切成”一块块的，这就要求<strong>同一个 Patch 内部的所有像素，在内存中必须是连续排列的</strong>。</p>
+<p>因此，我们需要对坐标轴的顺序进行置换（Permutation 对应对称群 $S_6$ 中的一个元素），将坐标空间重组为：</p>
+<p>$$\text{Space}_2 &#x3D; \text{Batch} \times (\text{Grid}_Y \times \text{Grid}_X) \times (\text{Channel} \times \text{Patch}_Y \times \text{Patch}_X)$$</p>
+<p>映射后的六维坐标系顺序变成了：$(n, h_p, w_p, c, p_y, p_x)$。</p>
+<p>这一步在数学上意味着<strong>基底的交换</strong>，在张量底层则会改变遍历内存的“步长（Stride）”。这是这三步中<strong>唯一一个真正改变数据逻辑相邻关系的操作</strong>。</p>
+<h3 id="4-第三步-reshape：子空间的降维展开"><a href="#4-第三步-reshape：子空间的降维展开" class="headerlink" title="4. 第三步 reshape：子空间的降维展开"></a>4. 第三步 <code>reshape</code>：子空间的降维展开</h3><p>代码：<code>patches = patches.reshape(N, H_p * W_p, C * P * P)</code></p>
+<p>经过 <code>permute</code> 之后，我们已经将维度分成了三大阵营：</p>
+<ol>
+<li><p>样本维度：$(n)$</p>
+</li>
+<li><p>Patch 的宏观网格维度：$(h_p, w_p)$</p>
+</li>
+<li><p>Patch 内部的微观维度：$(c, p_y, p_x)$</p>
+</li>
+</ol>
+<p>最后这一步 <code>reshape</code> 其实是第一步的<strong>逆向操作（合并除法的商和余数）</strong>。</p>
+<p>我们将宏观网格坐标展平为一个一维索引 $i_{patch}$，可以视作 $W_p$ 进制的转换：</p>
+<p>$$i_{patch} &#x3D; h_p \cdot W_p + w_p \quad \in [0, H_p W_p - 1]$$</p>
+<p>同样，将 Patch 内部的维度展平为 $i_{dim}$（这就是你要投影的维度）：</p>
+<p>$$i_{dim} &#x3D; c \cdot (P^2) + p_y \cdot P + p_x \quad \in [0, C \cdot P^2 - 1]$$</p>
+<p>至此，原本的 $(n, h_p, w_p, c, p_y, p_x)$ 被完美映射到了 $(N, N_{patches}, D_{patch})$。</p>
+<h1 id="编码器层"><a href="#编码器层" class="headerlink" title="编码器层"></a>编码器层</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, src, src_mask=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Pass the inputs (and mask) through the encoder layer.</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Inputs:</span><br><span class="hljs-string">    - src: the sequence to the encoder layer, of shape (N, S, D)</span><br><span class="hljs-string">    - src_mask: the parts of the source sequence to mask, of shape (S, S)</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Returns:</span><br><span class="hljs-string">    - out: the Transformer features, of shape (N, S, D)</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment"># <span class="hljs-doctag">TODO:</span> Implement the encoder layer by applying self-attention followed    #</span><br>    <span class="hljs-comment"># by a feedforward block. This code will be very similar to decoder layer. #</span><br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment"># self-attn</span><br>    shortcut = src<br>    out = <span class="hljs-variable language_">self</span>.self_attn(query=src, key=src, value=src, attn_mask=src_mask)<br>    out = <span class="hljs-variable language_">self</span>.dropout_self(out)<br>    out = out + shortcut<br>    out = <span class="hljs-variable language_">self</span>.norm_self(out)<br><br>    <span class="hljs-comment"># ffn</span><br>    shortcut = out<br>    out = <span class="hljs-variable language_">self</span>.ffn(out)<br>    out = <span class="hljs-variable language_">self</span>.dropout_ffn(out)<br>    out = shortcut + out<br>    out = <span class="hljs-variable language_">self</span>.norm_ffn(out)<br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment">#                             END OF YOUR CODE                             #</span><br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-keyword">return</span> out<br></code></pre></td></tr></table></figure>
+
+<p>没有什么好说的，注意结构就是</p>
+<p><img src="/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260915133310.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="vision-Transformer"><a href="#vision-Transformer" class="headerlink" title="vision Transformer"></a>vision Transformer</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Forward pass of Vision Transformer.</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Inputs:</span><br><span class="hljs-string">     - x: Input image tensor of shape (N, C, H, W)</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Returns:</span><br><span class="hljs-string">     - logits: Output classification logits of shape (N, num_classes)</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    N, C, H, W = x.shape<br>    logits = torch.zeros(N, <span class="hljs-variable language_">self</span>.num_classes, device=x.device)<br>    <br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment"># <span class="hljs-doctag">TODO:</span> Implement the forward pass of the Vision Transformer.             #</span><br>    <span class="hljs-comment"># 1. Convert the input image into a sequence of patch vectors.            #</span><br>    <span class="hljs-comment"># 2. Add positional encodings to retain spatial information.              #</span><br>    <span class="hljs-comment"># 3. Pass the sequence through the Transformer encoder.                   #</span><br>    <span class="hljs-comment"># 4. Average pool patch vectors to get a feature vector for each image.   #</span><br>    <span class="hljs-comment">#    You may find torch.mean useful.                                      #</span><br>    <span class="hljs-comment"># 5. Feed it through a linear layer to produce class logits.              #</span><br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment"># into patch vectors</span><br>    logits = <span class="hljs-variable language_">self</span>.patch_embed(x)<br>    <span class="hljs-comment"># add positional encodings</span><br>    logits = <span class="hljs-variable language_">self</span>.positional_encoding(logits)<br>    <span class="hljs-comment"># pass into transforemer encoder</span><br>    logits = <span class="hljs-variable language_">self</span>.transformer(logits)<br>    <span class="hljs-comment"># average poll</span><br>    logits = torch.mean(logits, dim=<span class="hljs-number">1</span>)<br>    <span class="hljs-comment"># linear layer</span><br>    logits = <span class="hljs-variable language_">self</span>.head(logits)<br>    <span class="hljs-comment">############################################################################</span><br>    <span class="hljs-comment">#                             END OF YOUR CODE                             #</span><br>    <span class="hljs-comment">############################################################################</span><br></code></pre></td></tr></table></figure>
+
+<p>这个过程可以由如下解释</p>
+<p><img src="/images/CS231N-assignment3%EF%BC%9AVIT/Pasted%20image%2020260915183831.png" srcset="/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CS231N/" class="category-chain-item">CS231N</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/CS231N/Assignment/" class="category-chain-item">Assignment</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CS231N assignment3：VIT</div>
+      <div>https://augusteing.github.io/2026/10/21/CS231N-assignment3：VIT/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>pluto</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年10月21日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/10/21/CS231N-lecture10-note/" title="CS231N lecture10 note">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CS231N lecture10 note</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/10/09/CS61B%EF%BC%9A%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93/" title="问题：归并排序、LSD 处理字符串">
+                        <span class="hidden-mobile">问题：归并排序、LSD 处理字符串</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
